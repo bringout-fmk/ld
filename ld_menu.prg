@@ -33,7 +33,7 @@ class TLDMod: public TAppMod
 #endif
 
 #ifndef CPP
-#include "class(y).ch"
+#include "hbclass.ch"
 CREATE CLASS TLDMod INHERIT TAppMod
 	EXPORTED:
 	method dummy 

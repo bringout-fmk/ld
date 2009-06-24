@@ -29,7 +29,6 @@ class TDbLD: public TDB
      public:
      	TObject self;
 	string cName;
-	*void dummy();
 	*void skloniSezonu(string cSezona, bool finverse, bool fda, bool fnulirati, bool fRS);
 	*void install(string cKorisn,string cSifra,variant p3,variant p4,variant p5,variant p6,variant p7);
 	*void setgaDBFs();
@@ -58,13 +57,6 @@ END CLASS
 #endif
 
 
-/*! \fn *void TDbLD::dummy()
- */
-*void TDbLD::dummy()
-*{
-method dummy
-return
-*}
 
 /*! \fn *void TDbLD::skloniSezonu(string cSezona, bool finverse,bool fda,bool fnulirati,bool fRS)
  *  \brief formiraj sezonsku bazu podataka

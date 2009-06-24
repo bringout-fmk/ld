@@ -14,8 +14,6 @@ PRG_SOURCES=\
       brisanje_obracuna_menu.prg \
       datum_isplate.prg \
       doprinosi.prg \
-      gvars.prg \
-      install.prg \
       korekcija_obracuna.prg \
       krediti.prg \
       krediti_menu.prg \
@@ -111,7 +109,7 @@ include $(TOP)$(ROOT)config/bin.cf
 
 HB_FLAGS = -n -b -ufmk_std.ch -kM -gc0 -I$(TOP) -I$(HB_INC_COMPILE)
 
-launcher.c : ../../launcher.prg ../../fin.ch
+launcher.c : ../../launcher.prg ../../ld.ch
 	$(HB) ../../launcher.prg $(PRG_USR) $(HB_FLAGS)
 
 launcher.o : launcher.c
