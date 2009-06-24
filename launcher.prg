@@ -1,6 +1,8 @@
 #include "ld.ch"
 
-EXTERNAL RIGHT,LEFT,FIELDPOS
+EXTERNAL RIGHT
+EXTERNAL LEFT
+EXTERNAL FIELDPOS
 
 #ifdef LIB
 
@@ -17,6 +19,9 @@ return
 #endif
 
 
+function TFileRead()
+return
+
 
 /*! \fn MainLD(cKorisn,cSifra,p3,p4,p5,p6,p7)
  *  \brief
@@ -25,6 +30,7 @@ return
 function MainLD(cKorisn,cSifra,p3,p4,p5,p6,p7)
 *{
 local oLD
+local cModul
 
 oLD:=TLDModNew()
 cModul:="LD"
@@ -37,5 +43,5 @@ oLD:init(NIL, cModul, D_LD_VERZIJA, D_LD_PERIOD , cKorisn, cSifra, p3,p4,p5,p6,p
 oLD:run()
 
 return 
-*}
+
 

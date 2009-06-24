@@ -40,7 +40,7 @@ class TDbLD: public TDB
 #endif
 
 #ifndef CPP
-#include "class(y).ch"
+#include "hbclass.ch"
 CREATE CLASS TDbLD INHERIT TDB
 
 	EXPORTED:
