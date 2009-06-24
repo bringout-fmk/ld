@@ -15,6 +15,7 @@ private nRata:=0
 private nRata2:=0
 private cOsnov:=SPACE(20)
 
+
 if Logirati(goModul:oDataBase:cName,"KREDIT","NOVIKREDIT")
 	lLogNoviKredit:=.t.
 else
