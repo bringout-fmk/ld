@@ -1072,7 +1072,6 @@ function TekRec2()
 *{
 nSlog++
 @ m_x+1, m_y+2 SAY PADC(ALLTRIM(STR(nSlog))+"/"+ALLTRIM(STR(nUkupno)),20)
-@ m_x+2, m_y+2 SAY "Obuhvaceno: "+STR(cmxKeysIncluded())
 return (NIL)
 *}
 
@@ -1659,24 +1658,6 @@ PROCEDURE PoDoIzSez(cG,cM)
 
   SELECT (nArr)
 RETURN
-
-*************************************************************
-FUNCTION Razrijedi (cStr)
-*
-*   Razrijedi (cStr) --> cStrRazr
-*      Ubaci u string, izmedju slova, SPACE()
-*
-*************************************************************
-LOCAL cRazrStr, nLenM1, nCnt
-cStr := ALLTRIM (cStr)
-nLenM1 := LEN (cStr) - 1
-cRazrStr := ""
-FOR nCnt := 1 TO nLenM1
-  cRazrStr += SUBSTR (cStr, nCnt, 1) + " "
-NEXT
-cRazrStr += RIGHT (cStr, 1)
-RETURN (cRazrStr)
-
 
 
 FUNC ASezona2(cPath,cG,cFajl)

@@ -585,9 +585,9 @@ O_RADKR
 O_KRED
 O_RADN
 O_LD
-cmxAutoOpen(.f.)
+//cmxAutoOpen(.f.)
 O__LD; SET ORDER TO; GO TOP
-cmxAutoOpen(.t.)
+//cmxAutoOpen(.t.)
 O__RADN
 O__RADKR
 O__KRED
@@ -700,9 +700,9 @@ copy file (cDisk+"_KRED.DBF") to (PRIVPATH+"_KRED.DBF")
 O__KRED; GO TOP
 O__RADKR; GO TOP
 O__RADN; GO TOP
-cmxAutoOpen(.f.)
+//cmxAutoOpen(.f.)
 O__LD; SET ORDER TO; GO TOP
-cmxAutoOpen(.t.)
+//cmxAutoOpen(.t.)
 
 cidrj   := idrj
 cmjesec := mjesec

@@ -1,50 +1,9 @@
 #include "ld.ch"
 
 
-
-function TDbLDNew()
-local oObj
-oObj:=TDbLD():new()
-oObj:self:=oObj
-oObj:cName:="LD"
-oObj:lAdmin:=.f.
-return oObj
-
-
-/*! \file fmk/ld/db/2g/db.prg
- *  \brief LD Database
- *
- * TDbLD Database objekat 
- */
-
-
-/*! \class TDbLD
- *  \brief Database objekat
- */
-
-
-#ifdef CPP
-class TDbLD: public TDB 
-{
-     public:
-     	TObject self;
-	string cName;
-	*void skloniSezonu(string cSezona, bool finverse, bool fda, bool fnulirati, bool fRS);
-	*void install(string cKorisn,string cSifra,variant p3,variant p4,variant p5,variant p6,variant p7);
-	*void setgaDBFs();
-	*void obaza(int i);
-	*void ostalef();
-	*void kreiraj(int nArea);
-}
-#endif
-
-#ifndef CPP
 #include "hbclass.ch"
-CREATE CLASS TDbLD INHERIT TDB
-
-	EXPORTED:
-	var    self
-	var    cName
+CLASS TDbLD INHERIT TDB
+	method New
 	method skloniSezonu	
 	method install	
 	method setgaDBFs	
@@ -52,10 +11,17 @@ CREATE CLASS TDbLD INHERIT TDB
 	method obaza	
 	method kreiraj	
 	method konvZn
-
 END CLASS
-#endif
 
+
+// ------------------------------------------------
+// ------------------------------------------------
+method New()
+
+ ::cName:="FIN"
+ ::lAdmin:=.f.
+
+return self
 
 
 /*! \fn *void TDbLD::skloniSezonu(string cSezona, bool finverse,bool fda,bool fnulirati,bool fRS)

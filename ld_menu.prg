@@ -1,52 +1,26 @@
 #include "ld.ch"
 
 
-function TLDModNew()
-local oObj
-
-#ifdef CLIP
-
-#else
-	oObj:=TLDMod():new()
-#endif
-
-oObj:self:=oObj
-return oObj
-
-
-#ifdef CPP
-/*! \class TLDMod
- *  \brief LD aplikacijski modul
- */
-
-class TLDMod: public TAppMod
-{
-	public:
-	*void dummy();
-	*void setGVars();
-	*void mMenu();
-	*void mMenuStandard();
-	*void sRegg();
-	*void initdb();
-	*void srv();
-	*void chk_db();
-#endif
-
-#ifndef CPP
 #include "hbclass.ch"
-CREATE CLASS TLDMod INHERIT TAppMod
-	EXPORTED:
+CLASS TLDMod FROM TAppMod
+	method New
 	method dummy 
 	method setGVars
 	method mMenu
 	method mMenuStandard
-	method sRegg
 	method initdb
 	method srv
 	method chk_db
 END CLASS
-#endif
 
+
+// -----------------------------------------------------
+// -----------------------------------------------------
+method new(p1, p2, p3, p4, p5, p6, p7, p8, p9)
+
+::super:new(p1, p2, p3, p4, p5, p6, p7, p8, p9)
+
+return self
 
 /*! \fn TLDMod::dummy()
  *  \brief dummy
@@ -59,14 +33,12 @@ return
 *}
 
 
-*void TLDMod::initdb()
-*{
 method initdb()
 
-::oDatabase:=TDBLDNew()
+::oDatabase:=TDbLd():new()
 
 return nil
-*}
+
 
 
 /*! \fn *void TLDMod::chk_db()
@@ -121,8 +93,6 @@ Izbor:=1
 
 O_LD
 select ld
-
-TrebaRegistrovati(10)
 
 ::chk_db()
 
@@ -191,21 +161,12 @@ AADD(opcexe, {|| MnuParams()})
 
 private Izbor:=1
 
-say_fmk_ver()
 say_ahonorar()
 
 Menu_SC("gld",.t.,lPodBugom)
 
 return
 
-
-
-*void TLDMod::sRegg()
-*{
-method sRegg()
-sreg("LD.EXE","LD")
-return
-*}
 
 *void TLDMod::srv()
 *{
@@ -240,7 +201,7 @@ O_PARAMS
 
 //::super:setGVars()
 
-SetFmkSGVars()
+set_global_vars()
 
 //SetLDSpecifVars()
 
@@ -374,15 +335,6 @@ LDPoljaINI()
 gGlBaza:="LD.DBF"
 
 public lPodBugom:=.f.
-IF IzFMKINI("ZASTITA","PodBugom","N",KUMPATH)=="D"
-  lPodBugom:=.t.
-  gaKeys := { { K_ALT_O , {|| OtkljucajBug()} } }
-ELSE
-  lPodBugom:=.f.
-ENDIF
-
-// setuj gVarObracun na vrijednost prema tekucim zak.promjenama
-// set_obr_2009()
 
 return
 

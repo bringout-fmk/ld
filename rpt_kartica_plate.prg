@@ -3,6 +3,16 @@
 static DUZ_STRANA:=64
 static __var_obr
 
+// ovo treba pregledati šta je !
+function printfile()
+return
+
+// i ovo fali
+function diofajlauniz()
+local aArr := {}
+return aArr
+
+
 // -------------------------------------------------------------
 // kartica plate radnika
 // -------------------------------------------------------------

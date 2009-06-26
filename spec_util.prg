@@ -1613,16 +1613,4 @@ cPom+="."+PADL(ALLTRIM(STR(nGodina,4)),4,"0")
 return CTOD(cPom)
 *}
 
-* odsjeca Prazne Linije na Kraju stringa
-function OdsjPLK(cTxt)
-*{
-local i
-for i:=len(cTxt) to 1 step -1
-  if !(substr(cTxt,i,1) $ Chr(13)+Chr(10)+" ç")
-       exit
-  endif
-next
-return left(cTxt,i)
-*}
-
 
