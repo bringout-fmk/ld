@@ -8,10 +8,8 @@ EXTERNAL RIGHT
  */
 
 function Main(cKorisn,cSifra,p3,p4,p5,p6,p7)
-*{
 	MainLD(cKorisn,cSifra,p3,p4,p5,p6,p7)
 return
-*}
 
 
 function TFileRead()
