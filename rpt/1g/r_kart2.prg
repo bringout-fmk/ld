@@ -326,6 +326,8 @@ if gPrBruto $ "D#X"
 		O_KBENEF
 	endif
 
+	altd()
+
 	nBO:=0
 	nBFO:=0
 	
