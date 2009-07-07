@@ -349,13 +349,21 @@ function min_bruto( nBruto, nSati )
 local nRet
 local nMBO
 local nParSati
+local nTmpSati
 
 // sati iz parametara obracuna
 nParSati := parobr->k1
 
 // puno radno vrijeme ili rad na 4 sata
 if (nSati = nParSati) .or. (nParSati/2 = nSati) .or. (radn->k1 == "M")
-	nMBO := ROUND2( nParSati * parobr->m_br_sat, gZaok2 )
+	
+	nTmpSati := nSati
+	
+	if radn->k1 == "M"
+		nTmpSati := nSati * 2
+	endif
+
+	nMBO := ROUND2( nTmpSati * parobr->m_br_sat, gZaok2 )
 	nRet := MAX( nBruto, nMBO )
 else
 	nRet := nBruto
@@ -372,13 +380,21 @@ function min_neto( nNeto, nSati )
 local nRet
 local nMNO
 local nParSati
+local nTmpSati
 
 // sati iz parametara obracuna
 nParSati := parobr->k1
 
 // ako je rad puni ili rad na 4 sata
 if (nParSati = nSati) .or. (nParSati/2 = nSati) .or. (radn->k1 == "M")
-	nMNO := ROUND2( nParSati * parobr->m_net_sat, gZaok2 )
+
+	nTmpSati := nSati
+
+	if radn->k1 == "M"
+		nTmpSati := nSati * 2
+	endif
+
+	nMNO := ROUND2( nTmpSati * parobr->m_net_sat, gZaok2 )
 	nRet := MAX( nNeto, nMNO )
 else
 	nRet := nNeto
