@@ -322,12 +322,14 @@ private cIsplata:=""
 private cLokacija
 private cConstBrojTR
 private nH
+private cParKonv
 
 if cVarijanta=="1"
 	cIsplata:="TR"
 else
    	cIsplata:="SK"
 endif
+
 cZaBanku:="N"
 cIDBanka:=SPACE(_LR_)
 cDrugiDio:="D"
@@ -337,6 +339,7 @@ O_PARAMS
 private cSection:="4"
 private cHistory:=" "
 private aHistory:={}
+
 RPar("VS",@cVarSort)
 
 Box(,11,50)
@@ -479,7 +482,7 @@ for nDio:=1 to IF(cDrugiDio=="D",2,1)
    			else
     				@ prow(),pcol()+1 SAY _uiznos pict gpici
 				if cZaBanku == "D"
-					cZaBnkIznos:=FormatSTR(ALLTRIM(STR(_uiznos), 6, 2), 7, .t. )
+					cZaBnkIznos:=FormatSTR(ALLTRIM(STR(_uiznos), 8, 2), 8, .t. )
 				endif
    			endif
  		else
@@ -488,12 +491,12 @@ for nDio:=1 to IF(cDrugiDio=="D",2,1)
  		if cIsplata=="TR"
   			@ prow(),pcol()+4 SAY padl(radn->brtekr,22)
 			if cZaBanku=="D"
-				cZaBnkTekRn:=FormatSTR(ALLTRIM(radn->brtekr), 7, .t. )
+				cZaBnkTekRn:=FormatSTR(ALLTRIM(radn->brtekr), 25, .f., "" )
 			endif
  		else
    			@ prow(),pcol()+4 SAY padl(radn->brknjiz,22)
  			if cZaBanku=="D"
-				cZaBnkTekRn:=FormatSTR(ALLTRIM(radn->brknjiz), 7, .t. )
+				cZaBnkTekRn:=FormatSTR(ALLTRIM(radn->brknjiz), 25, .f., "" )
 			endif
 		endif
  		if cProred=="D"
@@ -513,12 +516,19 @@ for nDio:=1 to IF(cDrugiDio=="D",2,1)
  		endif
  		skip
 		
+		// upisi u fajl za banku
 		if cZaBanku=="D"
+
 			cUpisiZaBanku:=""
 			cUpisiZaBanku+=cZaBnkTekRn
 			cUpisiZaBanku+=cZaBnkRadnik
 			cUpisiZaBanku+=cZaBnkIznos
+			
+			// napravi konverziju 
+			KonvZnWin( @cUpisiZaBanku, cParKonv )
+			
 			Write2File(nH, cUpisiZaBanku, .t.)
+
 			// reset varijable
 			cUpisiZaBanku:=""
 		endif
@@ -920,21 +930,27 @@ endif
 return cRet
 
 
-
+// -----------------------------------------
+// kreiranje fajla za eksport
+// -----------------------------------------
 function CreateFileBanka()
-*{
-MsgBeep("Odaberite lokaciju za snimanje fajla")
+
 Box(,5,70)
 	cLokacija:="C:\" + DToS(Date()) + ".txt" + SPACE(30)
 	cConstBrojTR:="56480 "
+	cParKonv := "5"
 	@ 1+m_x, 2+m_y SAY "Parametri:"
 	@ 3+m_x, 2+m_y SAY "Sifra isplatioca tek.rac:" GET cConstBrojTR 
 	@ 4+m_x, 2+m_y SAY "Naziv fajla prenosa:" GET cLokacija
+	@ 5+m_x, 2+m_y SAY "Konverzija znakova:" GET cParKonv
+	
 	read
 BoxC()
+
 if Pitanje(,"Izvrsiti prenos fajla","D")=="N"
 	return
 endif
+
 if (AT("a:", cLokacija)<>0 .or. AT("A:", cLokacija)<>0)
 	MsgBeep("Spremite praznu disketu...")
 endif
@@ -948,7 +964,7 @@ if nH==-1
 	return
 endif
 return
-*}
+
 
 
 function CloseFileBanka(nHnd)
