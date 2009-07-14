@@ -7,10 +7,10 @@
 #define cSpace  " "
 #define cQuote  "'"
 
-// ---------------------------------------------
+// --------------------------------------------------------------
 // export poreske kartice
-// ---------------------------------------------
-function pk_sql_export( cFileLocation )
+// --------------------------------------------------------------
+function pk_sql_export( cFileLocation, lEmptyDb, cConvert )
 local cSql := ""
 local cTbl 
 local cScr
@@ -22,25 +22,33 @@ if cFileLocation == nil
 	cFileLocation := "c:\"
 endif
 
+if lEmptyDb == nil
+	lEmptyDb := .f.
+endif
+
+if cConvert == nil
+	cConvert := "5"
+endif
+
 ? sqlite3_libversion()
 
 if sqlite3_libversion_number() < 3005001
 	return
 endif
 
-create_db( cFileLocation )
+create_db( cFileLocation, lEmptyDb )
 
 select pk_radn
 go top
 
 cTbl := "pk_radn"
-create_from_dbf( cSql, cTbl, cFileLocation )
+create_from_dbf( cSql, cTbl, cFileLocation, cConvert )
 
 select pk_data
 go top
 
 cTbl := "pk_data"
-create_from_dbf( cSql, cTbl, cFileLocation )
+create_from_dbf( cSql, cTbl, cFileLocation, cConvert )
 
 inkey(0)
 
@@ -52,12 +60,12 @@ return
 // -----------------------------------------------
 // kreiranje database-a
 // -----------------------------------------------
-function create_db( cFileLocation )
+function create_db( cFileLocation, lEmpty )
 local lCreateIfNotExist := .f.
 local db := sqlite3_open( cFileLocation + ;
 	DB_NAME, lCreateIfNotExist )
 
-if ! Empty( db )
+if lEmpty == .t. .and. ! Empty( db )
 	sqlite3_exec( db, "DROP TABLE pk_data;" )
 	sqlite3_exec( db, "DROP TABLE pk_radn;" )
 endif
@@ -267,7 +275,7 @@ RETURN
 // --------------------------------------------------------------------
 // kreiraj sqlite iz dbf-a
 // --------------------------------------------------------------------
-function create_from_dbf( cSQL, cTbl, cLocation )
+function create_from_dbf( cSQL, cTbl, cLocation, cConv )
 LOCAL aStruct
 LOCAL cData := ""
 LOCAL cDBase
@@ -325,12 +333,18 @@ DO WHILE ! EOF()
    // Put all fields in a row list comma separated
    cFList := ""
    FOR n := 1 TO nFields
+       
        cFList := cFList + ;
-       cQuote + RTRIM( xconvert( FIELDGET( n )) ) + cQuote+ ;
-       IIF( n < FCOUNT(), ",", "")
+       cQuote + RTRIM( xconvert( FieldGet( n ) ) ) + cQuote+ ; 
+       	IIF( n < FCOUNT(), ",", "")
+   
    NEXT
 
-   cSQL := "insert into " + cDBase + " values(" + cFList + ");"
+   // konvertuj u utf-8
+   cFList := strkzn( cFList, cConv, "U" ) 
+
+   cSQL := "insert into " + cDBase + " values(" + ;
+   	cFList + ");"
 
    ? cSQL
 

@@ -1,0 +1,24 @@
+#
+# $Id$
+#
+{allwin}incpaths=\devel\git\fmk\fmk_lib\include
+{allwin}libpaths=${HB_DIR_QT}\lib ${QT_DIR}\lib
+
+{mingw|mingwce|(gcc&(linux|darwin))}libs=supc++
+{allwin&!HB_QT_STATIC}libs=QtCore4 QtGui4 QtNetwork4 QtWebKit4
+{allwin&HB_QT_STATIC}libs=QtCore QtGui QtNetwork QtWebKit
+{linux}libs=QtCore QtGui QtNetwork QtWebKit
+{darwin}libs=/Library/Frameworks/QtCore.framework/QtCore
+{darwin}libs=/Library/Frameworks/QtGui.framework/QtGui
+{darwin}libs=/Library/Frameworks/QtNetwork.framework/QtNetwork
+{darwin}libs=/Library/Frameworks/QtWebKit.framework/QtWebKit
+
+libs=hbvm hbrtl hblang hbrdd hbrtl hbmacro hbpp rddcdx rddfpt rddntx
+libs=hbsqlit3 sqlite3
+libs=hbcommon hbct  fmk_skeleton fmk_security fmk_common fmk_ui fmk_db
+libs=fmk_codes fmk_event fmk_rules fmk_ugov fmk_exp_dbf fmk_lokalizacija fmk_rabat hbdebug
+gui=yes
+{!HB_QT_STATIC}gt=gtqtc
+{HB_QT_STATIC}gt=gtqtcs
+# optional
+mt=yes

@@ -8,6 +8,13 @@ EXTERNAL RIGHT
  */
 
 function Main(cKorisn,cSifra,p3,p4,p5,p6,p7)
+
+	// set language
+	//REQUEST HB_CODEPAGE_PLISO
+
+	//hb_setcodepage("PLISO")
+	//hb_settermcp("PLISO",.t.)
+
 	MainLD(cKorisn,cSifra,p3,p4,p5,p6,p7)
 return
 
