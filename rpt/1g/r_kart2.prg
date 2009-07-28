@@ -169,7 +169,7 @@ for i:=1 to cLDPolja
 				? cLPom:=cLMSK + "   ----------------------------- ----------------------------"
         			? cLMSK + "    SUMA IZ PRETHODNIH OBRA¬UNA   UKUPNO (SA OVIM OBRA¬UNOM)"
         			? cLPom
-        			? cLMSK + "   " + PADC(STR(nKumPrim - _i&cPom),29)+" "+PADC(STR(nKumPrim),28)
+        			? cLMSK + "   " + PADC(STR(nKumPrim - ABS(_i&cPom)),29)+" "+PADC(STR(nKumPrim),28)
         			? cLPom
   			endif
 		

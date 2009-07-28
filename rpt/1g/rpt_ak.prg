@@ -114,6 +114,7 @@ local cDopr2X := "2X"
 local cTipRada := "1"
 local cVarPrn := "2"
 local cObracun := gObracun
+local cIdRadn := SPACE(6)
 
 // kreiraj pomocnu tabelu
 cre_tmp_tbl()
@@ -150,6 +151,9 @@ Box("#RPT: AKONTACIJA POREZA PO ODBITKU...", 13, 75)
 if lViseObr
   	@ m_x+3,col()+2 SAY "Obracun:" GET cObracun WHEN HelpObr(.t.,cObracun) VALID ValObr(.t.,cObracun)
 endif
+
+@ m_x + 4, m_y + 2 SAY "   Radnik (prazno-svi):" GET cIdRadn ;
+	VALID EMPTY(cIdRadn) .or. P_Radn( @cIdRadn )
 
 @ m_x + 5, m_y + 2 SAY "   Doprinos zdr: " GET cDopr1X
 @ m_x + 6, m_y + 2 SAY "   Doprinos pio: " GET cDopr2X
@@ -189,7 +193,7 @@ ld_sort( cRj, cGodina, cMjesec, cObracun )
 
 // nafiluj podatke obracuna
 fill_data( cRj, cGodina, cMjesec, ;
-	cDopr1X, cDopr2X, cTipRada, cObracun )
+	cDopr1X, cDopr2X, cTipRada, cObracun, cIdRadn )
 
 
 dDatIspl := DATE()
@@ -582,7 +586,7 @@ return
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
 static function fill_data( cRj, cGodina, cMjesec, ;
-	cDopr1X, cDopr2X, cVRada, cObr )
+	cDopr1X, cDopr2X, cVRada, cObr, cRadnik )
 
 local cPom
 
@@ -592,6 +596,14 @@ do while !eof() .and. field->godina = cGodina .and. ;
 	field->mjesec = cMjesec
 
 	cT_radnik := field->idradn
+
+	if !EMPTY( cRadnik )
+		if cT_radnik <> cRadnik
+			skip
+			loop
+		endif
+	endif
+
 	cT_tiprada := g_tip_rada( field->idradn, field->idrj )
 
 	select radn
