@@ -48,8 +48,8 @@ do while !eof()
 		endif
 	endif
 
-	if prow() > ( 53 + gPStranica )
-		FF
+	if prow() > ( 64 + gPStranica )
+		//FF
 	endif
 
 	? id, "-", naz
@@ -226,8 +226,8 @@ do while !eof()
 				skip
 		        endif
 			
-			if prow() > (62 + gPStranica)
-				FF
+			if prow() > (64 + gPStranica)
+				//FF
 			endif
 		
 		enddo

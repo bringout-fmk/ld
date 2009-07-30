@@ -1,6 +1,6 @@
 #include "ld.ch"
 
-static DUZ_STRANA := 64
+static DUZ_STRANA := 70
 
 // -------------------------------------------------
 // nova varijanta kartica plate
@@ -326,8 +326,6 @@ if gPrBruto $ "D#X"
 		O_KBENEF
 	endif
 
-	altd()
-
 	nBO:=0
 	nBFO:=0
 	
@@ -363,8 +361,6 @@ if gPrBruto $ "D#X"
 	
 	IF lSkrivena
 		? cMainLine
-	ELSE
-		?
 	ENDIF
 	
 	// razrada doprinosa ....
@@ -478,7 +474,7 @@ if gPrBruto $ "D#X"
 		
 		endif
 		
-		if !lSkrivena .and. prow()>57+gPStranica
+		if !lSkrivena .and. prow()>64+gPStranica
 			FF
 		endif
 		
@@ -605,7 +601,7 @@ if gPrBruto $ "D#X"
 
 	? cMainLine
 
-	if !lSkrivena .and. prow()>55+gPStranica
+	if !lSkrivena .and. prow() > 64 + gPStranica
 		FF
 	endif
 
