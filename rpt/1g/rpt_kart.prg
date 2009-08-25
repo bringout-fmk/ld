@@ -324,11 +324,11 @@ ELSE
 	endif
 
 	if __var_obr == "2"
-		?? SPACE(2) + Lokal("Koef.licnog odbitka:"), radn->klo	
+		?? SPACE(2) + Lokal("Koef.licnog odbitka:"), ALLTRIM(STR(radn->klo))	
 	endif
 	
 	if lRadniSati
-		?? SPACE(19) + Lokal("Radni sati:   ") + ALLTRIM(STR(ld->radsat))
+		?? SPACE(2) + Lokal("Radni sati:   ") + ALLTRIM(STR(ld->radsat))
 	endif
 ENDIF
 
