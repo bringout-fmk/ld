@@ -21,6 +21,7 @@ local nRptVar1 := 1
 local nRptVar2 := 1
 local nDays := 7.5
 local cKred := SPACE(6)
+local cExport
 
 O_KRED
 
@@ -28,7 +29,7 @@ __PAGE_LEN := 60
 
 if _get_vars( @cRj, @cMonthFrom, @cMonthTo, @cYear, @nDays, ;
 		@cHours, @nHourLimit, @nMinHrLimit, @nKoef, @nAcontAmount, ;
-		@nRptVar1, @nRptVar2, @cKred ) == 0
+		@nRptVar1, @nRptVar2, @cKred, @cExport ) == 0
 	return
 endif
 
@@ -39,13 +40,64 @@ if _gen_list( cRj, cMonthFrom, cMonthTo, cYear, nDays, ;
 	return
 endif
 
-
-// printaj izvjestaj....
-_print_list( cMonthFrom, cMonthTo, cYear, nRptVar1, nRptVar2, cKred )
+if cExport == "D"
+	// export podataka 
+	_export_data()
+else
+	// printaj izvjestaj....
+	_print_list( cMonthFrom, cMonthTo, cYear, nRptVar1, nRptVar2, cKred )
+endif
 
 close all
 
 return
+
+
+
+// ---------------------------------------
+// export podataka u txt fajl
+// ---------------------------------------
+static function _export_data()
+local cTxt
+private cLokacija
+private cConstBrojTR
+private nH
+private cParKonv
+
+createfilebanka()
+
+select _tmp
+go top
+
+do while !EOF()
+	
+	cTxt := ""
+	
+	// tek.racun
+	cTxt += FormatSTR( ALLTRIM(field->r_tr), 25, .f., "" )
+	
+	// prezime - ime oca - ime
+	cTxt += FormatSTR( ALLTRIM(field->r_prezime) + ;
+		" (" + ;
+		ALLTRIM(field->r_imeoca) + ;
+		") " + ;
+		ALLTRIM(field->r_ime), 40 )
+
+	// iznos
+	cTxt += FormatSTR( ALLTRIM(STR(field->r_to, 8, 2)), 8, .t. )
+
+	// konverzija znakova...
+	KonvZnWin( @cTxt, cParKonv )
+
+	write2file( nH, cTxt, .t.)
+	
+	skip
+enddo
+
+closefilebanka(nH)
+
+return
+
 
 
 // --------------------------------------
@@ -54,9 +106,9 @@ return
 static function _get_vars( cRj, cMonthFrom, cMonthTo, cYear, nDays, ;
 				cHours, nHourLimit, nMinHrLimit, ;
 				nKoef, nAcontAmount, ;
-				nRptVar1, nRptVar2, cKred )
+				nRptVar1, nRptVar2, cKred, cExport )
 local nTArea := SELECT()
-local nBoxX := 20
+local nBoxX := 22
 local nBoxY := 70
 local nX := 1
 local cColor := "BG+/B"
@@ -80,6 +132,8 @@ RPar( "a1", @nAcontAmount )
 RPar( "v1", @nRptVar1 )
 RPar( "v2", @nRptVar2 )
 RPar( "kr", @cKred )
+
+cExport := "N"
 
 Box(, nBoxX, nBoxY )
 	
@@ -149,6 +203,11 @@ Box(, nBoxX, nBoxY )
 	nX += 1
 	
 	@ m_x + nX, m_y + 2 SAY SPACE(3) + "(2) isplata razlike" COLOR cColor
+	
+	nX += 1
+	
+	@ m_x + nX, m_y + 2 SAY SPACE(3) + "Export izvjestaja ?" ;
+		GET cExport VALID cExport $ "DN" PICT "@!"
 
 
 	read
