@@ -42,7 +42,7 @@ endif
 
 if cExport == "D"
 	// export podataka 
-	_export_data()
+	_export_data( nRptVar1, nRptVar2 )
 else
 	// printaj izvjestaj....
 	_print_list( cMonthFrom, cMonthTo, cYear, nRptVar1, nRptVar2, cKred )
@@ -57,7 +57,7 @@ return
 // ---------------------------------------
 // export podataka u txt fajl
 // ---------------------------------------
-static function _export_data()
+static function _export_data( nVar1, nVar2 )
 local cTxt
 private cLokacija
 private cConstBrojTR
@@ -83,8 +83,20 @@ do while !EOF()
 		") " + ;
 		ALLTRIM(field->r_ime), 40 )
 
-	// iznos
-	cTxt += FormatSTR( ALLTRIM(STR(field->r_to, 8, 2)), 8, .t. )
+	if nVar1 = 1
+		// iznos toplog obroka
+		cTxt += FormatSTR( ALLTRIM(STR(field->r_to, 8, 2)), 8, .t. )
+	else
+		if nVar2 = 1
+			// isplata akontacije
+			cTxt += FormatSTR( ALLTRIM(STR(field->r_acont, 8, 2)),;
+				8, .t. )
+		else
+			// isplata ostatka
+			cTxt += FormatSTR( ALLTRIM(STR(field->r_total, 8, 2)),;
+				8, .t. )
+		endif
+	endif
 
 	// konverzija znakova...
 	KonvZnWin( @cTxt, cParKonv )
