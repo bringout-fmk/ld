@@ -1,5 +1,12 @@
 #include "ld.ch"
 
+
+static __mj_od
+static __mj_do
+static __god_od
+static __god_do
+static __xml := 0
+
 // ---------------------------------------
 // otvara potrebne tabele
 // ---------------------------------------
@@ -23,7 +30,7 @@ return
 // ---------------------------------------------------------
 // sortiranje tabele LD
 // ---------------------------------------------------------
-static function ld_sort(cRj, cGodina, cMjesec, cMjesecDo, ;
+static function ld_sort(cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
 			cRadnik, cTipRpt, cObr )
 local cFilter := ""
 
@@ -53,16 +60,16 @@ if EMPTY(cRadnik)
 	if cTipRpt $ "1#2"
 		INDEX ON str(godina)+SortPrez(idradn)+str(mjesec)+idrj TO "TMPLD"
 	   	go top
-		seek str(cGodina,4)
+		seek str(cGod_od,4)
 	else
 		INDEX ON str(godina)+str(mjesec)+SortPrez(idradn)+idrj TO "TMPLD"
 		go top
-		seek str(cGodina,4)+str(cMjesec,2)+cRadnik
+		seek str(cGod_od,4)+str(cMj_od,2)+cRadnik
 	endif
 else
 	set order to tag (TagVO("2"))
 	go top
-	seek str(cGodina,4)+str(cMjesec,2)+cRadnik
+	seek str(cGod_od,4)+str(cMj_od,2)+cRadnik
 endif
 
 return
@@ -71,7 +78,8 @@ return
 // ---------------------------------------------
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
-static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, cMjesec, nPrihod, ;
+static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, cMjesec, ;
+		nGodina, nPrihod, ;
 		nPrihOst, nBruto, nDop_u_st, nDopPio, ;
 		nDopZdr, nDopNez, nDop_uk, nNeto, nKLO, ;
 		nLOdb, nOsn_por, nIzn_por, nUk )
@@ -84,7 +92,8 @@ append blank
 
 replace idradn with cRadnik
 replace naziv with cNazIspl
-replace mjesec with NazMjeseca( cMjesec )
+replace mjesec with NazMjeseca( cMjesec, nGodina )
+replace godina with nGodina
 replace datispl with dDatIsplate
 replace prihod with nPrihod
 replace prihost with nPrihOst
@@ -116,6 +125,7 @@ AADD(aDbf,{ "IDRADN", "C", 6, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "DATISPL", "D", 8, 0 })
 AADD(aDbf,{ "MJESEC", "C", 15, 0 })
+AADD(aDbf,{ "GODINA", "N", 4, 0 })
 AADD(aDbf,{ "PRIHOD", "N", 12, 2 })
 AADD(aDbf,{ "PRIHOST", "N", 12, 2 })
 AADD(aDbf,{ "BRUTO", "N", 12, 2 })
@@ -132,7 +142,10 @@ AADD(aDbf,{ "IZN_POR", "N", 12, 2 })
 AADD(aDbf,{ "UKUPNO", "N", 12, 2 })
 
 t_exp_create( aDbf )
+
+O_R_EXP
 // index on ......
+index on idradn + STR(godina,4) + mjesec tag "1"
 
 return
 
@@ -149,23 +162,26 @@ local cRj := SPACE(60)
 local cRadnik := SPACE(_LR_) 
 local cPrimDobra := SPACE(100)
 local cIdRj
-local cMjesec
-local cMjesecDo
-local cGodina
+local cMj_od
+local cMj_do
+local cGod_od
+local cGod_do
 local cDopr10 := "10"
 local cDopr11 := "11"
 local cDopr12 := "12"
 local cDopr1X := "1X"
 local cTipRpt := "1"
 local cObracun := gObracun
+local cWinPrint := "N"
 
 // kreiraj pomocnu tabelu
 cre_tmp_tbl()
 
 cIdRj := gRj
-cMjesec := gMjesec
-cGodina := gGodina
-cMjesecDo := cMjesec
+cMj_od := gMjesec
+cMj_do := gMjesec
+cGod_od := gGodina
+cGod_do := gGodina
 
 cPredNaz := SPACE(50)
 cPredAdr := SPACE(50)
@@ -189,13 +205,13 @@ cPredJMB := PADR(cPredJMB, 13)
 Box("#OBRACUNSKI LISTOVI RADNIKA", 15, 75)
 
 @ m_x + 1, m_y + 2 SAY "Radne jedinice: " GET cRj PICT "@!S25"
-@ m_x + 2, m_y + 2 SAY "Za mjesece od:" GET cMjesec pict "99"
-@ m_x + 2, col() + 2 SAY "do:" GET cMjesecDo pict "99" ;
-	VALID cMjesecDo >= cMjesec
-@ m_x + 3, m_y + 2 SAY "Godina: " GET cGodina pict "9999"
+@ m_x + 2, m_y + 2 SAY "Period od:" GET cMj_od pict "99"
+@ m_x + 2, col() + 1 SAY "/" GET cGod_od pict "9999"
+@ m_x + 2, col() + 1 SAY "do:" GET cMj_do pict "99" 
+@ m_x + 2, col() + 1 SAY "/" GET cGod_do pict "9999"
 
 if lViseObr
-  	@ m_x+3,col()+2 SAY "Obracun:" GET cObracun WHEN HelpObr(.t.,cObracun) VALID ValObr(.t.,cObracun)
+  	@ m_x+2,col()+2 SAY "Obracun:" GET cObracun WHEN HelpObr(.t.,cObracun) VALID ValObr(.t.,cObracun)
 endif
 
 @ m_x + 4, m_y + 2 SAY "Radnik (prazno-svi radnici): " GET cRadnik ;
@@ -213,6 +229,9 @@ endif
 @ m_x + 15, m_y + 2 SAY "(1) OLP-1021 / (2) GIP-1022: " GET cTipRpt ;
 	VALID cTipRpt $ "12" 
 
+@ m_x + 15, col() + 2 SAY "win stampa (D/N)?" GET cWinPrint ;
+	VALID cWinPrint $ "DN" PICT "@!" 
+
 read
 	
 clvbox()
@@ -225,30 +244,237 @@ if lastkey() == K_ESC
 	return
 endif
 
+// staticke
+__mj_od := cMj_od
+__mj_do := cMj_do
+__god_od := cGod_od
+__god_do := cGod_do
+
+if cWinPrint == "D"
+	__xml := 1
+endif
+
 // upisi vrijednosti
 select params
 WPar("i1", cPredNaz)
 WPar("i2", cPredAdr)  
 
-
 select ld
 
 // sortiraj tabelu i postavi filter
-ld_sort( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, cTipRpt, cObracun )
+ld_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 
 // nafiluj podatke obracuna
-fill_data( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, cPrimDobra, ;
+fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cPrimDobra, ;
 	cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun )
+
+// stampa izvjestaja xml/oo3
+_xml_print( cTipRpt )
+
+if __xml = 1
+	return
+endif
 
 // printaj obracunski list
 if cTipRpt == "1"
-	olp_print( cMjesec, cMjesecDo )
+	olp_print( cMj_od, cMj_do )
 else
 	gip_print( )
 endif
 
 return
 
+
+// ----------------------------------------
+// stampa xml-a
+// ----------------------------------------
+static function _xml_print( cTip )
+local cOdtName := ""
+local cOutput := "c:\ld_out.odt"
+
+if __xml = 0
+	return
+endif
+
+// napuni xml fajl
+_fill_xml()
+
+do case
+	case cTip == "1"
+		cOdtName := "ld_olp.odt"
+	case cTip == "2"
+		cOdtName := "ld_gip.odt"
+endcase
+
+save screen to cScreen
+
+clear screen
+
+cJODRep := ALLTRIM( gJODRep )
+
+// stampanje labele
+cCmdLine := "java -jar " + cJODRep + " " + ;
+	"c:\" + cOdtName + " c:\data.xml " + cOutput
+
+run &cCmdLine
+
+clear screen
+
+cOOStart := '"' + ALLTRIM( gOOPath ) + ALLTRIM( gOOWriter ) + '"'
+cOOParam := ""
+
+// otvori naljepnicu
+cCmdLine := "start " + cOOStart + " " + cOOParam + " " + cOutput
+
+run &cCmdLine
+
+restore screen from cScreen
+
+return
+
+
+
+// --------------------------------------------
+// filuje xml fajl sa podacima izvjestaja
+// --------------------------------------------
+static function _fill_xml()
+local nTArea := SELECT()
+local nT_prih := 0
+local nT_pros := 0
+local nT_bruto := 0
+local nT_neto := 0
+local nT_poro := 0
+local nT_pori := 0
+local nT_dop_s := 0
+local nT_dop_u := 0
+local nT_d_zdr := 0
+local nT_d_pio := 0
+local nT_d_nez := 0
+local nT_klo := 0
+local nT_lodb := 0
+
+// otvori xml za upis
+open_xml("c:\data.xml")
+// upisi header
+xml_head()
+
+xml_subnode("rpt", .f.)
+
+// naziv firme
+xml_node( "p_naz", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+xml_node( "p_adr", strkzn( ALLTRIM(cPredAdr), "8", "U" ) )
+xml_node( "p_jmb", ALLTRIM(cPredJmb) )
+xml_node( "p_per", g_por_per() )
+
+select r_export
+set order to tag "1"
+go top
+
+do while !EOF()
+	
+	// po radniku
+	cT_radnik := field->idradn
+	
+	// pronadji radnika u sifrarniku
+	select radn
+	seek cT_radnik
+
+	select r_export
+
+	xml_subnode("radnik", .f.)
+
+	xml_node("ime", strkzn( ALLTRIM(radn->ime) + ;
+		" (" + ALLTRIM(radn->imerod) + ;
+		") " + ALLTRIM(radn->naz), "8", "U" ) )
+
+	xml_node("mb", ALLTRIM(radn->matbr) )
+	
+	xml_node("adr", strkzn( ALLTRIM(radn->streetname) + ;
+		" " + ALLTRIM(radn->streetnum), "8", "U" ) )
+
+	nT_prih := 0
+	nT_pros := 0
+	nT_bruto := 0
+	nT_neto := 0
+	nT_poro := 0
+	nT_pori := 0
+	nT_dop_s := 0
+	nT_dop_u := 0
+	nT_d_zdr := 0
+	nT_d_pio := 0
+	nT_d_nez := 0
+	nT_klo := 0
+	nT_lodb := 0
+
+	do while !EOF() .and. field->idradn == cT_radnik
+		
+		xml_subnode("obracun", .f.)
+
+		xml_node("mjesec", strkzn( ALLTRIM( field->mjesec ), ;
+			"8", "U" ) )
+		xml_node("prihod", STR( field->prihod, 12, 2 ) )
+		xml_node("prih_o", STR( field->prihost, 12, 2 ) )
+		xml_node("bruto", STR( field->bruto, 12, 2 ) )
+		xml_node("do_us", STR( field->dop_u_st, 12, 2 ) )
+		xml_node("do_uk", STR( field->dop_uk, 12, 2 ) )
+		xml_node("do_pio", STR( field->dop_pio, 12, 2 ) )
+		xml_node("do_zdr", STR( field->dop_zdr, 12, 2 ) )
+		xml_node("do_nez", STR( field->dop_nez, 12, 2 ) )
+		xml_node("neto", STR( field->neto, 12, 2 ) )
+		xml_node("klo", STR( field->klo, 12, 2 ) )
+		xml_node("l_odb", STR( field->l_odb, 12, 2 ) )
+		xml_node("p_osn", STR( field->osn_por, 12, 2 ) )
+		xml_node("p_izn", STR( field->izn_por, 12, 2 ) )
+		xml_node("d_isp", DTOC( field->datispl ) )
+
+		xml_subnode("obracun", .t.)
+		
+		nT_prih += field->prihod
+		nT_pros += field->prihost
+		nT_bruto += field->bruto
+		nT_neto += field->neto
+		nT_poro += field->osn_por
+		nT_pori += field->izn_por
+		nT_dop_s += field->dop_u_st
+		nT_dop_u += field->dop_uk
+		nT_d_zdr += field->dop_zdr
+		nT_d_pio += field->dop_pio
+		nT_d_nez += field->dop_nez
+		nT_klo += field->klo
+		nT_lodb += field->l_odb
+
+		skip
+	enddo
+
+	// upisi totale za radnika
+	xml_subnode("total", .f.)
+
+	xml_node("prihod", STR( nT_prih, 12, 2 ) )
+	xml_node("prih_o", STR( nT_pros, 12, 2 ) )
+	xml_node("bruto", STR( nT_bruto, 12, 2 ) )
+	xml_node("neto", STR( nT_neto, 12, 2 ) )
+	xml_node("p_izn", STR( nT_pori, 12, 2 ) )
+	xml_node("p_osn", STR( nT_poro, 12, 2 ) )
+	xml_node("do_st", STR( nT_dop_s, 12, 2 ) )
+	xml_node("do_uk", STR( nT_dop_u, 12, 2 ) )
+	xml_node("do_pio", STR( nT_d_pio, 12, 2 ) )
+	xml_node("do_zdr", STR( nT_d_zdr, 12, 2 ) )
+	xml_node("do_nez", STR( nT_d_nez, 12, 2 ) )
+	xml_node("klo", STR( nT_klo, 12, 2 ) )
+	xml_node("l_odb", STR( nT_lodb, 12, 2 ) )
+
+	xml_subnode("total", .t.)
+	
+	// zatvori radnika
+	xml_subnode("radnik", .t.)
+
+enddo
+
+// zatvori <rpt>
+xml_subnode("rpt", .t.)
+
+select (nTArea)
+return
 
 
 // ----------------------------------------------
@@ -258,8 +484,10 @@ static function gip_print()
 local cT_radnik := ""
 local cLine := ""
 
+altd()
 O_R_EXP
 select r_export
+set order to tag "1"
 go top
 
 START PRINT CRET
@@ -375,12 +603,13 @@ return
 // ----------------------------------------------
 // stampa obracunskog lista
 // ----------------------------------------------
-static function olp_print(cMjesec, cMjesecDo)
+static function olp_print()
 local cT_radnik := ""
 local cLine := ""
 
 O_R_EXP
 select r_export
+set order to tag "1"
 go top
 
 START PRINT CRET
@@ -591,15 +820,17 @@ next
 
 return cLine
 
-// ---------------------------------------
+
+// ----------------------------------------------------------
 // vraca string poreznog perioda
-// ---------------------------------------
+// ----------------------------------------------------------
 static function g_por_per()
 
 local cRet := ""
 
-cRet += "1/1 - 31/12 "  
-cRet += ALLTRIM(STR(YEAR(DATE())))
+cRet += ALLTRIM(STR(__mj_od)) + "/" + ALLTRIM(STR(__god_od))  
+cRet += " - "
+cRet += ALLTRIM(STR(__mj_do)) + "/" + ALLTRIM(STR(__god_do))
 cRet += " godine"
 
 return cRet
@@ -685,11 +916,23 @@ select (nTArea)
 return
 
 
+// -------------------------------------------
+// vraca string sa datumom uslovskim
+// -------------------------------------------
+static function __date( nGod, nMj )
+local cRet
+
+cRet := PADR( ALLTRIM( STR( nGod ) ), 4 ) + ;
+	PADL( ALLTRIM( STR( nMj ) ) , 2, "0" )
+
+return cRet
+
+
 
 // ---------------------------------------------------------
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
-static function fill_data( cRj, cGodina, cMjesec, cMjesecDo, ;
+static function fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
 	cRadnik, cPrimDobra, cDopr10, cDopr11, cDopr12, cDopr1X, cRptTip, ;
 	cObracun )
 local i
@@ -703,14 +946,12 @@ endif
 
 select ld
 
-do while !eof() .and. field->godina = cGodina  
+do while !eof() .and. __date( field->godina, field->mjesec ) >= ;
+	__date( cGod_od, cMj_od )   
 
-	if field->mjesec > cMjesecDo .or. ;
-		field->mjesec < cMjesec 
-		
+	if __date( field->godina, field->mjesec ) > __date( cGod_do, cMj_do )
 		skip
 		loop
-
 	endif
 
 	cT_radnik := field->idradn
@@ -725,7 +966,7 @@ do while !eof() .and. field->godina = cGodina
 	cTipRada := g_tip_rada( ld->idradn, ld->idrj )
 
 	// samo pozicionira bazu PAROBR na odgovarajuci zapis
-	ParObr( cMjesec, cGodina, IF(lViseObr, ld->obr,), ld->idrj )
+	ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ld->idrj )
 
 	select radn
 	seek cT_radnik
@@ -747,17 +988,21 @@ do while !eof() .and. field->godina = cGodina
 	nDopUk := 0
 	nNeto := 0
 	nPrDobra := 0
-	
-	do while !eof() .and. field->mjesec <= cMjesecDo ;
-		.and. field->mjesec >= cMjesec ;
-		.and. field->godina = cGodina  ;
-		.and. field->idradn == cT_radnik
 
-		
+	do while !EOF() .and. __date( field->godina, field->mjesec ) >= ;
+		__date( cGod_od, cMj_od ) .and. ;
+		field->idradn == cT_radnik
+
+		if __date( field->godina, field->mjesec ) > ;
+			__date( cGod_do, cMj_do )
+			skip
+			loop
+		endif
+
 		// uvijek provjeri tip rada, ako ima vise obracuna
 		cTipRada := g_tip_rada( ld->idradn, ld->idrj )
 		
-		ParObr( cMjesec, cGodina, IF(lViseObr, ld->obr,), ld->idrj )
+		ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ld->idrj )
 		
 		if !( cTipRada $ " #I#N") 
 			skip
@@ -843,6 +1088,7 @@ do while !eof() .and. field->godina = cGodina
 				"placa", ;
 				dDatIspl, ;
 				ld->mjesec, ;
+				ld->godina, ;
 				nBruto - nBrDobra, ;
 				nBrDobra, ;
 				nBruto, ;

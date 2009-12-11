@@ -904,24 +904,39 @@ FUNCTION PRNKod_OFF(cKod)
     ENDCASE
   NEXT
 return (nil)
-*}
 
 
-
-function NazMjeseca(nMjesec)
-*{
+// ---------------------------------------------------
+// vraca naziv mjeseca 
+// ---------------------------------------------------
+function NazMjeseca(nMjesec, nGodina)
 local aVrati:={"Januar","Februar","Mart","April","Maj","Juni","Juli",;
                 "Avgust","Septembar","Oktobar","Novembar","Decembar","UKUPNO"}
-if (nMjesec>0 .and. nMjesec<14)
-	return aVrati[nMjesec]
+local cTmp
+
+if nGodina == nil
+	nGodina := 0
+endif
+
+if ( nMjesec > 0 .and. nMjesec < 14 )
+	
+	cTmp := aVrati[ nMjesec ]
+
+	if nGodina > 0
+		cTmp := cTmp + " (" + ALLTRIM(STR(nGodina)) + ")"
+	endif
+
+	return cTmp
+
 else
 	return ""
 endif
-*}
+
+return
+
 
 
 function Specif2()
-*{
 
 O_RADN
 O_RJ
