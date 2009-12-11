@@ -909,10 +909,14 @@ return (nil)
 // ---------------------------------------------------
 // vraca naziv mjeseca 
 // ---------------------------------------------------
-function NazMjeseca(nMjesec, nGodina)
+function NazMjeseca( nMjesec, nGodina, lShort )
 local aVrati:={"Januar","Februar","Mart","April","Maj","Juni","Juli",;
                 "Avgust","Septembar","Oktobar","Novembar","Decembar","UKUPNO"}
 local cTmp
+
+if lShort == nil
+	lShort := .f.
+endif
 
 if nGodina == nil
 	nGodina := 0
@@ -922,8 +926,12 @@ if ( nMjesec > 0 .and. nMjesec < 14 )
 	
 	cTmp := aVrati[ nMjesec ]
 
+	if lShort == .t.
+		cTmp := PADR( cTmp, 3 )
+	endif
+
 	if nGodina > 0
-		cTmp := cTmp + " (" + ALLTRIM(STR(nGodina)) + ")"
+		cTmp := cTmp + " " + ALLTRIM(STR(nGodina))
 	endif
 
 	return cTmp

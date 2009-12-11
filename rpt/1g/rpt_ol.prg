@@ -92,7 +92,7 @@ append blank
 
 replace idradn with cRadnik
 replace naziv with cNazIspl
-replace mjesec with NazMjeseca( cMjesec, nGodina )
+replace mjesec with NazMjeseca( cMjesec, nGodina, .t. )
 replace godina with nGodina
 replace datispl with dDatIsplate
 replace prihod with nPrihod
