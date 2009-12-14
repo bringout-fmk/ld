@@ -58,9 +58,8 @@ endif
 
 if EMPTY(cRadnik) 
 	if cTipRpt $ "1#2"
-		INDEX ON str(godina)+SortPrez(idradn)+str(mjesec)+idrj TO "TMPLD"
+		INDEX ON SortPrez(idradn)+str(godina)+str(mjesec)+idrj TO "TMPLD"
 	   	go top
-		seek str(cGod_od,4)
 	else
 		INDEX ON str(godina)+str(mjesec)+SortPrez(idradn)+idrj TO "TMPLD"
 		go top
@@ -78,7 +77,7 @@ return
 // ---------------------------------------------
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
-static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, cMjesec, ;
+static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, nMjesec, ;
 		nGodina, nPrihod, ;
 		nPrihOst, nBruto, nDop_u_st, nDopPio, ;
 		nDopZdr, nDopNez, nDop_uk, nNeto, nKLO, ;
@@ -92,7 +91,8 @@ append blank
 
 replace idradn with cRadnik
 replace naziv with cNazIspl
-replace mjesec with NazMjeseca( cMjesec, nGodina, .t. )
+replace mjesec with nMjesec
+replace mj_opis with NazMjeseca( nMjesec, nGodina, .t. )
 replace godina with nGodina
 replace datispl with dDatIsplate
 replace prihod with nPrihod
@@ -124,7 +124,8 @@ local aDbf := {}
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "DATISPL", "D", 8, 0 })
-AADD(aDbf,{ "MJESEC", "C", 15, 0 })
+AADD(aDbf,{ "MJESEC", "N", 2, 0 })
+AADD(aDbf,{ "MJ_OPIS", "C", 15, 0 })
 AADD(aDbf,{ "GODINA", "N", 4, 0 })
 AADD(aDbf,{ "PRIHOD", "N", 12, 2 })
 AADD(aDbf,{ "PRIHOST", "N", 12, 2 })
@@ -145,7 +146,7 @@ t_exp_create( aDbf )
 
 O_R_EXP
 // index on ......
-index on idradn + STR(godina,4) + mjesec tag "1"
+index on idradn + STR(godina,4) + STR(mjesec,2) tag "1"
 
 return
 
@@ -410,8 +411,10 @@ do while !EOF()
 		
 		xml_subnode("obracun", .f.)
 
-		xml_node("mjesec", strkzn( ALLTRIM( field->mjesec ), ;
+		xml_node("pl_opis", strkzn( ALLTRIM( field->mj_opis ), ;
 			"8", "U" ) )
+		xml_node("mjesec", STR( field->mjesec ) )
+		xml_node("godina", STR( field->godina ) )
 		xml_node("prihod", STR( field->prihod, 12, 2 ) )
 		xml_node("prih_o", STR( field->prihost, 12, 2 ) )
 		xml_node("bruto", STR( field->bruto, 12, 2 ) )
@@ -426,6 +429,7 @@ do while !EOF()
 		xml_node("p_osn", STR( field->osn_por, 12, 2 ) )
 		xml_node("p_izn", STR( field->izn_por, 12, 2 ) )
 		xml_node("d_isp", DTOC( field->datispl ) )
+		xml_node("opis", strkzn( ALLTRIM( field->naziv ), "8", "U") )
 
 		xml_subnode("obracun", .t.)
 		
@@ -484,7 +488,6 @@ static function gip_print()
 local cT_radnik := ""
 local cLine := ""
 
-altd()
 O_R_EXP
 select r_export
 set order to tag "1"
@@ -522,7 +525,7 @@ do while !EOF()
 
 	do while !EOF() .and. field->idradn == cT_radnik
 
-		? mjesec
+		? mj_opis
 
 		@ prow(), nPoc:=pcol()+1 SAY STR(prihod,12,2)
 		nUPrihod += prihod
@@ -637,7 +640,8 @@ do while !EOF()
 		? PADL( ALLTRIM( STR(++nCount)), 3 ) + ")"
 
 		@ prow(), pcol()+1 SAY datispl
-		@ prow(), pcol()+1 SAY PADR(ALLTRIM(naziv) + "/" + ALLTRIM(mjesec), 15)
+		@ prow(), pcol()+1 SAY PADR(ALLTRIM(naziv) + "/ " + ;
+			ALLTRIM(mj_opis), 15)
 		@ prow(), pcol()+1 SAY STR(prihod,12,2)
 		@ prow(), pcol()+1 SAY STR(prihost,12,2)
 		@ prow(), pcol()+1 SAY STR(bruto,12,2)
@@ -946,8 +950,12 @@ endif
 
 select ld
 
-do while !eof() .and. __date( field->godina, field->mjesec ) >= ;
-	__date( cGod_od, cMj_od )   
+do while !eof() 
+
+	if __date( field->godina, field->mjesec ) < __date( cGod_od, cMj_od )   
+		skip
+		loop
+	endif
 
 	if __date( field->godina, field->mjesec ) > __date( cGod_do, cMj_do )
 		skip
@@ -989,9 +997,13 @@ do while !eof() .and. __date( field->godina, field->mjesec ) >= ;
 	nNeto := 0
 	nPrDobra := 0
 
-	do while !EOF() .and. __date( field->godina, field->mjesec ) >= ;
-		__date( cGod_od, cMj_od ) .and. ;
-		field->idradn == cT_radnik
+	do while !EOF() .and. field->idradn == cT_radnik 
+	
+		if __date( field->godina, field->mjesec ) < ;
+			__date( cGod_od, cMj_od ) 
+			skip
+			loop
+		endif
 
 		if __date( field->godina, field->mjesec ) > ;
 			__date( cGod_do, cMj_do )
