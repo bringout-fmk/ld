@@ -406,11 +406,14 @@ do while !EOF()
 	nT_d_nez := 0
 	nT_klo := 0
 	nT_lodb := 0
+		
+	nCnt := 0
 
 	do while !EOF() .and. field->idradn == cT_radnik
 		
 		xml_subnode("obracun", .f.)
 
+		xml_node("rbr", STR( ++nCnt ) )
 		xml_node("pl_opis", strkzn( ALLTRIM( field->mj_opis ), ;
 			"8", "U" ) )
 		xml_node("mjesec", STR( field->mjesec ) )
@@ -428,6 +431,7 @@ do while !EOF()
 		xml_node("l_odb", STR( field->l_odb, 12, 2 ) )
 		xml_node("p_osn", STR( field->osn_por, 12, 2 ) )
 		xml_node("p_izn", STR( field->izn_por, 12, 2 ) )
+		xml_node("uk", STR( field->ukupno, 12, 2 ) )
 		xml_node("d_isp", DTOC( field->datispl ) )
 		xml_node("opis", strkzn( ALLTRIM( field->naziv ), "8", "U") )
 
