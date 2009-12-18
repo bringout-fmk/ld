@@ -87,6 +87,11 @@ if gVarObracun == "2"
 	AADD(opcexe, {|| unos_disp()})
 endif
 
+if gSihtGroup == "D"
+	AADD(opc, "S. obrada sihtarica")
+	AADD(opcexe, {|| siht_obr()})
+endif
+
 if IzFmkIni("LD","RadniSati","N",KUMPATH) == "D"
 	AADD(opc, "R. pregled/ispravka radnih sati radnika")
 	AADD(opcexe, {|| edRadniSati()})
@@ -97,5 +102,37 @@ Menu_SC("ao")
 return
 
 
+// ------------------------------------------------
+// obrada sihtarica
+// ------------------------------------------------
+function siht_obr()
+private opc:={}
+private opcexe:={}
+private Izbor:=1
 
+AADD(opc, "1. unos/ispravka         ")
+if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","UNOS"))
+	AADD(opcexe, {|| def_siht()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "2. pregled       ")
+if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","PRINT"))
+	AADD(opcexe, {|| get_siht()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "3. brisanje sihtarice ")
+
+if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","BRISANJE"))
+	AADD(opcexe, {|| del_siht()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+Menu_SC("sobr")
+
+return
 

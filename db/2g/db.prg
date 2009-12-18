@@ -759,6 +759,7 @@ if !file(KUMPATH+"RADSIHT.DBF")
 endif
 
 CREATE_INDEX("1","str(godina)+str(mjesec)+idradn+idrj+str(dan)+dandio+idtippr",KUMPATH+"RADSIHT")
+CREATE_INDEX("2","idnorsiht+str(godina)+str(mjesec)+idradn",KUMPATH+"RADSIHT")
 
 
 //NORSIHT - norme u sihtarici - koristi se vjerovatno samo kod rada u normi

@@ -311,7 +311,7 @@ Box(,21,77)
 	
 	if gSihtarica=="D"
 		UzmiSiht()
-	endif 
+	endif
 
 	PrikUnos()
 	
