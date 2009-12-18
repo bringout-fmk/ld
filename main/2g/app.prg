@@ -276,6 +276,7 @@ public gTipObr:="1"
 public gVarSpec:="1"
 public cVarPorOl:="1"
 public gSihtarica:="N"
+public gSihtGroup:="N"
 public gAHonorar := "N"
 public gFUPrim:=PADR("UNETO+I24+I25",50)
 public gBFForm:=PADR("",100)
@@ -351,6 +352,7 @@ Rpar("ur",@gFURaz)
 Rpar("va",@gValuta)
 Rpar("vs",@gVarSpec)
 Rpar("Si",@gSihtarica)
+Rpar("SG",@gSihtGroup)
 Rpar("aH",@gAHonorar)
 Rpar("z2",@gZaok2)
 Rpar("zo",@gZaok)
@@ -364,6 +366,11 @@ Rpar("ks",@gKarSDop)
 Rpar("rf",@gRadnFilter)
 
 //Rpar("tB",@gTabela)
+
+// bazna opcija sihtarica mora biti iskljucena
+if gSihtGroup == "D"
+	gSihtarica := "N"
+endif
 
 select (F_PARAMS)
 use

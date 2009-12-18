@@ -100,6 +100,11 @@ if gSihtarica=="D"
 	AADD(opcexe, {|| P_NorSiht()})
 endif
 
+if gSihtGroup == "D"
+	AADD(opc,"8. grupe sihtarica   ")
+	AADD(opcexe, {|| p_sgroup()})
+endif
+
 if gAHonorar == "D"
 	AADD(opc,"9. autorski honorari - izdanja ")
 	AADD(opcexe, {|| P_Izdanja()})

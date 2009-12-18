@@ -1,0 +1,12 @@
+DEF_SIHT..........siht              GR_POS............sif_sht
+G_SG_NAZ..........sif_sht           P_SGROUP..........sif_sht
+RPT_SIHT..........rpt_sht           
+
+siht              Offset: 00000010H  Code and data size: 48H
+  DEF_SIHT        
+
+rpt_sht           Offset: 000002b0H  Code and data size: 48H
+  RPT_SIHT        
+
+sif_sht           Offset: 00000550H  Code and data size: 489H
+  GR_POS            G_SG_NAZ          P_SGROUP        

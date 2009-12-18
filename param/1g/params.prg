@@ -154,15 +154,27 @@ Box(, 18, 77)
 
       	@ m_x+nX,m_y+2 SAY "Grupe poslova u specif.uz platu (1-automatski/2-korisnik definise):" GET gVarSpec  valid gVarSpec $ "12" pict "9"
       	++nX
-      	@ m_x+nX,m_y+2 SAY "Obrada sihtarice ?" GET gSihtarica valid gSihtarica $ "DN" pict "@!"
+      	@ m_x+nX,m_y+2 SAY "Obrada sihtarice ?" GET gSihtarica ;
+		VALID gSihtarica $ "DN" pict "@!"
+        ++nX	
+      	@ m_x+nX,m_y+2 SAY "Sihtarice po grupama ?" GET gSihtGroup ;
+		VALID gSihtGroup $ "DN" pict "@!"
+	++nX
+      	@ m_x+nX,m_y+2 SAY "Obrada autorskih honorara ?" GET gAHonorar ;
+		VALID gAHonorar $ "DN" .and. ahon_ready() pict "@!"
       	++nX
-      	@ m_x+nX,m_y+2 SAY "Obrada autorskih honorara ?" GET gAHonorar valid gAHonorar $ "DN" .and. ahon_ready() pict "@!"
-      	++nX
-      	@ m_x+nX,m_y+2 SAY "Filter 'aktivan' u sifraniku radnika ?" GET gRadnFilter valid gRadnFilter $ "DN" pict "@!"
+      	@ m_x+nX,m_y+2 SAY "Filter 'aktivan' u sifraniku radnika ?" ;
+		GET gRadnFilter ;
+		VALID gRadnFilter $ "DN" pict "@!"
 	read
 BoxC()
 
-if (LastKey()<>K_ESC)
+if (LastKey() <> K_ESC)
+	
+	if gSihtGroup == "D"
+		gSihtarica := "N"
+	endif
+	
 	WPar("fo", gSetForm)
       	WPar("mr", @gMinR)   // min rad %, Bodovi
       	WPar("p9", @gDaPorOl) // praviti poresku olaksicu D/N
@@ -171,6 +183,7 @@ if (LastKey()<>K_ESC)
       	WPar("um",gUNMjesec)
       	Wpar("vs",gVarSpec)
       	Wpar("Si",gSihtarica)
+      	Wpar("SG",gSihtGroup)
       	Wpar("aH",gAHonorar)
 	Wpar("ov",gvarObracun)
 	Wpar("rf",gRadnFilter)
