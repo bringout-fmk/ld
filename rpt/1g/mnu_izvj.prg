@@ -163,8 +163,12 @@ if (IsRamaGlas())
 	AADD(opcexe,{|| PlatePoRNalozima()})
 endif
 
+AADD(opc,"S. pregled utroska po sihtaricama")
+AADD(opcexe,{|| r_sh_print()})
+
 AADD(opc,"T. lista radnika za isplatu toplog obroka")
 AADD(opcexe,{|| to_list()})
+
 
 Menu_SC("ost")
 return

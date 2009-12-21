@@ -134,21 +134,7 @@ if g_vars( @nGodina, @nMjesec, @cIdRadn, @cGroup ) == 0
 	return
 endif
 
-cFilter := "godina =" + STR( nGodina )  
-cFilter += " .and. mjesec = " + STR( nMjesec )
-cFilter += " .and. dandio == 'G' "
-
-if !EMPTY( cIdRadn )
-	cFilter += " .and. idradn == " + cm2str( cIdRadn )
-endif
-
-if !EMPTY( cGroup )
-	cFilter += " .and. idnorsiht == " + cm2str( cGroup )
-endif
-
-
-O_RADSIHT
-set filter to &cFilter
+sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
 set order to tag "2"
 go top
 
@@ -189,6 +175,34 @@ set filter to
 select (nTArea)
 return
 
+
+
+// ------------------------------------------------------------
+// sortiranje sihtarice
+// ------------------------------------------------------------
+function sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
+local cFilter
+
+cFilter := "godina =" + STR( nGodina )  
+cFilter += " .and. mjesec = " + STR( nMjesec )
+cFilter += " .and. dandio == 'G' "
+
+if !EMPTY( cIdRadn )
+	cFilter += " .and. idradn == " + cm2str( cIdRadn )
+endif
+
+if !EMPTY( cGroup )
+	cFilter += " .and. idnorsiht == " + cm2str( cGroup )
+endif
+
+O_RADSIHT
+select radsiht
+set filter to &cFilter
+go top
+
+return
+
+
 // ------------------------------------------
 // brisanje sihtarice
 // ------------------------------------------
@@ -204,24 +218,12 @@ if g_vars( @nGodina, @nMjesec, @cIdRadn, @cGroup ) == 0
 	return
 endif
 
-cFilter := "godina =" + STR( nGodina )  
-cFilter += " .and. mjesec = " + STR( nMjesec )
-cFilter += " .and. dandio == 'G' "
-
-if !EMPTY( cIdRadn )
-	cFilter += " .and. idradn == " + cm2str( cIdRadn )
-endif
-
-if !EMPTY( cGroup )
-	cFilter += " .and. idnorsiht == " + cm2str( cGroup )
-endif
+sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
 
 if Pitanje(,"Pobrisati zapise sa ovim kriterijem (D/N)","N") == "N"
 	return
 endif
 
-O_RADSIHT
-set filter to &cFilter
 set order to tag "2"
 go top
 
@@ -260,7 +262,7 @@ return .t.
 // ------------------------------------------------
 // vraca ime i prezime radnika
 // ------------------------------------------------
-static function _rad_ime( cId, lImeOca )
+function _rad_ime( cId, lImeOca )
 local xRet := ""
 local nTArea := SELECT()
 

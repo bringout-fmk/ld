@@ -391,6 +391,28 @@ return PostojiSifra(F_PAROBR, 1, 10, 70, Lokal("Parametri obracuna"), ;
 
 
 
+// -----------------------------------------------
+// vraca naziv tipa primanja
+// -----------------------------------------------
+function g_tp_naz( cId )
+local nTArea := SELECT()
+local xRet := ""
+
+O_TIPPR
+select tippr
+seek cId
+
+if FOUND()
+	xRet := ALLTRIM( tippr->naz )
+endif
+
+select (nTArea)
+return xRet
+
+
+
+
+
 // --------------------------------------------
 // --------------------------------------------
 function P_TipPr(cId,dx,dy)

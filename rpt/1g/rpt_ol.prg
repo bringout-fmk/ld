@@ -10,7 +10,7 @@ static __xml := 0
 // ---------------------------------------
 // otvara potrebne tabele
 // ---------------------------------------
-static function o_tables()
+function ol_o_tbl()
 
 O_OBRACUNI
 O_PAROBR
@@ -30,7 +30,7 @@ return
 // ---------------------------------------------------------
 // sortiranje tabele LD
 // ---------------------------------------------------------
-static function ld_sort(cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
+function ol_sort(cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
 			cRadnik, cTipRpt, cObr )
 local cFilter := ""
 
@@ -81,7 +81,8 @@ static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, nMjesec, ;
 		nGodina, nPrihod, ;
 		nPrihOst, nBruto, nDop_u_st, nDopPio, ;
 		nDopZdr, nDopNez, nDop_uk, nNeto, nKLO, ;
-		nLOdb, nOsn_por, nIzn_por, nUk )
+		nLOdb, nOsn_por, nIzn_por, nUk, nUSati, nIzn1, nIzn2, ;
+		nIzn3, nIzn4, nIzn5 )
 
 local nTArea := SELECT()
 
@@ -109,6 +110,24 @@ replace l_odb with nLOdb
 replace osn_por with nOsn_Por
 replace izn_por with nIzn_Por
 replace ukupno with nUk
+replace sati with nUSati
+
+if nIzn1 <> nil
+	replace tp_1 with nIzn1
+endif
+if nIzn2 <> nil
+	replace tp_2 with nIzn2
+endif
+if nIzn3 <> nil
+	replace tp_3 with nIzn3
+endif
+if nIzn4 <> nil
+	replace tp_4 with nIzn4
+endif
+if nIzn5 <> nil
+	replace tp_5 with nIzn5
+endif
+
 
 select (nTArea)
 return
@@ -118,7 +137,7 @@ return
 // ---------------------------------------------
 // kreiranje pomocne tabele
 // ---------------------------------------------
-static function cre_tmp_tbl()
+function ol_tmp_tbl()
 local aDbf := {}
 
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
@@ -141,6 +160,12 @@ AADD(aDbf,{ "L_ODB", "N", 12, 2 })
 AADD(aDbf,{ "OSN_POR", "N", 12, 2 })
 AADD(aDbf,{ "IZN_POR", "N", 12, 2 })
 AADD(aDbf,{ "UKUPNO", "N", 12, 2 })
+AADD(aDbf,{ "SATI", "N", 12, 2 })
+AADD(aDbf,{ "TP_1", "N", 12, 2 })
+AADD(aDbf,{ "TP_2", "N", 12, 2 })
+AADD(aDbf,{ "TP_3", "N", 12, 2 })
+AADD(aDbf,{ "TP_4", "N", 12, 2 })
+AADD(aDbf,{ "TP_5", "N", 12, 2 })
 
 t_exp_create( aDbf )
 
@@ -176,7 +201,7 @@ local cObracun := gObracun
 local cWinPrint := "N"
 
 // kreiraj pomocnu tabelu
-cre_tmp_tbl()
+ol_tmp_tbl()
 
 cIdRj := gRj
 cMj_od := gMjesec
@@ -189,7 +214,7 @@ cPredAdr := SPACE(50)
 cPredJMB := SPACE(13)
 
 // otvori tabele
-o_tables()
+ol_o_tbl()
 
 select params
 
@@ -253,6 +278,8 @@ __god_do := cGod_do
 
 if cWinPrint == "D"
 	__xml := 1
+else
+	__xml := 0
 endif
 
 // upisi vrijednosti
@@ -263,16 +290,16 @@ WPar("i2", cPredAdr)
 select ld
 
 // sortiraj tabelu i postavi filter
-ld_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
+ol_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 
 // nafiluj podatke obracuna
-fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cPrimDobra, ;
+ol_fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cPrimDobra, ;
 	cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun )
 
 // stampa izvjestaja xml/oo3
 _xml_print( cTipRpt )
 
-if __xml = 1
+if __xml == 1
 	return
 endif
 
@@ -293,7 +320,7 @@ static function _xml_print( cTip )
 local cOdtName := ""
 local cOutput := "c:\ld_out.odt"
 
-if __xml = 0
+if __xml == 0
 	return
 endif
 
@@ -940,12 +967,34 @@ return cRet
 // ---------------------------------------------------------
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
-static function fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
+function ol_fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
 	cRadnik, cPrimDobra, cDopr10, cDopr11, cDopr12, cDopr1X, cRptTip, ;
-	cObracun )
+	cObracun, cTp1, cTp2, cTp3, cTp4, cTp5 )
 local i
 local cPom
 local nPrDobra
+local nTp1 := 0
+local nTp2 := 0
+local nTp3 := 0
+local nTp4 := 0
+local nTp5 := 0
+
+// dodatni tipovi primanja
+if cTp1 == nil
+	cTp1 := ""
+endif
+if cTp2 == nil
+	cTp2 := ""
+endif
+if cTp3 == nil
+	cTp3 := ""
+endif
+if cTp4 == nil
+	cTp4 := ""
+endif
+if cTp5 == nil
+	cTp5 := ""
+endif
 
 lDatIspl := .f.
 if obracuni->(fieldpos("DAT_ISPL")) <> 0
@@ -1000,6 +1049,11 @@ do while !eof()
 	nDopUk := 0
 	nNeto := 0
 	nPrDobra := 0
+	nTp1 := 0
+	nTp2 := 0
+	nTp3 := 0
+	nTp4 := 0
+	nTp5 := 0
 
 	do while !EOF() .and. field->idradn == cT_radnik 
 	
@@ -1036,6 +1090,24 @@ do while !eof()
        			nPrDobra += IF( cPom $ cPrimDobra, LD->&("I"+cPom), 0 )
      		   next
    		endif
+		
+		// ostali tipovi primanja
+		if !EMPTY( cTp1 )
+			nTp1 := LD->&( "I" + cTp1 )
+		endif
+		if !EMPTY( cTp2 )
+			nTp2 := LD->&( "I" + cTp2 )
+		endif
+		if !EMPTY( cTp3 )
+			nTp3 := LD->&( "I" + cTp3 )
+		endif
+		if !EMPTY( cTp4 )
+			nTp4 := LD->&( "I" + cTp4 )
+		endif
+		if !EMPTY( cTp5 )
+			nTp5 := LD->&( "I" + cTp5 )
+		endif
+
 
 		nNeto := field->uneto
 		nKLO := radn->klo
@@ -1118,7 +1190,13 @@ do while !eof()
 				nL_Odb, ;
 				nPorOsn, ;
 				nPorez, ;
-				nIsplata )
+				nIsplata, ;
+				ld->usati, ;
+				nTp1, ;
+				nTp2, ;
+				nTp3, ;
+				nTp4, ;
+				nTp5 )
 				
 		select ld
 		skip
