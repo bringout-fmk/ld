@@ -32,6 +32,8 @@ local cWinPrint := "N"
 local cDodPr1 := SPACE(2)
 local cDodPr2 := SPACE(2)
 local cDodPr3 := SPACE(2)
+local cDodPr4 := SPACE(2)
+local cDodPr5 := SPACE(2)
 local cPrimDobra := ""
 
 // kreiraj pomocnu tabelu
@@ -46,7 +48,7 @@ cGod_do := gGodina
 // otvori tabele
 ol_o_tbl()
 
-Box("#PREGLED TROSKOVA PO SIHTARICAMA", 10, 75)
+Box("#PREGLED TROSKOVA PO SIHTARICAMA", 11, 75)
 
 @ m_x + 1, m_y + 2 SAY "Radne jedinice: " GET cRj PICT "@!S25"
 @ m_x + 2, m_y + 2 SAY "Period od:" GET cMj_od pict "99"
@@ -64,9 +66,16 @@ endif
 @ m_x + 5, m_y + 2 SAY "Grupa (prazno-sve): " GET cGroup ;
 	VALID EMPTY(cGroup) .or. p_sgroup(@cRadnik)
 
-@ m_x + 7, m_y + 2 SAY "Dodatna primanja za prikaz (1): " GET cDodPr1 
-@ m_x + 8, m_y + 2 SAY "Dodatna primanja za prikaz (2): " GET cDodPr2 
-@ m_x + 9, m_y + 2 SAY "Dodatna primanja za prikaz (3): " GET cDodPr3 
+@ m_x + 7, m_y + 2 SAY "Dodatna primanja za prikaz (1): " GET cDodPr1 ;
+	VALID { || show_it( g_tp_naz( cDodPr1), 20 ), .t. }
+@ m_x + 8, m_y + 2 SAY "Dodatna primanja za prikaz (2): " GET cDodPr2 ;
+	VALID { || show_it( g_tp_naz( cDodPr2), 20 ), .t. }
+@ m_x + 9, m_y + 2 SAY "Dodatna primanja za prikaz (3): " GET cDodPr3 ; 
+	VALID { || show_it( g_tp_naz( cDodPr3), 20 ), .t. }
+@ m_x + 10, m_y + 2 SAY "Dodatna primanja za prikaz (4): " GET cDodPr4 ;
+	VALID { || show_it( g_tp_naz( cDodPr4), 20 ), .t. }
+@ m_x + 11, m_y + 2 SAY "Dodatna primanja za prikaz (5): " GET cDodPr5 ;
+	VALID { || show_it( g_tp_naz( cDodPr5), 20 ), .t. }
 
 read
 	
@@ -398,14 +407,21 @@ go top
 START PRINT CRET
 
 ?
-? "Pregled obradjenih sihtarica za: ", STR(__mj_od) + "/" + STR(__god_od) 
+? "Pregled utroska po objektima za: ", STR(__mj_od) + "/" + STR(__god_od)
 ?
+
+P_COND2
 
 _g_line( @cLine ) 
 
 nCnt := 0
 do while !EOF()
 
+	// n.str
+	if prow() > 64 
+		FF
+	endif
+	
 	cGr_id := field->group
 
 	nU_sati := 0
@@ -422,11 +438,16 @@ do while !EOF()
 	nU_tp_4 := 0
 	nU_tp_5 := 0
 
-	? SPACE(3), "Objekat: ", ;
+	? SPACE(1), "Objekat: ", ;
 		"(" + cGr_id + ")", ;
 		PADR( g_sg_naz( cGr_id ), 30 )
 
 	do while !EOF() .and. field->group == cGr_id
+
+		// n.str
+		if prow() > 64 
+			FF
+		endif
 
 		? PADL( ALLTRIM(STR(++nCnt)) + ".", 5 )
 		@ prow(), pcol()+1 SAY PADR( _rad_ime(field->idradn), 30 )
@@ -487,7 +508,7 @@ do while !EOF()
 
 	// total po grupi....
 	? cLine
-	? PADL( "ukupno " + cGr_id + ":", 25 )
+	? PADL( "Ukupno " + cGr_id + ":", 25 )
 	@ prow(), nCol SAY STR( nU_sati, 8, 2 )
 	@ prow(), pcol()+1 SAY STR( nU_bruto, 12, 2 )
 	@ prow(), pcol()+1 SAY STR( nU_neto, 12, 2 )
@@ -512,11 +533,11 @@ do while !EOF()
 		@ prow(), pcol()+1 SAY STR( nU_tp_5, 12, 2 )
 	endif
 	
-	? cLine
+	? 
 
 enddo
 
-// total po grupi....
+// total za sve....
 ? cLine
 ? "UKUPNO: "
 @ prow(), nCol SAY STR( nT_sati, 8, 2 )
@@ -587,4 +608,6 @@ O_R_EXP
 index on group + idradn + STR(godina,4) + STR(mjesec,2) tag "1"
 
 return
+
+
 

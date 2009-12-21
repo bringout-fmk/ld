@@ -9,8 +9,8 @@ siht              Offset: 00000010H  Code and data size: 137eH
   DEF_SIHT          DEL_SIHT          GET_SIHT          SHOW_IT
   SORT_SIHT         _RAD_IME        
 
-rpt_sht           Offset: 00001a80H  Code and data size: 34e1H
+rpt_sht           Offset: 00001a80H  Code and data size: 3727H
   R_SH_PRINT      
 
-sif_sht           Offset: 000057a0H  Code and data size: 489H
+sif_sht           Offset: 00005a10H  Code and data size: 489H
   GR_POS            G_SG_NAZ          P_SGROUP        
