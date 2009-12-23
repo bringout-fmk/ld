@@ -64,7 +64,7 @@ endif
 	VALID EMPTY(cRadnik) .or. p_radn(@cRadnik)
 
 @ m_x + 5, m_y + 2 SAY "Grupa (prazno-sve): " GET cGroup ;
-	VALID EMPTY(cGroup) .or. p_konto(@cRadnik)
+	VALID EMPTY(cGroup) .or. p_konto(@cGroup)
 
 @ m_x + 7, m_y + 2 SAY "Dodatna primanja za prikaz (1): " GET cDodPr1 ;
 	VALID { || show_it( g_tp_naz( cDodPr1), 20 ), .t. }
@@ -217,6 +217,7 @@ go top
 do while !EOF()
 	
 	cGr_siht := field->idkonto
+	cGr_naz := g_gr_naz( cGr_siht )
 	cRa_siht := field->idradn
 	// ovo su sati po sihtarici
 	nSiht_sati := field->izvrseno
@@ -259,6 +260,7 @@ do while !EOF()
 	replace field->r_naz with _rad_ime( cRa_siht )
 	replace field->naziv with cRa_naz
 	replace field->group with cGr_siht
+	replace field->gr_naz with cGr_naz
 	replace field->sati with nSiht_sati
 	replace field->prihod with _calc_val( nPrih, nSati, nSiht_sati ) 
 	replace field->bruto with _calc_val( nBruto, nSati, nSiht_sati )
@@ -589,6 +591,7 @@ local aDbf := {}
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
 AADD(aDbf,{ "R_NAZ", "C", 30, 0 })
 AADD(aDbf,{ "GROUP", "C", 7, 0 })
+AADD(aDbf,{ "GR_NAZ", "C", 50, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "MJESEC", "N", 2, 0 })
 AADD(aDbf,{ "GODINA", "N", 4, 0 })
