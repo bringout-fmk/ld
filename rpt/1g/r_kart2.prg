@@ -322,6 +322,15 @@ if lRadniSati
 	?
 endif
 
+if gSihtGroup == "D"
+	// sihtarice po grupama
+	// izbaci satinicu za radnika
+	nTmp := get_siht( .t., cGodina, cMjesec, cIdRadn, "" )
+	if ld->usati < nTmp
+		? "Greska: sati po sihtarici veci od uk.sati place !"
+	endif
+endif
+
 if gPrBruto $ "D#X"  
 	
 	// prikaz bruto iznosa

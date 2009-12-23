@@ -749,6 +749,8 @@ AADD(aDBf,{ 'Dan'                 , 'N' ,   2 ,  0 })
 AADD(aDBf,{ 'DanDio'              , 'C' ,   1 ,  0 })
 AADD(aDBf,{ 'IDRJ'                , 'C' ,   2 ,  0 })
 AADD(aDBf,{ 'IDRADN'              , 'C' ,   6 ,  0 })
+AADD(aDBf,{ 'IDKONTO'             , 'C' ,   7 ,  0 })
+AADD(aDBf,{ 'OPIS'                , 'C' ,  50 ,  0 })
 AADD(aDBf,{ 'IDTipPR'             , 'C' ,   2 ,  0 })
 AADD(aDBf,{ 'BRBOD'               , 'N' ,  11 ,  2 })
 AADD(aDBf,{ 'IdNorSiht'           , 'C' ,   4 ,  0 })
@@ -759,7 +761,8 @@ if !file(KUMPATH+"RADSIHT.DBF")
 endif
 
 CREATE_INDEX("1","str(godina)+str(mjesec)+idradn+idrj+str(dan)+dandio+idtippr",KUMPATH+"RADSIHT")
-CREATE_INDEX("2","idnorsiht+str(godina)+str(mjesec)+idradn",KUMPATH+"RADSIHT")
+CREATE_INDEX("2","idkonto+str(godina)+str(mjesec)+idradn",KUMPATH+"RADSIHT")
+CREATE_INDEX("3","idnorsiht+str(godina)+str(mjesec)+idradn",KUMPATH+"RADSIHT")
 
 
 //NORSIHT - norme u sihtarici - koristi se vjerovatno samo kod rada u normi

@@ -16,7 +16,7 @@ static __tp5
 function r_sh_print()
 local cRj := SPACE(60)
 local cRadnik := SPACE(_LR_) 
-local cGroup := SPACE(4)
+local cGroup := SPACE(7)
 local cTipRpt := "1"
 local cIdRj
 local cMj_od
@@ -64,7 +64,7 @@ endif
 	VALID EMPTY(cRadnik) .or. p_radn(@cRadnik)
 
 @ m_x + 5, m_y + 2 SAY "Grupa (prazno-sve): " GET cGroup ;
-	VALID EMPTY(cGroup) .or. p_sgroup(@cRadnik)
+	VALID EMPTY(cGroup) .or. p_konto(@cRadnik)
 
 @ m_x + 7, m_y + 2 SAY "Dodatna primanja za prikaz (1): " GET cDodPr1 ;
 	VALID { || show_it( g_tp_naz( cDodPr1), 20 ), .t. }
@@ -104,8 +104,14 @@ endif
 if !EMPTY( cDodPr2 )
 	__tp2 := g_tp_naz( cDodPr2 )
 endif
-if !EMPTY( cDodPr2 )
+if !EMPTY( cDodPr3 )
 	__tp3 := g_tp_naz( cDodPr3 )
+endif
+if !EMPTY( cDodPr4 )
+	__tp4 := g_tp_naz( cDodPr4 )
+endif
+if !EMPTY( cDodPr5 )
+	__tp5 := g_tp_naz( cDodPr5 )
 endif
 
 select ld
@@ -117,7 +123,7 @@ ol_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 // nafiluj podatke obracuna
 ol_fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cPrimDobra, ;
 	cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun, ;
-	cDodPr1, cDodPr2, cDodPr3 )
+	cDodPr1, cDodPr2, cDodPr3, cDodPr4, cDodPr5 )
 
 msgc()
 
@@ -183,8 +189,8 @@ return
 static function o_tables()
 O_LD
 O_RADN
+O_KONTO
 O_RADSIHT
-O_NORSIHT
 O_DOPR
 O_POR
 return
@@ -210,7 +216,7 @@ go top
 
 do while !EOF()
 	
-	cGr_siht := field->idnorsiht
+	cGr_siht := field->idkonto
 	cRa_siht := field->idradn
 	// ovo su sati po sihtarici
 	nSiht_sati := field->izvrseno
@@ -399,6 +405,7 @@ local nT_tp_2 := 0
 local nT_tp_3 := 0
 local nT_tp_4 := 0
 local nT_tp_5 := 0
+local nCol := 15
 
 select r_export
 set order to tag "1"
@@ -440,7 +447,7 @@ do while !EOF()
 
 	? SPACE(1), "Objekat: ", ;
 		"(" + cGr_id + ")", ;
-		PADR( g_sg_naz( cGr_id ), 30 )
+		PADR( g_gr_naz( cGr_id ), 30 )
 
 	do while !EOF() .and. field->group == cGr_id
 
@@ -579,7 +586,7 @@ static function cre_tmp_tbl()
 local aDbf := {}
 
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
-AADD(aDbf,{ "GROUP", "C", 4, 0 })
+AADD(aDbf,{ "GROUP", "C", 7, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "MJESEC", "N", 2, 0 })
 AADD(aDbf,{ "GODINA", "N", 4, 0 })

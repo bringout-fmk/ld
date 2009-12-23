@@ -1,16 +1,15 @@
 DEF_SIHT..........siht              DEL_SIHT..........siht
 GET_SIHT..........siht              GR_POS............sif_sht
-G_SG_NAZ..........sif_sht           P_SGROUP..........sif_sht
-R_SH_PRINT........rpt_sht           SHOW_IT...........siht
-SORT_SIHT.........siht              _RAD_IME..........siht
+G_GR_NAZ..........sif_sht           R_SH_PRINT........rpt_sht
+SHOW_IT...........siht              SORT_SIHT.........siht
+_RAD_IME..........siht              
 
-
-siht              Offset: 00000010H  Code and data size: 137eH
+siht              Offset: 00000010H  Code and data size: 1410H
   DEF_SIHT          DEL_SIHT          GET_SIHT          SHOW_IT
   SORT_SIHT         _RAD_IME        
 
-rpt_sht           Offset: 00001a80H  Code and data size: 3727H
+rpt_sht           Offset: 00001b10H  Code and data size: 3755H
   R_SH_PRINT      
 
-sif_sht           Offset: 00005a10H  Code and data size: 489H
-  GR_POS            G_SG_NAZ          P_SGROUP        
+sif_sht           Offset: 00005ad0H  Code and data size: 212H
+  GR_POS            G_GR_NAZ        

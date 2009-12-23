@@ -101,8 +101,8 @@ if gSihtarica=="D"
 endif
 
 if gSihtGroup == "D"
-	AADD(opc,"8. grupe sihtarica   ")
-	AADD(opcexe, {|| p_sgroup()})
+	AADD(opc,"8. lista konta   ")
+	AADD(opcexe, {|| p_konto()})
 endif
 
 if gAHonorar == "D"
