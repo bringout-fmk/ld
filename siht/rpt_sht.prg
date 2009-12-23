@@ -256,6 +256,7 @@ do while !EOF()
 	replace field->mjesec with nRa_mj
 	replace field->godina with nRa_god
 	replace field->idradn with cRa_siht
+	replace field->r_naz with _rad_ime( cRa_siht )
 	replace field->naziv with cRa_naz
 	replace field->group with cGr_siht
 	replace field->sati with nSiht_sati
@@ -586,6 +587,7 @@ static function cre_tmp_tbl()
 local aDbf := {}
 
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
+AADD(aDbf,{ "R_NAZ", "C", 30, 0 })
 AADD(aDbf,{ "GROUP", "C", 7, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "MJESEC", "N", 2, 0 })
