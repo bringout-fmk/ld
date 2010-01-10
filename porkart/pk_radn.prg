@@ -88,7 +88,7 @@ Box(, 22, 77)
 	++ nX
 
 	@ m_x + nX, m_y + 2 SAY "zahtjev broj:" GET _zahtjev
-	@ m_x + nX, col() + 2 SAY "datum:" GET _datum
+	@ m_x + nX, col() + 2 SAY "datum koeficijenta:" GET _datum
 
 	++ nX
 

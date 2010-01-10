@@ -310,4 +310,53 @@ select (nTArea)
 return nOdb
 
 
+// ----------------------------------------------
+// setovanje datuma za sve poreske kartice
+// ----------------------------------------------
+function pk_set_date()
+local nTArea := SELECT()
+local dN_date
+local nCnt := 0
+
+if g_date( @dN_date ) == 0
+	return
+endif
+
+select pk_radn
+set order to tag "1"
+
+go top
+
+do while !EOF()
+	++ nCnt 
+	replace field->datum with dN_date
+	skip
+enddo
+
+if nCnt > 0
+	msgbeep("izvrseno " + ALLTRIM(STR(nCnt)) + " promjena !!!")
+endif
+
+select (nTArea)
+
+return
+
+
+static function g_date( dDate )
+local nRet := 1
+private GetList := {}
+
+dDate := CTOD("01.01.09")
+
+box(, 1, 30 )
+	@ m_x + 1, m_y + 2 SAY "postavi na:" GET dDate
+	read
+boxc()
+
+if LastKey() == K_ESC
+	nRet := 0
+endif
+
+return nRet
+
 

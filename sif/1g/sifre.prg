@@ -290,6 +290,17 @@ elseif ( UPPER(CHR(Ch)) == "D" )
 	select radn
 	return DE_CONT
 
+elseif Ch == K_CTRL_D
+
+	// setovanje datuma u poreskim karticama
+	if pitanje(,"setovati datum poreskih kartica ?", "N") == "D"
+	
+		pk_set_date()
+		select radn
+		return DE_CONT
+	
+	endif
+
 elseif ( UPPER(CHR(Ch))=="S" )
 	
 	// filter po radnicima
