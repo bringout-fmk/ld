@@ -290,7 +290,7 @@ elseif ( UPPER(CHR(Ch)) == "D" )
 	select radn
 	return DE_CONT
 
-elseif Ch == K_CTRL_D
+elseif Ch == K_CTRL_G
 
 	// setovanje datuma u poreskim karticama
 	if pitanje(,"setovati datum poreskih kartica ?", "N") == "D"
