@@ -316,9 +316,11 @@ return nOdb
 function pk_set_date()
 local nTArea := SELECT()
 local dN_date
+local dT_date
+local cGrDate
 local nCnt := 0
 
-if g_date( @dN_date ) == 0
+if g_date( @dT_date, @dN_date, @cGrDate ) == 0
 	return
 endif
 
@@ -328,13 +330,22 @@ set order to tag "1"
 go top
 
 do while !EOF()
-	++ nCnt 
-	replace field->datum with dN_date
+	
+	if ( cGrDate == "D" )
+		if ( field->datum <= dT_date )
+			replace field->datum with dN_date
+			++ nCnt 
+		endif
+	else
+		replace field->datum with dN_date
+		++ nCnt 
+	endif
+	
 	skip
 enddo
 
 if nCnt > 0
-	msgbeep("izvrseno " + ALLTRIM(STR(nCnt)) + " promjena !!!")
+	msgbeep("izvrsene " + ALLTRIM(STR(nCnt)) + " promjene !!!")
 endif
 
 select (nTArea)
@@ -342,15 +353,25 @@ select (nTArea)
 return
 
 
-static function g_date( dDate )
+static function g_date( dTmp_date, dDate, cGrDate )
 local nRet := 1
 private GetList := {}
 
 dDate := CTOD("01.01.09")
+dTmp_date := DATE()
+cGrDate := "N"
 
-box(, 1, 30 )
-	@ m_x + 1, m_y + 2 SAY "postavi na:" GET dDate
+box(, 4, 65 )
+	@ m_x + 1, m_y + 2 SAY "postavi tekuci datum na:" GET dDate
+	@ m_x + 2, m_y + 2 SAY "gledati granicni datum ?" GET cGrDate ;
+		VALID cGrDate $ "DN" PICT "@!"
 	read
+	
+	if cGrDate == "D"
+		@ m_x + 3, m_y + 2 SAY "<= od" GET dTmp_Date
+		read
+	endif
+	
 boxc()
 
 if LastKey() == K_ESC

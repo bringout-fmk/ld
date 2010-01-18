@@ -1072,7 +1072,8 @@ do while !eof()
 		// uvijek provjeri tip rada, ako ima vise obracuna
 		cTipRada := g_tip_rada( ld->idradn, ld->idrj )
 		
-		ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ld->idrj )
+		ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ;
+				ld->idrj )
 		
 		if !( cTipRada $ " #I#N") 
 			skip
@@ -1158,10 +1159,16 @@ do while !eof()
 		nIDopr1X := round2(nMBruto * nDopr1X / 100, gZaok2)
 
 		dDatIspl := DATE()
+		cObr := " "
+		if lViseObr
+			cObr := field->obr
+		endif
+
 		if lDatIspl 
 			dDatIspl := g_isp_date( field->idrj, ;
 					field->godina, ;
-					field->mjesec )
+					field->mjesec, ;
+					cObr )
 		endif
 
 		nIsplata := ((nBruto - nIDopr1X) - nPorez)

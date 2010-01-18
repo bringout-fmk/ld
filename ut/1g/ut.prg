@@ -355,11 +355,11 @@ local nTmpSati
 nParSati := parobr->k1
 
 // puno radno vrijeme ili rad na 4 sata
-if (nSati = nParSati) .or. (nParSati/2 = nSati) .or. (radn->k1 == "M")
+if (nSati = nParSati) .or. (nParSati/2 = nSati) .or. (radn->k1 $ "M#P")
 	
 	nTmpSati := nSati
 	
-	if radn->k1 == "M"
+	if radn->k1 == "P" 
 		nTmpSati := nSati * 2
 	endif
 
@@ -386,11 +386,11 @@ local nTmpSati
 nParSati := parobr->k1
 
 // ako je rad puni ili rad na 4 sata
-if (nParSati = nSati) .or. (nParSati/2 = nSati) .or. (radn->k1 == "M")
+if (nParSati = nSati) .or. (nParSati/2 = nSati) .or. (radn->k1 $ "M#P")
 
 	nTmpSati := nSati
 
-	if radn->k1 == "M"
+	if radn->k1 == "P" 
 		nTmpSati := nSati * 2
 	endif
 

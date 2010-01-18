@@ -155,7 +155,7 @@ endif
 if !EMPTY( cIdRadn )
 	nLineLen := 50
 endif
-
+altd()
 sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
 set order to tag "2"
 go top
@@ -203,6 +203,84 @@ set filter to
 select (nTArea)
 return nT_sati
 
+
+
+// --------------------------------------------
+// lista sihtarice
+// 
+// --------------------------------------------
+function get_siht2()
+local nTArea := SELECT()
+local cFilter := ""
+local nLineLen := 43
+local nMjesec
+local nGodina
+local cGroup
+local cIdRadn
+local nCol := 12
+
+// nema parametara unesenih
+nMjesec := gMjesec
+nGodina := gGodina
+cGroup := SPACE(7)
+cIdRadn := SPACE(6)
+
+if g_vars( @nGodina, @nMjesec, @cIdRadn, @cGroup ) == 0
+	return
+endif
+
+sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
+set order to tag "4"
+// "4","idradn+str(godina)+str(mjesec)+idkonto"
+go top
+
+START PRINT CRET
+?
+
+? "Lista satnica po sihtarici: ", STR(nMjesec) + "/" + STR(nGodina) 
+? REPLICATE( "-", nLineLen )
+? PADR("rbr", 5), PADR("radnik", 20), PADR("sati", 15)
+? REPLICATE( "-", nLineLen )
+
+nT_sati := 0
+nT_tsati := 0
+nCnt := 0
+
+// zavrti se po radnicima...
+do while !EOF()
+
+  cId_radn := field->idradn
+  nT_sati := 0
+
+  do while !EOF() .and. field->idradn == cId_radn
+
+    nT_sati += field->izvrseno
+    nT_tsati += field->izvrseno
+
+    skip
+  
+  enddo
+
+  // ispisi ukupno
+  ? PADL( ALLTRIM( STR( ++nCnt, 4 )) + ".", 5 )
+  @ prow(), pcol()+1 SAY PADR( _rad_ime( cId_radn ), 20 )
+  @ prow(), nCol := pcol()+1 SAY STR(nT_sati, 12, 2)
+
+enddo
+
+? REPLICATE("-", nLineLen )
+? "UKUPNO SATI: "
+@ prow(), nCol SAY STR( nT_tsati, 12, 2 )
+? REPLICATE("-", nLineLen )
+
+FF
+END PRINT
+
+go top
+set filter to
+
+select (nTArea)
+return
 
 
 // ------------------------------------------------------------

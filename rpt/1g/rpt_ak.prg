@@ -185,7 +185,6 @@ select params
 WPar("i1", cPredNaz)
 WPar("i2", cPredAdr)  
 
-
 select ld
 
 // sortiraj tabelu i postavi filter
@@ -198,7 +197,8 @@ fill_data( cRj, cGodina, cMjesec, ;
 
 dDatIspl := DATE()
 if obracuni->(fieldpos("DAT_ISPL")) <> 0
-	dDatIspl := g_isp_date( "  ", cGodina, cMjesec )
+	cObr := " "
+	dDatIspl := g_isp_date( "  ", cGodina, cMjesec, cObr )
 endif
 
 cPeriod := ALLTRIM(STR(cMjesec)) + "/" + ALLTRIM(STR(cGodina))

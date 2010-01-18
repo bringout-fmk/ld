@@ -110,21 +110,28 @@ private opc:={}
 private opcexe:={}
 private Izbor:=1
 
-AADD(opc, "1. unos/ispravka         ")
+AADD(opc, "1. unos/ispravka                ")
 if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","UNOS"))
 	AADD(opcexe, {|| def_siht()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
-AADD(opc, "2. pregled       ")
+AADD(opc, "2. pregled unesenih sihtarica")
 if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","PRINT"))
 	AADD(opcexe, {|| get_siht()})
 else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
-AADD(opc, "3. brisanje sihtarice ")
+AADD(opc, "3. pregled ukupnih sati po siht.")
+if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","PRINT"))
+	AADD(opcexe, {|| get_siht2()})
+else
+	AADD(opcexe, {|| MsgBeep(cZabrana)})
+endif
+
+AADD(opc, "4. brisanje sihtarice ")
 
 if (ImaPravoPristupa(goModul:oDatabase:cName,"SIHT","BRISANJE"))
 	AADD(opcexe, {|| del_siht()})

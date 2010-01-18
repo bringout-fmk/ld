@@ -763,6 +763,7 @@ endif
 CREATE_INDEX("1","str(godina)+str(mjesec)+idradn+idrj+str(dan)+dandio+idtippr",KUMPATH+"RADSIHT")
 CREATE_INDEX("2","idkonto+str(godina)+str(mjesec)+idradn",KUMPATH+"RADSIHT")
 CREATE_INDEX("3","idnorsiht+str(godina)+str(mjesec)+idradn",KUMPATH+"RADSIHT")
+CREATE_INDEX("4","idradn+str(godina)+str(mjesec)+idkonto",KUMPATH+"RADSIHT")
 
 
 //NORSIHT - norme u sihtarici - koristi se vjerovatno samo kod rada u normi
@@ -878,10 +879,14 @@ if !file(KUMPATH+"OBRACUNI.DBF")
         AADD(aDBf,{'GODINA','N',4,0})
         AADD(aDBf,{'MJESEC','N',2,0})
         AADD(aDBf,{'STATUS','C',1,0})
+        AADD(aDBf,{'OBR','C',1,0})
+        AADD(aDBf,{'K1','C',4,0})
+        AADD(aDBf,{'K2','C',10,0})
+
         DBCREATE2(KUMPATH+'OBRACUNI.DBF',aDbf)
 endif
 
-CREATE_INDEX("RJ","rj+STR(godina)+STR(mjesec)+status",KUMPATH+"OBRACUNI")
+CREATE_INDEX("RJ","rj+STR(godina)+STR(mjesec)+status+obr",KUMPATH+"OBRACUNI")
 
 // RADSAT.DBF
 if !file(KUMPATH+"RADSAT.DBF")

@@ -318,14 +318,14 @@ if lRadniSati
 	? Lokal("NAPOMENA: Ostaje da se plati iz preraspodjele radnog vremena ")
 	?? ALLTRIM(STR((ld->radsat) - nRRSati))  + Lokal(" sati.")
 	? Lokal("          Uplaceno za tekuci mjesec: " + " sati.")
-	? Lokal("          Ostatak predhodnih obracuna: ") + GetStatusRSati(cIdRadn) + SPACE(1) + Lokal("sati")
+	? Lokal("          Ostatak predhodnih obracuna: ") + GetStatusRSati(ld->idradn) + SPACE(1) + Lokal("sati")
 	?
 endif
 
 if gSihtGroup == "D"
 	// sihtarice po grupama
 	// izbaci satinicu za radnika
-	nTmp := get_siht( .t., cGodina, cMjesec, cIdRadn, "" )
+	nTmp := get_siht( .t., cGodina, cMjesec, ld->idradn, "" )
 	if ld->usati < nTmp
 		? "Greska: sati po sihtarici veci od uk.sati place !"
 	endif
