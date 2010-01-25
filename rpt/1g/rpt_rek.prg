@@ -1591,7 +1591,7 @@ for i:=1 to cLDPolja
 			else
 				? Lokal("UKUPNO NETO:")
 			endif
-			@ prow(),nC1+8  SAY  nUSati  pict gpics
+			@ prow(),nC1+8  SAY STR( nUSati, 12, 2 ) 
 			?? SPACE(1) + Lokal("sati")
        			@ prow(),60 SAY nUNeto pict gpici
 			?? "",gValuta
@@ -1601,7 +1601,7 @@ for i:=1 to cLDPolja
 			else
 				? Lokal("UKUPNO NETO:")
 			endif
-			@ prow(),nC1+5  SAY  nUSati  pict gpics
+			@ prow(),nC1+5  SAY STR( nUSati, 12, 2 )
 			?? SPACE(1) + Lokal("sati")
        			@ prow(),42 SAY nUNeto pict gpici; ?? "",gValuta
        			@ prow(),60 SAY nUNeto*(por->iznos/100) pict gpici
@@ -1618,7 +1618,8 @@ for i:=1 to cLDPolja
   		nC1:=pcol()
   		if !lPorNaRekap
    			if tippr->fiksan $ "DN"
-     				@ prow(),pcol()+8 SAY aRekap[i,1]  pict gpics; ?? " s"
+     				@ prow(),pcol()+8 SAY STR(aRekap[i,1],12,2 ) 
+				?? " s"
      				@ prow(),60 say aRekap[i,2]      pict gpici
    			elseif tippr->fiksan=="P"
      				@ prow(),pcol()+8 SAY aRekap[i,1]/nLjudi pict "999.99%"
@@ -1631,7 +1632,8 @@ for i:=1 to cLDPolja
    			endif
   		else
    			if tippr->fiksan $ "DN"
-     				@ prow(),pcol()+5 SAY aRekap[i,1]  pict gpics; ?? " s"
+     				@ prow(),pcol()+5 SAY STR(aRekap[i,1],12,2)
+				?? " s"
      				@ prow(),42 say aRekap[i,2]      pict gpici
      				if tippr->uneto=="D"
         				@ prow(),60 say aRekap[i,2]*(por->iznos/100)      pict gpici
