@@ -562,10 +562,13 @@ return NIL
 #endif
 
 
+// -----------------------------------------
+// koliko polja ima ld
+// -----------------------------------------
 function LDPoljaINI()
-*{
-//sasa, 17.04.04, ako ne postoji LD.DBF preskoci ove parametre i idi na instalacju fajlova
+
 if !FILE(KUMPATH+"LD.DBF")
+	public cLdPolja := 40
 	return
 endif
 
@@ -591,7 +594,7 @@ endif
 
 use
 return
-*}
+
 
 
 function HelpObr(lIzv,cObracun)
