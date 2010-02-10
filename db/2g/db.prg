@@ -874,14 +874,20 @@ CREATE_INDEX("NAZ","naz", SIFPATH+"BANKE")
 
 // OBRACUNI.DBF
 if !file(KUMPATH+"OBRACUNI.DBF")
-        aDbf:={}
-        AADD(aDBf,{'RJ','C',2,0})
+        
+	aDbf:={}
+        
+	AADD(aDBf,{'RJ','C',2,0})
         AADD(aDBf,{'GODINA','N',4,0})
         AADD(aDBf,{'MJESEC','N',2,0})
         AADD(aDBf,{'STATUS','C',1,0})
         AADD(aDBf,{'OBR','C',1,0})
         AADD(aDBf,{'K1','C',4,0})
         AADD(aDBf,{'K2','C',10,0})
+        AADD(aDBf,{'MJ_ISPL','N',2,0})
+        AADD(aDBf,{'DAT_ISPL','D',8,0})
+        AADD(aDBf,{'ISPL_ZA','C',50,0})
+        AADD(aDBf,{'VR_ISPL','C',50,0})
 
         DBCREATE2(KUMPATH+'OBRACUNI.DBF',aDbf)
 endif

@@ -78,6 +78,7 @@ return
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
 static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, nMjesec, ;
+		nMjisp, cIsplZa, cVrsta, ;
 		nGodina, nPrihod, ;
 		nPrihOst, nBruto, nDop_u_st, nDopPio, ;
 		nDopZdr, nDopNez, nDop_uk, nNeto, nKLO, ;
@@ -94,6 +95,9 @@ replace idradn with cRadnik
 replace naziv with cNazIspl
 replace mjesec with nMjesec
 replace mj_opis with NazMjeseca( nMjesec, nGodina, .t. )
+replace mj_ispl with nMjispl
+replace ispl_za with cIsplZa
+replace vr_ispl with cVrsta
 replace godina with nGodina
 replace datispl with dDatIsplate
 replace prihod with nPrihod
@@ -145,6 +149,9 @@ AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "DATISPL", "D", 8, 0 })
 AADD(aDbf,{ "MJESEC", "N", 2, 0 })
 AADD(aDbf,{ "MJ_OPIS", "C", 15, 0 })
+AADD(aDbf,{ "MJ_ISPL", "N",  2, 0 })
+AADD(aDbf,{ "ISPL_ZA", "C", 50, 0 })
+AADD(aDbf,{ "VR_ISPL", "C", 50, 0 })
 AADD(aDbf,{ "GODINA", "N", 4, 0 })
 AADD(aDbf,{ "PRIHOD", "N", 12, 2 })
 AADD(aDbf,{ "PRIHOST", "N", 12, 2 })
@@ -445,7 +452,10 @@ do while !EOF()
 			"8", "U" ) )
 		xml_node("mjesec", STR( field->mjesec ) )
 		xml_node("godina", STR( field->godina ) )
-		xml_node("prihod", STR( field->prihod, 12, 2 ) )
+		xml_node("isp_m", STR(field->mj_ispl) )
+		xml_node("isp_z", strkzn( ALLTRIM(field->ispl_za), "8", "U" ) )
+		xml_node("isp_v", strkzn( ALLTRIM( field->vr_ispl ), "8", "U" ))
+		xml_node("prihod", STR( field->prihod, 12, 2 ) ) 
 		xml_node("prih_o", STR( field->prihost, 12, 2 ) )
 		xml_node("bruto", STR( field->bruto, 12, 2 ) )
 		xml_node("do_us", STR( field->dop_u_st, 12, 2 ) )
@@ -453,6 +463,7 @@ do while !EOF()
 		xml_node("do_pio", STR( field->dop_pio, 12, 2 ) )
 		xml_node("do_zdr", STR( field->dop_zdr, 12, 2 ) )
 		xml_node("do_nez", STR( field->dop_nez, 12, 2 ) )
+		xml_node("bbd", STR( field->bruto - field->dop_uk, 12, 2 ) )
 		xml_node("neto", STR( field->neto, 12, 2 ) )
 		xml_node("klo", STR( field->klo, 12, 2 ) )
 		xml_node("l_odb", STR( field->l_odb, 12, 2 ) )
@@ -1158,8 +1169,12 @@ do while !eof()
 		nIDopr12 := round2(nMBruto * nDopr12 / 100, gZaok2)
 		nIDopr1X := round2(nMBruto * nDopr1X / 100, gZaok2)
 
+		nMjIspl := 0
+		cIsplZa := ""
+		cVrstaIspl := ""
 		dDatIspl := DATE()
 		cObr := " "
+		
 		if lViseObr
 			cObr := field->obr
 		endif
@@ -1168,7 +1183,8 @@ do while !eof()
 			dDatIspl := g_isp_date( field->idrj, ;
 					field->godina, ;
 					field->mjesec, ;
-					cObr )
+					cObr, @nMjIspl, ;
+					@cIsplZa, @cVrstaIspl )
 		endif
 
 		nIsplata := ((nBruto - nIDopr1X) - nPorez)
@@ -1183,6 +1199,9 @@ do while !eof()
 				"placa", ;
 				dDatIspl, ;
 				ld->mjesec, ;
+				nMjIspl, ;
+				cIsplZa, ;
+				cVrstaIspl, ;
 				ld->godina, ;
 				nBruto - nBrDobra, ;
 				nBrDobra, ;
@@ -1192,7 +1211,7 @@ do while !eof()
 				nIDopr11, ;
 				nIDopr12, ;
 				nIDopr1X, ;
-				nBruto - nIDopr1X, ;
+				nBruto - nIDopr1X - nPorez, ;
 				nKLO, ;
 				nL_Odb, ;
 				nPorOsn, ;
