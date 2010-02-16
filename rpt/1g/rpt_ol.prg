@@ -274,6 +274,12 @@ endif
 
 read
 
+dPerOd := DATE()
+dPerDo := DATE()
+
+// daj period od - do
+g_per_oddo( cMj_od, cGod_od, cMj_do, cGod_do, @dPerOd, @dPerDo )
+
 if cWinPrint == "E"
 	
 	nPorGodina := cGod_do
@@ -337,6 +343,64 @@ else
 endif
 
 return
+
+
+// --------------------------------------
+// vraca period od-do
+// --------------------------------------
+static function g_per_oddo( cMj_od, cGod_od, cMj_do, cGod_do, ;
+	dPerOd, dPerDo )
+local cTmp := ""
+
+cTmp += "01" + "."
+cTmp += PADL( ALLTRIM( STR( cMj_od) ) , 2, "0" ) + "." 
+cTmp += ALLTRIM( STR( cGod_od ) )
+
+dPerOd := CTOD( cTmp )
+
+cTmp := g_day( cMj_do ) + "."
+cTmp += PADL( ALLTRIM( STR( cMj_do ) ) , 2, "0" ) + "." 
+cTmp += ALLTRIM( STR( cGod_do ) )
+
+dPerDo := CTOD( cTmp )
+
+return
+
+// ------------------------------------------
+// vraca koliko dana ima u mjesecu
+// ------------------------------------------
+static function g_day( nMonth )
+local cDay := "31"
+do case
+	case nMonth = 1
+		cDay := "31"
+	case nMonth = 2
+		cDay := "28"
+	case nMonth = 3
+		cDay := "31"
+	case nMonth = 4
+		cDay := "30"
+	case nMonth = 5
+		cDay := "31"
+	case nMonth = 6
+		cDay := "30"
+	case nMonth = 7
+		cDay := "31"
+	case nMonth = 8
+		cDay := "31"
+	case nMonth = 9
+		cDay := "30"
+	case nMonth = 10
+		cDay := "31"
+	case nMonth = 11
+		cDay := "30"
+	case nMonth = 12
+		cDay := "31"
+
+endcase
+
+return cDay
+
 
 
 // -------------------------------------
@@ -559,6 +623,9 @@ do while !EOF()
 	 xml_node("AdresaPrebivalista", strkzn( ALLTRIM(radn->streetname) + ;
 		" " + ALLTRIM(radn->streetnum), "8", "U" ) )
 	 xml_node("PoreznaGodina", STR( nPorGodina ) )
+	 
+	 xml_node("PeriodOd", xml_date( dPerOd ) )
+	 xml_node("PeriodDo", xml_date( dPerDo ) )
 
 	xml_subnode("Dio1PodaciOPoslodavcuIPoreznomObvezniku", .t.)
 	
