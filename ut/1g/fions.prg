@@ -519,36 +519,43 @@ PopWa()
 return  nMj1
 
 
-*********************
-*
-*********************
+
 function Predhodni(i,cVar,cObr)
- local cKljuc:=""
- if cObr==NIL; cObr:="1"; ENDIF
- private cpom:=""
+local cKljuc:=""
 
- IF "U" $ TYPE("lRekalk"); lRekalk:=.f.; ENDIF
+if cObr == NIL
+	cObr := "1"
+endif
 
- IF lRekalk .and. !TPImaPO(SUBSTR(cVar,3))  // pri rekalkulaciji ne racunaj
-   return 0                                 // predhodni ukoliko u formuli
- ENDIF                                      // nema parametara obracuna
+private cpom:=""
 
- PushWa()
+altd()
 
- //CREATE_INDEX("LDi1","str(godina)+idrj+str(mjesec)+idradn","LD")
- //CREATE_INDEX("LDi2","str(godina)+str(mjesec)+idradn","LD")
- set order to tag (TagVO("2","I"))
+IF "U" $ TYPE("lRekalk"); lRekalk:=.f.; ENDIF
 
- if _Mjesec-i<1
-    hseek str(_Godina-1,4)+str(12+_Mjesec-1,2)+_idradn
- else
-    hseek str(_Godina,4)+str(_Mjesec-i,2)+_idradn
- endif
+IF lRekalk .and. !TPImaPO(SUBSTR(cVar,3))  
+	// pri rekalkulaciji ne racunaj
+	// predhodni ukoliko u formuli
+	// nema parametara obracuna
+	return 0                                 
+ENDIF                                      
 
- cPom:=cVar
- cField=substr(cPom,2)
+PushWa()
 
- if lViseObr
+//CREATE_INDEX("LDi1","str(godina)+idrj+str(mjesec)+idradn","LD")
+//CREATE_INDEX("LDi2","str(godina)+str(mjesec)+idradn","LD")
+set order to tag (TagVO("2","I"))
+
+if _Mjesec-i<1
+	hseek str(_Godina-1,4)+str(12+_Mjesec-1,2)+_idradn
+else
+	hseek str(_Godina,4)+str(_Mjesec-i,2)+_idradn
+endif
+
+cPom:=cVar
+cField=substr(cPom,2)
+
+if lViseObr
    &cPom := 0
    cKljuc := STR(godina,4)+STR(mjesec,2)+idradn
    IF !EMPTY(cObr)
@@ -564,11 +571,12 @@ function Predhodni(i,cVar,cObr)
        skip 1
      enddo
    ENDIF
- else
-   &cPom:=&cField
- endif
+else
+	&cPom:=&cField
+endif
 
- PopWa()
+PopWa()
+
 return 0
 
 
