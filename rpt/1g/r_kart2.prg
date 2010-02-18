@@ -42,7 +42,7 @@ nOsnNeto := 0
 nOsnOstalo := 0
 //nLicOdbitak := g_licni_odb( radn->id )
 nLicOdbitak := ld->ulicodb
-nKoefOdbitka := radn->klo
+nKoefOdbitka := g_klo( nLicOdbitak )
 cRTipRada := g_tip_rada( ld->idradn, ld->idrj )
 
 ? cTprLine

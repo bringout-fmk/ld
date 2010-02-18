@@ -324,7 +324,7 @@ ELSE
 	endif
 
 	if __var_obr == "2"
-		?? SPACE(2) + Lokal("Koef.licnog odbitka:"), ALLTRIM(STR(radn->klo))	
+		?? SPACE(2) + Lokal("Koef.licnog odbitka:"), ALLTRIM(STR(g_klo(ld->ulicodb)))	
 	endif
 	
 	if lRadniSati

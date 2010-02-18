@@ -440,6 +440,16 @@ endif
 
 return ""
 
+// -----------------------------------------------------
+// vraca koeficijent licnog odbitka
+// -----------------------------------------------------
+function g_klo( nUOdbitak )
+local nKLO := 0
+if nUOdbitak <> 0
+	nKLO := nUOdbitak / gOsnLOdb
+endif
+return nKLO
+
 
 
 // ------------------------------------------------

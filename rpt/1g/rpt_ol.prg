@@ -1091,7 +1091,7 @@ do while !eof()
 
 
 		nNeto := field->uneto
-		nKLO := radn->klo
+		nKLO := g_klo( field->ulicodb )
 		nL_odb := field->ulicodb
 		
 		// bruto 
@@ -1106,26 +1106,6 @@ do while !eof()
 			nBrDobra := bruto_osn( nPrDobra, cTipRada, nL_odb )
 		endif
 		
-		// ukupno dopr iz 31%
-		nDoprIz := u_dopr_iz( nMBruto, cTipRada )
-		
-		// osnovica za porez
-		nPorOsn := ( nBruto - nDoprIz ) - nL_odb
-		
-		// ako je neoporeziv radnik, nema poreza
-		if !radn_oporeziv( radn->id, ld->idrj ) .or. ;
-			( nBruto - nDoprIz ) < nL_odb
-			nPorOsn := 0
-		endif
-		
-		// porez je ?
-		nPorez := izr_porez( nPorOsn, "B" )
-		
-		select ld
-		
-		// na ruke je
-		nNaRuke := ( nBruto - nDoprIz ) - nPorez
-
 		// ocitaj doprinose, njihove iznose
 		nDopr10 := Ocitaj( F_DOPR , cDopr10 , "iznos" , .t. )
 		nDopr11 := Ocitaj( F_DOPR , cDopr11 , "iznos" , .t. )
@@ -1136,7 +1116,36 @@ do while !eof()
 		nIDopr10 := round2(nMBruto * nDopr10 / 100, gZaok2)
 		nIDopr11 := round2(nMBruto * nDopr11 / 100, gZaok2)
 		nIDopr12 := round2(nMBruto * nDopr12 / 100, gZaok2)
-		nIDopr1X := round2(nMBruto * nDopr1X / 100, gZaok2)
+		// zbirni je zbir ova tri doprinosa
+		nIDopr1X := round2( nIDopr10 + nIDopr11 + nIDopr12 , gZaok2 )
+
+		// ukupno dopr iz 31%
+		//nDoprIz := u_dopr_iz( nMBruto, cTipRada )
+		
+		// osnovica za porez
+		nPorOsn := ( nBruto - nIDopr1X ) - nL_odb
+		
+		// ako je neoporeziv radnik, nema poreza
+		if !radn_oporeziv( radn->id, ld->idrj ) .or. ;
+			( nBruto - nIDopr1X ) < nL_odb
+			nPorOsn := 0
+		endif
+	
+		// porez je ?
+		//nPorez := izr_porez( nPorOsn, "B" )
+		// uvodim ovu glupost... radi poreske
+		nPorez := nPorOsn * ( 10 / 100 )
+		//   nPorez = 220.705
+		cTmp := ALLTRIM( STR( nPorez, 12, 3 ) )
+		//   cPorez = "220.705"
+		//   sada ukinem jedno decimalno mjesto
+		cPorez := PADR( cTmp, LEN( cTmp ) - 1 )
+		nPorez := VAL( cPorez )
+
+		select ld
+		
+		// na ruke je
+		nNaRuke := ( nBruto - nIDopr1X ) - nPorez
 
 		nMjIspl := 0
 		cIsplZa := ""

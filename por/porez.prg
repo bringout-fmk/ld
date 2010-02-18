@@ -217,7 +217,7 @@ local i:=1
 nDLimit := aPorTek[i, 4]
 nPor := aPorTek[i, 3]
 nOsnovica := MAX( nIznos, PAROBR->prosld * gPDLimit/100 ) 
-nPorIznos := MAX( nDLimit, ROUND( nPor/100 * MAX( nIznos, PAROBR->PROSLD * gPDLIMIT / 100), gZaok2))
+nPorIznos := MAX( nDLimit, ROUND( nPor/100 * MAX( nIznos, PAROBR->PROSLD * gPDLIMIT / 100), gZaok2 ))
 
 AADD(aPor, { aPorTek[i, 1], aPorTek[i, 2], ;
 	nPor, nPorIznos, nOsnovica })		
