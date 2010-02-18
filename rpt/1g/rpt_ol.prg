@@ -764,6 +764,7 @@ local nTArea := SELECT()
 local nT_prih := 0
 local nT_pros := 0
 local nT_bruto := 0
+local nT_bbd := 0
 local nT_neto := 0
 local nT_poro := 0
 local nT_pori := 0
@@ -817,6 +818,7 @@ do while !EOF()
 	nT_prih := 0
 	nT_pros := 0
 	nT_bruto := 0
+	nT_bbd := 0
 	nT_neto := 0
 	nT_poro := 0
 	nT_pori := 0
@@ -866,6 +868,7 @@ do while !EOF()
 		nT_prih += field->prihod
 		nT_pros += field->prihost
 		nT_bruto += field->bruto
+		nT_bbd += ( field->bruto - field->dop_uk )
 		nT_neto += field->neto
 		nT_poro += field->osn_por
 		nT_pori += field->izn_por
@@ -886,6 +889,7 @@ do while !EOF()
 	xml_node("prihod", STR( nT_prih, 12, 2 ) )
 	xml_node("prih_o", STR( nT_pros, 12, 2 ) )
 	xml_node("bruto", STR( nT_bruto, 12, 2 ) )
+	xml_node("bbd", STR( nT_bbd, 12, 2 ) )
 	xml_node("neto", STR( nT_neto, 12, 2 ) )
 	xml_node("p_izn", STR( nT_pori, 12, 2 ) )
 	xml_node("p_osn", STR( nT_poro, 12, 2 ) )

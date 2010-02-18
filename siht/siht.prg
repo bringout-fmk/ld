@@ -67,6 +67,7 @@ Box(, nBoxX, nBoxY )
 		_idradn := cIdRadn
 		_dandio := "G"
 		_izvrseno := 0
+		_bodova := 0
 	else
 		scatter()
 	endif
@@ -76,7 +77,12 @@ Box(, nBoxX, nBoxY )
 
 	@ m_x + nX, m_y + 2 SAY "broj odradjenih sati:" GET _izvrseno ;
 		PICT "99999.99"
+
+	++ nX
 	
+	@ m_x + nX, m_y + 2 SAY "od toga nocni rad:" GET _bodova ;
+		PICT "99999.99"
+
 	read
 
 	if LastKey() == K_ESC
@@ -132,7 +138,7 @@ return nRet
 function get_siht( lInfo, nGodina, nMjesec, cIdRadn, cGroup )
 local nTArea := SELECT()
 local cFilter := ""
-local nLineLen := 70
+local nLineLen := 100
 
 if pcount() <= 1
 	
@@ -153,9 +159,9 @@ if pcount() == 0
 endif
 
 if !EMPTY( cIdRadn )
-	nLineLen := 50
+	nLineLen := 80
 endif
-altd()
+
 sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
 set order to tag "2"
 go top
@@ -170,26 +176,43 @@ endif
 ? PADR("rbr", 4), ;
 	PADR("objekat", 30), ;
 	if(EMPTY(cIdRadn), PADR("radnik", 20), ""), ;
-	PADR("sati", 15)
+	PADR("sati", 15), PADR("nocni",15), PADR("redovni",15)
 
 ? REPLICATE( "-", nLineLen )
 
 nT_sati := 0
+nT_nsati := 0
+nT_razl := 0
+
+nTCol := 30
+
 nCnt := 0
+
 do while !EOF()
 
-	? PADL( ALLTRIM(STR(++nCnt)) + ".", 4 ), ;
-	  PADR( g_gr_naz( field->idkonto ), 30 ), ;
-	  if(EMPTY(cIdRadn), PADR( _rad_ime( field->idradn ), 20 ), "" ), ;
-	  STR( field->izvrseno, 12, 2 )
+	? PADL( ALLTRIM(STR(++nCnt)) + ".", 4 )
+	@ prow(), pcol()+1 SAY PADR( g_gr_naz( field->idkonto ), 30 )
+	
+	if EMPTY( cIdRadn )
+		@ prow(), pcol()+1 SAY PADR( _rad_ime( field->idradn ), 20 )
+	endif
+
+	@ prow(), nTCol := pcol()+1 SAY STR( field->izvrseno, 12, 2 )
+	@ prow(), pcol()+1 SAY STR( field->bodova, 12, 2 )
+	@ prow(), pcol()+1 SAY STR( field->izvrseno - field->bodova, 12, 2 )
 
 	nT_sati += field->izvrseno
+	nT_nsati += field->bodova
+	nT_razl += field->izvrseno - field->bodova
 
 	skip
 enddo
 
 ? REPLICATE("-", nLineLen )
-? PADL( "UKUPNO SATI: " + STR(nT_sati, 12, 2), nLineLen )
+? "UKUPNO SATI:"
+@ prow(), nTCOL SAY STR(nT_sati, 12, 2)
+@ prow(), pcol()+1 SAY STR(nT_nsati, 12, 2)
+@ prow(), pcol()+1 SAY STR(nT_razl, 12, 2)
 ? REPLICATE("-", nLineLen )
 
 if lInfo == .f.
@@ -212,7 +235,7 @@ return nT_sati
 function get_siht2()
 local nTArea := SELECT()
 local cFilter := ""
-local nLineLen := 43
+local nLineLen := 70
 local nMjesec
 local nGodina
 local cGroup
@@ -239,11 +262,19 @@ START PRINT CRET
 
 ? "Lista satnica po sihtarici: ", STR(nMjesec) + "/" + STR(nGodina) 
 ? REPLICATE( "-", nLineLen )
-? PADR("rbr", 5), PADR("radnik", 20), PADR("sati", 15)
+? PADR("rbr", 5), PADR("radnik", 20), PADR("sati", 15), PADR("nocni", 15), ;
+	PADR("redovni", 15)
 ? REPLICATE( "-", nLineLen )
 
 nT_sati := 0
+nT_nsati := 0
+
 nT_tsati := 0
+nT_tnsati := 0
+
+nT_razl := 0
+nT_trazl := 0
+
 nCnt := 0
 
 // zavrti se po radnicima...
@@ -251,11 +282,18 @@ do while !EOF()
 
   cId_radn := field->idradn
   nT_sati := 0
+  nT_nsati := 0
+  nT_razl := 0
 
   do while !EOF() .and. field->idradn == cId_radn
 
     nT_sati += field->izvrseno
+    nT_nsati += field->bodova
+    nT_razl += field->izvrseno - field->bodova
+
     nT_tsati += field->izvrseno
+    nT_tnsati += field->bodova
+    nT_trazl += field->izvrseno - field->bodova
 
     skip
   
@@ -265,12 +303,16 @@ do while !EOF()
   ? PADL( ALLTRIM( STR( ++nCnt, 4 )) + ".", 5 )
   @ prow(), pcol()+1 SAY PADR( _rad_ime( cId_radn ), 20 )
   @ prow(), nCol := pcol()+1 SAY STR(nT_sati, 12, 2)
+  @ prow(), pcol()+1 SAY STR(nT_nsati, 12, 2)
+  @ prow(), pcol()+1 SAY STR(nT_razl, 12, 2)
 
 enddo
 
 ? REPLICATE("-", nLineLen )
 ? "UKUPNO SATI: "
 @ prow(), nCol SAY STR( nT_tsati, 12, 2 )
+@ prow(), pcol()+1 SAY STR( nT_tnsati, 12, 2 )
+@ prow(), pcol()+1 SAY STR( nT_trazl, 12, 2 )
 ? REPLICATE("-", nLineLen )
 
 FF
