@@ -209,7 +209,7 @@ return nTotal
 // ---------------------------------------------------
 static function obr_por_os( aPorTek, nIznos )
 local aPor := {}
-local nPorIznos := 0
+local nPorIznos
 local nDLimit := 0
 local nPor := 0
 local i:=1
@@ -217,7 +217,11 @@ local i:=1
 nDLimit := aPorTek[i, 4]
 nPor := aPorTek[i, 3]
 nOsnovica := MAX( nIznos, PAROBR->prosld * gPDLimit/100 ) 
-nPorIznos := MAX( nDLimit, ROUND( nPor/100 * MAX( nIznos, PAROBR->PROSLD * gPDLIMIT / 100), gZaok2 ))
+
+//nPorIznos := MAX( nDLimit, ROUND( nPor/100 * MAX( nIznos, PAROBR->PROSLD * gPDLIMIT / 100), gZaok2 ))
+
+nPorIznos := nIznos * nPor/100
+nPorIznos := ROUND( nPorIznos, 2 )
 
 AADD(aPor, { aPorTek[i, 1], aPorTek[i, 2], ;
 	nPor, nPorIznos, nOsnovica })		

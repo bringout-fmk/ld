@@ -958,6 +958,10 @@ local nTp2 := 0
 local nTp3 := 0
 local nTp4 := 0
 local nTp5 := 0
+local nIDopr10 := 0000.00000
+local nIDopr11 := 0000.00000
+local nIDopr12 := 0000.00000
+local nIDopr1X := 0000.00000 
 
 // dodatni tipovi primanja
 if cTp1 == nil
@@ -1111,14 +1115,17 @@ do while !eof()
 		nDopr11 := Ocitaj( F_DOPR , cDopr11 , "iznos" , .t. )
 		nDopr12 := Ocitaj( F_DOPR , cDopr12 , "iznos" , .t. )
 		nDopr1X := Ocitaj( F_DOPR , cDopr1X , "iznos" , .t. )
-		
+	
 		// izracunaj doprinose
-		nIDopr10 := round2(nMBruto * nDopr10 / 100, gZaok2)
-		nIDopr11 := round2(nMBruto * nDopr11 / 100, gZaok2)
-		nIDopr12 := round2(nMBruto * nDopr12 / 100, gZaok2)
-		// zbirni je zbir ova tri doprinosa
-		nIDopr1X := round2( nIDopr10 + nIDopr11 + nIDopr12 , gZaok2 )
+		nIDopr10 := nMBruto * nDopr10 / 100 
+		nIDopr11 := nMBruto * nDopr11 / 100
+		nIDopr12 := nMBruto * nDopr12 / 100
 
+		// zbirni je zbir ova tri doprinosa
+		nIDopr1X := ROUND( nIDopr10, 2 ) + ;
+			ROUND( nIDopr11, 2 ) + ;
+			ROUND( nIDopr12, 2 )
+		
 		// ukupno dopr iz 31%
 		//nDoprIz := u_dopr_iz( nMBruto, cTipRada )
 		
@@ -1130,22 +1137,26 @@ do while !eof()
 			( nBruto - nIDopr1X ) < nL_odb
 			nPorOsn := 0
 		endif
-	
+
 		// porez je ?
 		//nPorez := izr_porez( nPorOsn, "B" )
+		nPorez := nPorOsn * 10 / 100
+
 		// uvodim ovu glupost... radi poreske
-		nPorez := nPorOsn * ( 10 / 100 )
+		//nPorez := nPorOsn * ( 10 / 100 )
 		//   nPorez = 220.705
-		cTmp := ALLTRIM( STR( nPorez, 12, 3 ) )
+		//cTmp := ALLTRIM( STR( nPorez, 12, 3 ) )
 		//   cPorez = "220.705"
 		//   sada ukinem jedno decimalno mjesto
-		cPorez := PADR( cTmp, LEN( cTmp ) - 1 )
-		nPorez := VAL( cPorez )
+		//cPorez := PADR( cTmp, LEN( cTmp ) - 1 )
+		//nPorez := VAL( cPorez )
 
 		select ld
-		
+	
 		// na ruke je
-		nNaRuke := ( nBruto - nIDopr1X ) - nPorez
+		nNaRuke := ROUND( nBruto, 2 ) - ;
+			ROUND( nIDopr1X, 2 ) - ;
+			ROUND( nPorez, 2 )
 
 		nMjIspl := 0
 		cIsplZa := ""
@@ -1165,8 +1176,10 @@ do while !eof()
 					@cIsplZa, @cVrstaIspl )
 		endif
 
-		nIsplata := ((nBruto - nIDopr1X) - nPorez)
-		
+		nIsplata :=  ROUND( nBruto, 2 ) - ;
+			ROUND( nIDopr1X, 2 ) - ;
+			ROUND( nPorez, 2 )
+
 		// da li se radi o minimalcu ?
 		if cTipRada $ " #I#N#" 
 			nIsplata := min_neto( nIsplata , field->usati )
@@ -1189,7 +1202,7 @@ do while !eof()
 				nIDopr11, ;
 				nIDopr12, ;
 				nIDopr1X, ;
-				nBruto - nIDopr1X - nPorez, ;
+				nNaRuke, ;
 				nKLO, ;
 				nL_Odb, ;
 				nPorOsn, ;
