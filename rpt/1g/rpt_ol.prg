@@ -160,7 +160,7 @@ AADD(aDbf,{ "DOP_U_ST", "N", 12, 2 })
 AADD(aDbf,{ "DOP_PIO", "N", 12, 2 })
 AADD(aDbf,{ "DOP_ZDR", "N", 12, 2 })
 AADD(aDbf,{ "DOP_NEZ", "N", 12, 2 })
-AADD(aDbf,{ "DOP_UK", "N", 12, 2 })
+AADD(aDbf,{ "DOP_UK", "N", 12, 4 })
 AADD(aDbf,{ "NETO", "N", 12, 2 })
 AADD(aDbf,{ "KLO", "N", 5, 2 })
 AADD(aDbf,{ "L_ODB", "N", 12, 2 })
@@ -650,6 +650,26 @@ do while !EOF()
 
 	do while !EOF() .and. field->idradn == cT_radnik
 		
+		// ukupni doprinosi
+		replace field->dop_uk with field->dop_pio + ;
+			field->dop_nez + field->dop_zdr
+
+		replace field->osn_por with ( field->bruto - field->dop_uk ) - ;
+			field->l_odb
+
+		if field->osn_por < 0 
+			replace field->osn_por with 0
+		endif
+
+		if field->osn_por > 0
+			replace field->izn_por with field->osn_por * 0.10
+		else
+			replace field->izn_por with 0
+		endif
+
+		replace field->neto with (field->bruto - field->dop_uk) - ;
+			field->izn_por
+
 		xml_subnode("PodaciOPrihodimaDoprinosimaIPorezu", .f.)
 
 		xml_node("Mjesec", STR( field->mjesec ) )
@@ -668,9 +688,9 @@ do while !EOF()
 			STR( field->dop_zdr, 12, 2 ) )
 		xml_node("IznosZaOsiguranjeOdNezaposlenosti", ;
 			STR( field->dop_nez, 12, 2 ) )
-		xml_node("UkupniDoprinosi", STR( field->dop_uk, 12, 2 ) )
+		xml_node("UkupniDoprinosi", STR( field->dop_uk , 12, 2 ) )
 		xml_node("PlacaBezDoprinosa", ;
-			STR( field->bruto - field->dop_uk, 12, 2 ) )
+			STR( field->bruto - field->dop_uk , 12, 2 ) )
 		
 		xml_node("FaktorLicnihOdbitakaPremaPoreznojKartici", ;
 			STR( field->klo, 12, 2 ) )
@@ -833,7 +853,27 @@ do while !EOF()
 	nCnt := 0
 
 	do while !EOF() .and. field->idradn == cT_radnik
-		
+
+		// ukupni doprinosi
+		replace field->dop_uk with field->dop_pio + ;
+			field->dop_nez + field->dop_zdr
+
+		replace field->osn_por with ( field->bruto - field->dop_uk ) - ;
+			field->l_odb
+
+		if field->osn_por < 0 
+			replace field->osn_por with 0
+		endif
+
+		if field->osn_por > 0
+			replace field->izn_por with field->osn_por * 0.10
+		else
+			replace field->izn_por with 0
+		endif
+
+		replace field->neto with (field->bruto - field->dop_uk) - ;
+			field->izn_por
+
 		xml_subnode("obracun", .f.)
 
 		xml_node("rbr", STR( ++nCnt ) )
@@ -1115,16 +1155,14 @@ do while !eof()
 		nDopr11 := Ocitaj( F_DOPR , cDopr11 , "iznos" , .t. )
 		nDopr12 := Ocitaj( F_DOPR , cDopr12 , "iznos" , .t. )
 		nDopr1X := Ocitaj( F_DOPR , cDopr1X , "iznos" , .t. )
-	
+
 		// izracunaj doprinose
-		nIDopr10 := nMBruto * nDopr10 / 100 
-		nIDopr11 := nMBruto * nDopr11 / 100
-		nIDopr12 := nMBruto * nDopr12 / 100
+		nIDopr10 := ROUND( nMBruto * nDopr10 / 100 , 4 )
+		nIDopr11 := ROUND( nMBruto * nDopr11 / 100, 4 )
+		nIDopr12 := ROUND( nMBruto * nDopr12 / 100, 4 )
 
 		// zbirni je zbir ova tri doprinosa
-		nIDopr1X := ROUND( nIDopr10, 2 ) + ;
-			ROUND( nIDopr11, 2 ) + ;
-			ROUND( nIDopr12, 2 )
+		nIDopr1X := ROUND( nIDopr10 + nIDopr11 + nIDopr12, 4 )
 		
 		// ukupno dopr iz 31%
 		//nDoprIz := u_dopr_iz( nMBruto, cTipRada )
@@ -1140,7 +1178,7 @@ do while !eof()
 
 		// porez je ?
 		//nPorez := izr_porez( nPorOsn, "B" )
-		nPorez := nPorOsn * 10 / 100
+		nPorez := ROUND( ROUND( nPorOsn, 2 ) * ( 10 / 100 ), 2 )
 
 		// uvodim ovu glupost... radi poreske
 		//nPorez := nPorOsn * ( 10 / 100 )
