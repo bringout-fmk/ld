@@ -77,10 +77,10 @@ return
 // ---------------------------------------------
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
-static function _ins_tbl( cRadnik, cNazIspl, dDatIsplate, nMjesec, ;
-		nMjisp, cIsplZa, cVrsta, ;
+static function _ins_tbl( cRadnik, cIdRj, cTipRada, cNazIspl, dDatIsplate, ;
+		nMjesec, nMjisp, cIsplZa, cVrsta, ;
 		nGodina, nPrihod, ;
-		nPrihOst, nBruto, nDop_u_st, nDopPio, ;
+		nPrihOst, nBruto, nMBruto, nDop_u_st, nDopPio, ;
 		nDopZdr, nDopNez, nDop_uk, nNeto, nKLO, ;
 		nLOdb, nOsn_por, nIzn_por, nUk, nUSati, nIzn1, nIzn2, ;
 		nIzn3, nIzn4, nIzn5 )
@@ -91,6 +91,8 @@ O_R_EXP
 select r_export
 append blank
 
+replace tiprada with cTipRada
+replace idrj with cIdRj
 replace idradn with cRadnik
 replace naziv with cNazIspl
 replace mjesec with nMjesec
@@ -103,6 +105,7 @@ replace datispl with dDatIsplate
 replace prihod with nPrihod
 replace prihost with nPrihOst
 replace bruto with nBruto
+replace mbruto with nMBruto
 replace dop_u_st with nDop_u_st
 replace dop_pio with nDopPio
 replace dop_zdr with nDopZdr
@@ -145,6 +148,8 @@ function ol_tmp_tbl()
 local aDbf := {}
 
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
+AADD(aDbf,{ "IDRJ", "C", 2, 0 })
+AADD(aDbf,{ "TIPRADA", "C", 1, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "DATISPL", "D", 8, 0 })
 AADD(aDbf,{ "MJESEC", "N", 2, 0 })
@@ -156,6 +161,7 @@ AADD(aDbf,{ "GODINA", "N", 4, 0 })
 AADD(aDbf,{ "PRIHOD", "N", 12, 2 })
 AADD(aDbf,{ "PRIHOST", "N", 12, 2 })
 AADD(aDbf,{ "BRUTO", "N", 12, 2 })
+AADD(aDbf,{ "MBRUTO", "N", 12, 2 })
 AADD(aDbf,{ "DOP_U_ST", "N", 12, 2 })
 AADD(aDbf,{ "DOP_PIO", "N", 12, 2 })
 AADD(aDbf,{ "DOP_ZDR", "N", 12, 2 })
@@ -656,8 +662,10 @@ do while !EOF()
 
 		replace field->osn_por with ( field->bruto - field->dop_uk ) - ;
 			field->l_odb
-
-		if field->osn_por < 0 
+	
+		// ako je neoporeziv radnik, nema poreza
+		if !radn_oporeziv( field->idradn, field->idrj ) .or. ;
+			field->osn_por < 0 
 			replace field->osn_por with 0
 		endif
 
@@ -669,7 +677,13 @@ do while !EOF()
 
 		replace field->neto with (field->bruto - field->dop_uk) - ;
 			field->izn_por
+	
+		if field->tiprada $ " #I#N#" 
+			replace field->neto with ;
+				min_neto( field->neto , field->sati )
+		endif
 
+		
 		xml_subnode("PodaciOPrihodimaDoprinosimaIPorezu", .f.)
 
 		xml_node("Mjesec", STR( field->mjesec ) )
@@ -860,8 +874,10 @@ do while !EOF()
 
 		replace field->osn_por with ( field->bruto - field->dop_uk ) - ;
 			field->l_odb
-
-		if field->osn_por < 0 
+	
+		// ako je neoporeziv radnik, nema poreza
+		if !radn_oporeziv( field->idradn, field->idrj ) .or. ;
+			field->osn_por < 0 
 			replace field->osn_por with 0
 		endif
 
@@ -873,6 +889,11 @@ do while !EOF()
 
 		replace field->neto with (field->bruto - field->dop_uk) - ;
 			field->izn_por
+	
+		if field->tiprada $ " #I#N#" 
+			replace field->neto with ;
+				min_neto( field->neto , field->sati )
+		endif
 
 		xml_subnode("obracun", .f.)
 
@@ -1093,6 +1114,9 @@ do while !eof()
 			loop
 		endif
 
+		// radna jedinica
+		cRadJed := ld->idrj
+
 		// uvijek provjeri tip rada, ako ima vise obracuna
 		cTipRada := g_tip_rada( ld->idradn, ld->idrj )
 		
@@ -1177,24 +1201,19 @@ do while !eof()
 		endif
 
 		// porez je ?
-		//nPorez := izr_porez( nPorOsn, "B" )
-		nPorez := ROUND( ROUND( nPorOsn, 2 ) * ( 10 / 100 ), 2 )
-
-		// uvodim ovu glupost... radi poreske
-		//nPorez := nPorOsn * ( 10 / 100 )
-		//   nPorez = 220.705
-		//cTmp := ALLTRIM( STR( nPorez, 12, 3 ) )
-		//   cPorez = "220.705"
-		//   sada ukinem jedno decimalno mjesto
-		//cPorez := PADR( cTmp, LEN( cTmp ) - 1 )
-		//nPorez := VAL( cPorez )
+		nPorez := izr_porez( nPorOsn, "B" )
 
 		select ld
 	
 		// na ruke je
-		nNaRuke := ROUND( nBruto, 2 ) - ;
-			ROUND( nIDopr1X, 2 ) - ;
-			ROUND( nPorez, 2 )
+		nNaRuke := ROUND( nBruto - nIDopr1X - nPorez, 2 ) 
+		
+		nIsplata := nNaRuke
+
+		// da li se radi o minimalcu ?
+		if cTipRada $ " #I#N#" 
+			nIsplata := min_neto( nIsplata , field->usati )
+		endif
 
 		nMjIspl := 0
 		cIsplZa := ""
@@ -1214,17 +1233,11 @@ do while !eof()
 					@cIsplZa, @cVrstaIspl )
 		endif
 
-		nIsplata :=  ROUND( nBruto, 2 ) - ;
-			ROUND( nIDopr1X, 2 ) - ;
-			ROUND( nPorez, 2 )
-
-		// da li se radi o minimalcu ?
-		if cTipRada $ " #I#N#" 
-			nIsplata := min_neto( nIsplata , field->usati )
-		endif
 
 		// ubaci u tabelu podatke
 		_ins_tbl( cT_radnik, ;
+				cRadJed, ;
+				cTipRada, ;
 				"placa", ;
 				dDatIspl, ;
 				ld->mjesec, ;
@@ -1235,6 +1248,7 @@ do while !eof()
 				nBruto - nBrDobra, ;
 				nBrDobra, ;
 				nBruto, ;
+				nMBruto, ;
 				nDopr1X,;
 				nIDopr10, ;
 				nIDopr11, ;
