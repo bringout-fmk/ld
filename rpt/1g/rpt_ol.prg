@@ -96,8 +96,9 @@ replace idrj with cIdRj
 replace idradn with cRadnik
 replace naziv with cNazIspl
 replace mjesec with nMjesec
-replace mj_opis with NazMjeseca( nMjesec, nGodina, .f., .t. )
-replace mj_ispl with NazMjeseca( nMjesec, nGodina, .f., .f. )
+replace mj_opis with NazMjeseca( nMjIspl, nGodina, .f., .t. )
+replace mj_naz with NazMjeseca( nMjIspl, nGodina, .f., .f. )
+replace mj_ispl with nMjIspl
 replace ispl_za with cIsplZa
 replace vr_ispl with cVrsta
 replace godina with nGodina
@@ -153,8 +154,9 @@ AADD(aDbf,{ "TIPRADA", "C", 1, 0 })
 AADD(aDbf,{ "NAZIV", "C", 15, 0 })
 AADD(aDbf,{ "DATISPL", "D", 8, 0 })
 AADD(aDbf,{ "MJESEC", "N", 2, 0 })
+AADD(aDbf,{ "MJ_NAZ", "C", 15, 0 })
 AADD(aDbf,{ "MJ_OPIS", "C", 15, 0 })
-AADD(aDbf,{ "MJ_ISPL", "C", 15, 0 })
+AADD(aDbf,{ "MJ_ISPL", "N", 2, 0 })
 AADD(aDbf,{ "ISPL_ZA", "C", 50, 0 })
 AADD(aDbf,{ "VR_ISPL", "C", 50, 0 })
 AADD(aDbf,{ "GODINA", "N", 4, 0 })
@@ -346,6 +348,7 @@ if __xml == 1
 else
 	nBrZahtjeva := g_br_zaht()
 	_xml_export( cTipRpt )
+	msgbeep("Obradjeno " + ALLTRIM(STR(nBrZahtjeva)) + " zahtjeva.")
 endif
 
 return
@@ -686,7 +689,7 @@ do while !EOF()
 		
 		xml_subnode("PodaciOPrihodimaDoprinosimaIPorezu", .f.)
 
-		xml_node("Mjesec", STR( field->mjesec ) )
+		xml_node("Mjesec", STR( field->mj_ispl ) )
 		xml_node("IsplataZaMjesecIGodinu", ;
 			strkzn( ALLTRIM(field->ispl_za), "8", "U" ) )
 		xml_node("VrstaIsplate", ;
@@ -900,9 +903,9 @@ do while !EOF()
 		xml_node("rbr", STR( ++nCnt ) )
 		xml_node("pl_opis", strkzn( ALLTRIM( field->mj_opis ), ;
 			"8", "U" ) )
-		xml_node("mjesec", STR( field->mjesec ) )
+		xml_node("mjesec", STR( field->mj_ispl ) )
 		xml_node("godina", STR( field->godina ) )
-		xml_node("isp_m", strkzn( ALLTRIM(field->mj_ispl), "8", "U") )
+		xml_node("isp_m", strkzn( ALLTRIM(field->mj_naz), "8", "U") )
 		xml_node("isp_z", strkzn( ALLTRIM(field->ispl_za), "8", "U" ) )
 		xml_node("isp_v", strkzn( g_v_ispl(ALLTRIM(field->vr_ispl));
 			, "8", "U" ))
