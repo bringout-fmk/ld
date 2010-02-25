@@ -998,7 +998,7 @@ return cRet
 // -------------------------------------------
 // vraca string sa datumom uslovskim
 // -------------------------------------------
-static function __date( nGod, nMj )
+function ld_date( nGod, nMj )
 local cRet
 
 cRet := PADR( ALLTRIM( STR( nGod ) ), 4 ) + ;
@@ -1053,12 +1053,14 @@ select ld
 
 do while !eof() 
 
-	if __date( field->godina, field->mjesec ) < __date( cGod_od, cMj_od )   
+	if ld_date( field->godina, field->mjesec ) < ;
+		ld_date( cGod_od, cMj_od )   
 		skip
 		loop
 	endif
 
-	if __date( field->godina, field->mjesec ) > __date( cGod_do, cMj_do )
+	if ld_date( field->godina, field->mjesec ) > ;
+		ld_date( cGod_do, cMj_do )
 		skip
 		loop
 	endif
@@ -1105,14 +1107,14 @@ do while !eof()
 
 	do while !EOF() .and. field->idradn == cT_radnik 
 	
-		if __date( field->godina, field->mjesec ) < ;
-			__date( cGod_od, cMj_od ) 
+		if ld_date( field->godina, field->mjesec ) < ;
+			ld_date( cGod_od, cMj_od ) 
 			skip
 			loop
 		endif
 
-		if __date( field->godina, field->mjesec ) > ;
-			__date( cGod_do, cMj_do )
+		if ld_date( field->godina, field->mjesec ) > ;
+			ld_date( cGod_do, cMj_do )
 			skip
 			loop
 		endif

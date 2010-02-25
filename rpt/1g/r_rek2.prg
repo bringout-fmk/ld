@@ -515,6 +515,8 @@ do while !eof() .and. eval(bUSlov)
 	select vposla
 	hseek _idvposla
 
+	ParObr(ld->mjesec, ld->godina, IF(lViseObr,cObracun,),ld->idrj)
+
 	select ld
 
 	cTipRada := g_tip_rada( ld->idradn, ld->idrj )
@@ -614,6 +616,8 @@ do while !eof() .and. eval(bUSlov)
 		nRSpr_koef := radn->sp_koef	
 	endif
 
+	altd()
+
 	// br.osn za radnika
 	nRadn_bo := bruto_osn( _oosnneto, cTipRada , nKoefLO, nRSpr_koef, cTrosk ) 
 	nTrosk := 0
@@ -684,7 +688,7 @@ do while !eof() .and. eval(bUSlov)
 	// ovo je total poreske osnove za radnika
 	nPorOsnova := nRadn_posn
 
-	if nPorOsnova < 0 .or. !radn_oporeziv( radn->id, ld->idrj )
+	if nPorOsnova < 0 .or. !radn_oporeziv( ld->idradn, ld->idrj )
 		nPorOsnova := 0
 	endif
 
@@ -696,10 +700,8 @@ do while !eof() .and. eval(bUSlov)
  	select por
 	go top
 	
-	
-
- 	nPor:=0
-	nPorOl:=0
+ 	nPor := 0
+	nPorOl := 0
  	
 	do while !eof()  
 		
@@ -725,8 +727,10 @@ do while !eof() .and. eval(bUSlov)
 		if nTmpP < 0 
 			nTmpP := 0
 		endif
-	
-		nPor += nTmpP
+
+		if por->por_tip == "B"
+			nPor += nTmpP
+		endif
 
 		if cAlgoritam == "S"
 			PopuniOpsLd( cAlgoritam, por->id, aPor )

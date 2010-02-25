@@ -65,7 +65,7 @@ return
 // ---------------------------------------------
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
-static function _ins_tbl( cRadnik, cIme, nSati, nPrim, ;
+static function _ins_tbl( cRadnik, cIdRj, cObrZa, cIme, nSati, nPrim, ;
 		nBruto, nDoprIz, nDopPio, ;
 		nDopZdr, nDopNez, nOporDoh, nLOdb, nPorez, nNeto, ;
 		nOdbici, nIsplata, nDop4, nDop5, nDop6 )
@@ -76,7 +76,9 @@ O_R_EXP
 select r_export
 append blank
 
+replace idrj with cIdRj
 replace idradn with cRadnik
+replace obr_za with cObrZa
 replace naziv with cIme
 replace sati with nSati
 replace neto with nNeto
@@ -106,7 +108,9 @@ return
 static function cre_tmp_tbl()
 local aDbf := {}
 
+AADD(aDbf,{ "IDRJ", "C", 2, 0 })
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
+AADD(aDbf,{ "OBR_ZA", "C", 15, 0 })
 AADD(aDbf,{ "NAZIV", "C", 20, 0 })
 AADD(aDbf,{ "SATI", "N", 12, 2 })
 AADD(aDbf,{ "PRIM", "N", 12, 2 })
@@ -205,8 +209,8 @@ fill_data( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
 	cDoprPio, cDoprZdr, cDoprNez, cObracun, cDoprD4, cDoprD5, cDoprD6 )
 
 // printaj izvjestaj
-ppv_print( cRj, cGodina, cMjesec, cMjesecDo, cDoprPio, cDoprZdr, cDoprNez, ;
-	cDoprD4, cDoprD5, cDoprD6 )
+ppv_print( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
+	cDoprPio, cDoprZdr, cDoprNez, cDoprD4, cDoprD5, cDoprD6 )
 
 return
 
@@ -215,8 +219,8 @@ return
 // ----------------------------------------------
 // stampa pregleda plata za vise mjeseci
 // ----------------------------------------------
-static function ppv_print( cRj, cGodina, cMjOd, cMjDo, cDop1, cDop2, cDop3, ;
-	cDop4, cDop5, cDop6 )
+static function ppv_print( cRj, cGodina, cMjOd, cMjDo, cRadnik, ;
+	cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
 
 local cT_radnik := ""
 local cLine := ""
@@ -230,9 +234,9 @@ START PRINT CRET
 ? "#%LANDS#"
 P_COND2
 
-ppv_zaglavlje(cRj, cGodina, cMjOd, cMjDo )
+ppv_zaglavlje(cRj, cGodina, cMjOd, cMjDo, cRadnik )
 
-cLine := ppv_header( cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
+cLine := ppv_header( cRadnik, cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
 
 nUSati := 0
 nUNeto := 0
@@ -258,8 +262,12 @@ do while !EOF()
 	
 	? STR(++nRbr, 4) + "."
 
-	@ prow(), pcol()+1 SAY idradn
-	
+	if !EMPTY( cRadnik )
+		@ prow(), pcol()+1 SAY PADR( obr_za, 7 )
+	else
+		@ prow(), pcol()+1 SAY PADR( idradn, 7 )
+	endif
+
 	@ prow(), pcol()+1 SAY naziv
 
 	@ prow(), nPoc:=pcol()+1 SAY STR(sati,12,2)
@@ -372,7 +380,8 @@ return
 // ----------------------------------------
 // stampa headera tabele
 // ----------------------------------------
-static function ppv_header( cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
+static function ppv_header( cRadnik, cDop1, cDop2, cDop3, ;
+	cDop4, cDop5, cDop6 )
 local aLines := {}
 local aTxt := {}
 local i 
@@ -383,7 +392,7 @@ local cTxt3 := ""
 local cTxt4 := ""
 
 AADD( aLines, { REPLICATE("-", 5) } )
-AADD( aLines, { REPLICATE("-", 6) } )
+AADD( aLines, { REPLICATE("-", 7) } )
 AADD( aLines, { REPLICATE("-", 20) } )
 AADD( aLines, { REPLICATE("-", 12) } )
 AADD( aLines, { REPLICATE("-", 12) } )
@@ -415,7 +424,11 @@ if !EMPTY(cDop6)
 endif
 
 AADD( aTxt, { "Red.", "br", "", "1" })
-AADD( aTxt, { "Sifra", "radn.", "", "2" })
+if !EMPTY( cRadnik )
+	AADD( aTxt, { "Obr.", "za mj", "", "2" })
+else
+	AADD( aTxt, { "Sifra", "radn.", "", "2" })
+endif
 AADD( aTxt, { "Naziv", "radnika", "", "3" })
 AADD( aTxt, { "Sati", "", "", "4" })
 AADD( aTxt, { "Primanja", "", "", "5" })
@@ -496,19 +509,23 @@ return cProc
 // ----------------------------------------
 // stampa zaglavlja izvjestaja
 // ----------------------------------------
-static function ppv_zaglavlje( cRj, cGodina, cMjOd, cMjDo )
+static function ppv_zaglavlje( cRj, cGodina, cMjOd, cMjDo, cRadnik )
 
 ? UPPER(gTS) + ":", gnFirma
 ?
 
 if EMPTY(cRj)
-	? Lokal("Pregled za sve RJ ukupno:")
+	? Lokal("Pregled za sve RJ:")
 else
 	? Lokal("RJ:"), cRj
 endif
 
 ?? SPACE(2) + Lokal("Mjesec od:"),str(cMjOd,2),"do:",str(cMjDo,2)
 ?? SPACE(4) + Lokal("Godina:"),str(cGodina,5)
+
+if !EMPTY( cRadnik )
+	? "Radnik: " + cRadnik
+endif
 
 return
 
@@ -524,14 +541,16 @@ local lInRS := .f.
 
 select ld
 
-do while !eof() .and. field->godina = cGodina  
+do while !eof()
 
-	if field->mjesec > cMjesecDo .or. ;
-		field->mjesec < cMjesec 
-		
+	if ld_date( ld->godina, ld->mjesec ) < ld_date( cGodina, cMjesec )  
 		skip
 		loop
+	endif
 
+	if ld_date( ld->godina, ld->mjesec ) > ld_date( cGodina, cMjesecdo )
+		skip
+		loop
 	endif
 
 	cT_radnik := field->idradn
@@ -549,12 +568,13 @@ do while !eof() .and. field->godina = cGodina
 	cOpor := g_oporeziv( ld->idradn, ld->idrj ) 
 
 	// samo pozicionira bazu PAROBR na odgovarajuci zapis
-	ParObr( cMjesec, cGodina, IF(lViseObr, ld->obr,), ld->idrj )
+	ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ld->idrj )
 
 	select radn
 	seek cT_radnik
-	cT_rnaziv := ALLTRIM( radn->ime ) + " " + ALLTRIM( radn->naz )
 	
+	cT_rnaziv := ALLTRIM( radn->ime ) + " " + ALLTRIM( radn->naz )
+
 	select ld
 
 	nSati := 0
@@ -574,17 +594,31 @@ do while !eof() .and. field->godina = cGodina
 	nPorez := 0
 	nIsplata := 0
 
-	do while !eof() .and. field->mjesec <= cMjesecDo ;
-		.and. field->mjesec >= cMjesec ;
-		.and. field->godina = cGodina  ;
-		.and. field->idradn == cT_radnik
+	do while !eof() .and. field->idradn == cT_radnik
 
+		if ld_date( field->godina, field->mjesec ) < ;
+			ld_date( cGodina, cMjesec )  
+			skip
+			loop
+		endif
+
+		if ld_date( field->godina, field->mjesec ) > ;
+			ld_date( cGodina, cMjesecdo )
+			skip
+			loop
+		endif
 		
+		cObr_za := ALLTRIM(STR(ld->mjesec)) + "/" + ;
+			ALLTRIM(STR(ld->godina))
+
+		cId_rj := ld->idrj
+
 		// uvijek provjeri tip rada, ako ima vise obracuna
 		cTipRada := g_tip_rada( ld->idradn, ld->idrj )
 		cTrosk := radn->trosk
 		
-		ParObr( cMjesec, cGodina, IF(lViseObr, ld->obr,), ld->idrj )
+		ParObr( ld->mjesec, ld->godina, ;
+			IF(lViseObr, ld->obr,), ld->idrj )
 
 		nPrKoef := 0
 		
@@ -706,6 +740,8 @@ do while !eof() .and. field->godina = cGodina
 
 	// ubaci u tabelu podatke
 	_ins_tbl( cT_radnik, ;
+		cId_rj, ;
+		cObr_za, ;
 		cT_rnaziv, ;
 		nSati, ;
 		nPrim, ;

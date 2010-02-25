@@ -23,7 +23,6 @@ O_RADN
 O_LD
 O_PAROBR
 
-ParObr(cMjesec,cGodina,IF(lViseObr,cObracun,),cIdRj)
 
 O_PARAMS
 private cSection:="4"
@@ -61,6 +60,8 @@ BoxC()
  WPar("VS",cVarSort)
  SELECT PARAMS
  USE
+
+ParObr( cMjesec, cGodina,IF(lViseObr,cObracun,) )
 
 if lViseObr
   O_TIPPRN
@@ -167,6 +168,8 @@ nUPorez := 0
 nUNetNr := 0
 
 do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .and.!( lViseObr .and. !EMPTY(cObracun) .and. obr<>cObracun )
+	
+	ParObr( ld->mjesec, ld->godina, IF(lViseObr,cObracun,), ld->idrj )
 	
 	if lViseObr .and. EMPTY(cObracun)
    		ScatterS(godina,mjesec,idrj,idradn)
