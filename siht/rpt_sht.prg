@@ -19,6 +19,7 @@ local cRadnik := SPACE(_LR_)
 local cGroup := SPACE(7)
 local cTipRpt := "1"
 local cIdRj
+local cRjDEF := SPACE(2)
 local cMj_od
 local cMj_do
 local cGod_od
@@ -121,7 +122,8 @@ msgo("... podaci plata ... molimo sacekajte")
 ol_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 
 // nafiluj podatke obracuna
-ol_fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cPrimDobra, ;
+ol_fill_data( cRj, cRjDef, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, ;
+	cPrimDobra, ;
 	cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun, ;
 	cDodPr1, cDodPr2, cDodPr3, cDodPr4, cDodPr5 )
 

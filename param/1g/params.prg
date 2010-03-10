@@ -121,6 +121,10 @@ private GetList:={}
 
 cVarPorol:=PADR(cVarPorol,2)
 
+// ovo je nepotrebno !
+// za sada setujem da je uvijek = N
+gAHonorar := "N"
+
 Box(, 18, 77)
 	
 	@ m_x+nX,m_y+2 SAY "Varijanta obracuna" GET gVarObracun
@@ -175,6 +179,8 @@ if (LastKey() <> K_ESC)
 		gSihtarica := "N"
 	endif
 	
+	gAHonorar := "N"
+
 	WPar("fo", gSetForm)
       	WPar("mr", @gMinR)   // min rad %, Bodovi
       	WPar("p9", @gDaPorOl) // praviti poresku olaksicu D/N

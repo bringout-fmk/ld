@@ -425,7 +425,7 @@ private cP1 := gPotp1
 private cP2 := gPotp2
 
 if gPotpRpt == "N"
-	return
+	return ""
 endif
 
 if !EMPTY(gPotp1)
@@ -439,6 +439,7 @@ if !EMPTY(gPotp2)
 endif
 
 return ""
+
 
 // -----------------------------------------------------
 // vraca koeficijent licnog odbitka

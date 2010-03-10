@@ -294,12 +294,10 @@ return
 *}
 
 
-/*! \fn PlatSpTR(cVarijanta)
- *  \brief Platni spisak tekuci racun
- *  \param cVarijanta "1" - tekuci racun, "2" - stedna knjizica
- */
-function PlatSpTR(cVarijanta)
-*{
+// --------------------------------------------------
+// platni spisak tekuci racun
+// --------------------------------------------------
+function PlatSpTR( cVarijanta )
 local nC1:=20
 cIdRadn:=space(_LR_)
 cIdRj:=gRj
@@ -426,8 +424,21 @@ endif
 EOF CRET
 
 nStrana:=0
-m:="----- ------ ----------------------------------- ----------- -------------------------"
-bZagl:={|| ZPlatSpTR() }
+
+// linija za zaglavlje
+m := REPLICATE( "-", 5 )
+m += SPACE(1)
+m += REPLICATE( "-", 6 )
+m += SPACE(1)
+m += REPLICATE( "-", 13 )
+m += SPACE(1)
+m += REPLICATE( "-", 35 )
+m += SPACE(1)
+m += REPLICATE( "-", 11 )
+m += SPACE(1)
+m += REPLICATE( "-", 25 )
+
+bZagl := {|| ZPlatSpTR() }
 
 select rj
 hseek ld->idrj
@@ -437,34 +448,45 @@ START PRINT CRET
 
 nPocRec:=RECNO()
 
-for nDio:=1 to IF(cDrugiDio=="D",2,1)
+for nDio :=1 to IF( cDrugiDio == "D", 2, 1 )
+	
 	if nDio==2
 		go (nPocRec)
 	endif
+	
 	Eval(bZagl)
+	
 	nT1:=0
 	nT2:=0
 	nT3:=0
 	nT4:=0
 	nRbr:=0
+	
 	do while !eof() .and.  cGodina==godina .and. idrj=cIdRj .and. cMjesec=mjesec .and.!(lViseObr .and. !EMPTY(cObracun) .and. obr<>cObracun )
+		
 		if lViseObr .and. EMPTY(cObracun)
    			ScatterS(godina,mjesec,idrj,idradn)
  		else
    			Scatter()
  		endif
+
  		select radn
 		hseek _idradn
 		select ld
- 		if radn->isplata<>cIsplata .or. radn->idbanka<>cIdBanka // samo za tekuce racune
+ 		
+		if radn->isplata<>cIsplata .or. ;
+			radn->idbanka <> cIdBanka 
+			// samo za tekuce racune
     			skip
     			loop
  		endif
+
  		if prow()>62+gPStranica
 			FF
-			Eval(bZagl)
+			//Eval(bZagl)
 		endif
- 		? str(++nRbr,4)+".",idradn, RADNIK
+ 		
+		? str(++nRbr,4)+".",idradn, radn->matbr, RADNIK
 		
  		if cZaBanku == "D"
 			cZaBnkRadnik := FormatSTR(ALLTRIM(RADNZABNK), 40)
@@ -536,21 +558,22 @@ for nDio:=1 to IF(cDrugiDio=="D",2,1)
 
 	if prow()>60+gPStranica
 		FF
-		Eval(bZagl)
+		//Eval(bZagl)
 	endif
+
 	? m
 	? SPACE(1) + Lokal("UKUPNO:")
+	
 	if cPrikIzn=="D"
   		@ prow(),nC1 SAY nT4 pict gpici
 	endif
+	
 	? m
 	
 	? p_potpis()
 	
 	FF
 next
-
-
 
 if cZaBanku == "D"
 	CloseFileBanka(nH)	
@@ -559,11 +582,12 @@ endif
 END PRINT
 CLOSERET
 return
-*}
 
+
+// ---------------------------------------------------
+// zaglavlje platni spisak tekuci racun
+// ---------------------------------------------------
 function ZPlatSpTR()
-*{
-P_12CPI
 
 select kred
 // ovo izbacio jer ne daje dobar naziv banke!!!
@@ -572,6 +596,10 @@ hseek cIdBanka
 select ld
 
 ?
+
+P_12CPI
+P_COND
+
 ? Lokal("Poslovna BANKA:") + SPACE(1), cIDBanka, "-", kred->naz
 ?
 ? UPPER(gTS)+":",gnFirma
@@ -600,7 +628,7 @@ if nprocenat<>100
 endif
 ?
 ? m
-? Lokal("Rbr   Sifra           Naziv radnika               ") + iif(cPrikIzn=="D",Lokal("ZA ISPLATU"),"          ") + iif(cIsplata=="TR", SPACE(9) + Lokal("Broj T.Rac"),SPACE(8) + Lokal("Broj St.knj"))
+? Lokal("Rbr   Sifra    JMB                 Naziv radnika               ") + iif(cPrikIzn=="D",Lokal("ZA ISPLATU"),"          ") + iif(cIsplata=="TR", SPACE(9) + Lokal("Broj T.Rac"),SPACE(8) + Lokal("Broj St.knj"))
 ? m
 
 return

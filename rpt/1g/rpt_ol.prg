@@ -200,6 +200,7 @@ local i
 local cTPNaz
 local nKrug:=1
 local cRj := SPACE(60)
+local cRJDef := SPACE(2)
 local cRadnik := SPACE(_LR_) 
 local cPrimDobra := SPACE(100)
 local cIdRj
@@ -277,6 +278,8 @@ endif
 @ m_x + 15, m_y + 2 SAY "(1) OLP-1021 / (2) GIP-1022: " GET cTipRpt ;
 	VALID cTipRpt $ "12" 
 
+@ m_x + 15, col() + 2 SAY "def.rj" GET cRJDef 
+
 @ m_x + 15, col() + 2 SAY "stampa/export (S/E)?" GET cWinPrint ;
 	VALID cWinPrint $ "SE" PICT "@!" 
 
@@ -338,8 +341,8 @@ select ld
 ol_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 
 // nafiluj podatke obracuna
-ol_fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cPrimDobra, ;
-	cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun )
+ol_fill_data( cRj, cRjDef, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, ;
+	cPrimDobra, cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun )
 
 // stampa izvjestaja xml/oo3
 
@@ -1011,7 +1014,7 @@ return cRet
 // ---------------------------------------------------------
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
-function ol_fill_data( cRj, cGod_od, cGod_do, cMj_od, cMj_do, ;
+function ol_fill_data( cRj, cRjDef, cGod_od, cGod_do, cMj_od, cMj_do, ;
 	cRadnik, cPrimDobra, cDopr10, cDopr11, cDopr12, cDopr1X, cRptTip, ;
 	cObracun, cTp1, cTp2, cTp3, cTp4, cTp5 )
 local i
@@ -1231,7 +1234,14 @@ do while !eof()
 		endif
 
 		if lDatIspl 
-			dDatIspl := g_isp_date( field->idrj, ;
+			
+			// radna jedinica
+			cTmpRj := field->idrj
+			if !EMPTY( cRJDef )
+				cTmpRj := cRJDef
+			endif
+
+			dDatIspl := g_isp_date( cTmpRJ, ;
 					field->godina, ;
 					field->mjesec, ;
 					cObr, @nMjIspl, ;

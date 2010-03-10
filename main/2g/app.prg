@@ -354,6 +354,7 @@ Rpar("vs",@gVarSpec)
 Rpar("Si",@gSihtarica)
 Rpar("SG",@gSihtGroup)
 Rpar("aH",@gAHonorar)
+gAHonorar := "N"
 Rpar("z2",@gZaok2)
 Rpar("zo",@gZaok)
 Rpar("lo",@gOsnLOdb)
