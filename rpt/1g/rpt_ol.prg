@@ -213,6 +213,7 @@ local cDopr11 := "11"
 local cDopr12 := "12"
 local cDopr1X := "1X"
 local cTipRpt := "1"
+local cTP_off := SPACE(100)
 local cObracun := gObracun
 local cWinPrint := "E"
 local nOper := 1
@@ -265,7 +266,10 @@ endif
 
 @ m_x + 4, m_y + 2 SAY "Radnik (prazno-svi radnici): " GET cRadnik ;
 	VALID EMPTY(cRadnik) .or. P_RADN(@cRadnik)
-@ m_x + 5, m_y + 2 SAY "Isplate u usl. ili dobrima: " GET cPrimDobra pict "@S30"
+@ m_x + 5, m_y + 2 SAY "    Isplate u usl. ili dobrima:" ;
+	GET cPrimDobra pict "@S30"
+@ m_x + 6, m_y + 2 SAY "Tipovi koji ne ulaze u obrazac:" ;
+	GET cTP_off pict "@S30"
 @ m_x + 7, m_y + 2 SAY "   Doprinos iz pio: " GET cDopr10 
 @ m_x + 8, m_y + 2 SAY "   Doprinos iz zdr: " GET cDopr11
 @ m_x + 9, m_y + 2 SAY "   Doprinos iz nez: " GET cDopr12
@@ -342,7 +346,8 @@ ol_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 
 // nafiluj podatke obracuna
 ol_fill_data( cRj, cRjDef, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, ;
-	cPrimDobra, cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun )
+	cPrimDobra, cTP_off, cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, ;
+	cObracun )
 
 // stampa izvjestaja xml/oo3
 
@@ -1015,11 +1020,12 @@ return cRet
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
 function ol_fill_data( cRj, cRjDef, cGod_od, cGod_do, cMj_od, cMj_do, ;
-	cRadnik, cPrimDobra, cDopr10, cDopr11, cDopr12, cDopr1X, cRptTip, ;
-	cObracun, cTp1, cTp2, cTp3, cTp4, cTp5 )
+	cRadnik, cPrimDobra, cTP_off, cDopr10, cDopr11, cDopr12, cDopr1X, ;
+	cRptTip, cObracun, cTp1, cTp2, cTp3, cTp4, cTp5 )
 local i
 local cPom
 local nPrDobra
+local nTP_off
 local nTp1 := 0
 local nTp2 := 0
 local nTp3 := 0
@@ -1102,6 +1108,7 @@ do while !eof()
 	nDopUk := 0
 	nNeto := 0
 	nPrDobra := 0
+	nTP_off := 0
 	nTp1 := 0
 	nTp2 := 0
 	nTp3 := 0
@@ -1137,9 +1144,10 @@ do while !eof()
 		endif
 		
 		nPrDobra := 0
+		nTP_off := 0
 
    		if !EMPTY( cPrimDobra ) 
-     		   for t:=1 to 99
+     		   for t:=1 to 60
        			cPom := IF( t>9, STR(t,2), "0"+STR(t,1) )
        			if ld->( FIELDPOS( "I" + cPom ) ) <= 0
          			EXIT
@@ -1147,7 +1155,17 @@ do while !eof()
        			nPrDobra += IF( cPom $ cPrimDobra, LD->&("I"+cPom), 0 )
      		   next
    		endif
-		
+	
+		if !EMPTY( cTP_off ) 
+     		   for o:=1 to 60
+       			cPom := IF( o>9, STR(o,2), "0"+STR(o,1) )
+       			if ld->( FIELDPOS( "I" + cPom ) ) <= 0
+         			EXIT
+       			endif
+       			nTP_off += IF( cPom $ cTP_off, LD->&("I"+cPom), 0 )
+     		   next
+   		endif
+	
 		// ostali tipovi primanja
 		if !EMPTY( cTp1 )
 			nTp1 := LD->&( "I" + cTp1 )
@@ -1170,8 +1188,13 @@ do while !eof()
 		nKLO := g_klo( field->ulicodb )
 		nL_odb := field->ulicodb
 		
-		// bruto 
-		nBruto := bruto_osn( nNeto, cTipRada, nL_odb ) 
+		// tipovi primanja koji ne ulaze u bruto osnovicu
+		if ( nTP_off > 0 )
+			nBruto := bruto_osn( ( nNeto - nTP_off ), ;
+				cTipRada, nL_odb ) 
+		else
+			nBruto := bruto_osn( nNeto, cTipRada, nL_odb ) 
+		endif
 		
 		// minimalni bruto
 		nMBruto := min_bruto( nBruto, field->usati )

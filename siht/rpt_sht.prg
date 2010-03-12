@@ -123,7 +123,7 @@ ol_sort( cRj, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, cTipRpt, cObracun )
 
 // nafiluj podatke obracuna
 ol_fill_data( cRj, cRjDef, cGod_od, cGod_do, cMj_od, cMj_do, cRadnik, ;
-	cPrimDobra, ;
+	cPrimDobra, "", ;
 	cDopr10, cDopr11, cDopr12, cDopr1X, cTipRpt, cObracun, ;
 	cDodPr1, cDodPr2, cDodPr3, cDodPr4, cDodPr5 )
 
