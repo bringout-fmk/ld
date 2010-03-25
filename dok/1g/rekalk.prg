@@ -180,7 +180,11 @@ do while !eof() .and. cGodina==godina .and. cIdRj==idrj .and. cMjesec=mjesec .an
 
 	nMinBO := _UBruto
 	if cTipRada $ " #I#N"
-		nMinBO := min_bruto( _Ubruto, _Usati )
+		if _I01 = 0
+			// ne racunaj bruto osnovu
+		else
+			nMinBO := min_bruto( _Ubruto, _Usati )
+		endif
 	endif
 
 	// uiznos je sada sa uracunatim brutom i ostalim

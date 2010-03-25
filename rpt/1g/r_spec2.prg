@@ -520,8 +520,12 @@ ENDIF
    	nPojBrDobra := bruto_osn( nPrDobra, cRTR, nKoefLO, nRSpr_koef )
    endif
 
-   // minimalni bruto 
-   nMPojBrOsn := min_bruto( nPojBrOsn, field->usati )
+   nMPojBrOsn := nPojBrOsn
+
+   if calc_mbruto()
+       // minimalni bruto 
+       nMPojBrOsn := min_bruto( nPojBrOsn, field->usati )
+   endif
 
    nBrutoOsnova += nPojBrOsn
    nBrutoDobra += nPojBrDobra

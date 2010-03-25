@@ -1169,7 +1169,9 @@ if gVarObracun == "2"
 	endif
 	if cTipRada $ " #I#N"
 		// minimalni bruto osnov
-		nBo := min_bruto( nBo, ld->usati )
+		if calc_mbruto()
+			nBo := min_bruto( nBo, ld->usati )
+		endif
 	endif
 else
   	nBo:=round2(parobr->k3/100*MAX(_UNeto,PAROBR->prosld*gPDLimit/100),gZaok2)

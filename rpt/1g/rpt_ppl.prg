@@ -137,6 +137,7 @@ if gVarObracun == "2"
 	m += " " + REPLICATE("-", 11) 
 	m += " " + REPLICATE("-", 11) 
 	m += " " + REPLICATE("-", 11) 
+	m += " " + REPLICATE("-", 11) 
 endif
 
 if cPrBruto == "D"
@@ -166,6 +167,7 @@ nUBruto := 0
 nUDoprIz := 0
 nUPorez := 0
 nUNetNr := 0
+nUNeto := 0
 
 do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .and.!( lViseObr .and. !EMPTY(cObracun) .and. obr<>cObracun )
 	
@@ -239,6 +241,7 @@ do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .an
 	cTrosk := ""
 	nLicOdb := 0
 	nNetNr := 0
+	nNeto := 0
 
 	if gVarObracun == "2"
 		
@@ -253,8 +256,12 @@ do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .an
 		// napravi mali obracun
 		nBO := bruto_osn( _uneto, cRTipRada, nLicOdb, nPrKoef, cTrosk )
 	
-		// minimalna bruto osnova
-		nMBO := min_bruto( nBo, ld->usati )
+		nMBO := nBO
+
+		if calc_mbruto()
+			// minimalna bruto osnova
+			nMBO := min_bruto( nBo, ld->usati )
+		endif
 
 		nBrOsn := nBo
 
@@ -276,6 +283,7 @@ do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .an
 			nPorez := izr_porez( nBrOsn - nDoprIz - nLicOdb, "B" )
 		endif
 		
+		nNeto := ( nBrOsn - nDoprIz )
 		nNetNr := ( nBrOsn - nDoprIz - nPorez )
 
 	endif
@@ -303,6 +311,8 @@ do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .an
 		@ prow(),pcol()+1 SAY nLicOdb pict gpici
 		// porez 10%
 		@ prow(),pcol()+1 SAY nPorez pict gpici
+		// neto	
+		@ prow(),pcol()+1 SAY nNeto pict gpici
 		// neto na ruke
 		@ prow(),pcol()+1 SAY nNetNr pict gpici
 	endif
@@ -343,6 +353,7 @@ do while !eof() .and.  cgodina==godina .and. idrj=cidrj .and. cmjesec=mjesec .an
 		nUDoprIz += nDoprIz	
 		nUPorez += nPorez
 		nUNetNr += nNetNr
+		nUNeto += nNeto
 	endif
 
 	skip
@@ -369,6 +380,7 @@ if gVarObracun == "2"
 	@ prow(),pcol()+1 SAY nUDoprIz pict gpici
 	@ prow(),pcol()+1 SAY nULicOdb pict gpici
 	@ prow(),pcol()+1 SAY nUPorez pict gpici
+	@ prow(),pcol()+1 SAY nUNeto pict gpici
 	@ prow(),pcol()+1 SAY nUNetNR pict gpici
 endif
 
@@ -428,9 +440,9 @@ if gVarObracun == "2"
   		? Lokal(" Rbr * Sifra*         Naziv radnika            *  Sati   *   Redovan *  Minuli   *   Neto    *       VAN NETA       * ZA ISPLATU*")
   		? Lokal("     *      *                                  *         *     rad   *   rad     *           * Primanja  * Obustave *           *")
 	ELSE
-  		? Lokal(" Rbr * Sifra*         Naziv radnika            *  Sati   * Primanja  * Bruto pl. * Dopr (iz) * L.odbici  *  Porez    *   Neto    * Odbici   * ZA ISPLATU*")
-  		      ? "     *      *                                  *         *           * 1 x koef. *  1 x 31%  *           *    10%    *  (2-3-5)  *          *   (6+7)   *"
-  		      ? "     *      *                                  *         *    (1)    *    (2)    *    (3)    *    (4)    *   (5)     *   (6)     *    (7)   *     (8)   *"
+  		? Lokal(" Rbr * Sifra*         Naziv radnika            *  Sati   * Primanja  * Bruto pl. * Dopr (iz) * L.odbici  *  Porez    *   Neto    *  Na ruke  * Odbici   * ZA ISPLATU*")
+  		      ? "     *      *                                  *         *           * 1 x koef. *  1 x 31%  *           *    10%    *   (2-3)   * (2-3-5)   *          *   (7+8)   *"
+  		      ? "     *      *                                  *         *    (1)    *    (2)    *    (3)    *    (4)    *   (5)     *   (6)     *   (7)     *    (8)   *     (9)   *"
 	ENDIF
 
 else

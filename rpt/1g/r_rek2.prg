@@ -647,9 +647,14 @@ do while !eof() .and. eval(bUSlov)
 	nRadn_bo := nRadn_bo - nRTrosk
 	
 	if cTipRada $ " #I#N" 
-		// minimalna bruto osnova
-		nMRadn_bo := min_bruto( nRadn_bo, _usati )
-		
+
+		nMRadn_bo := nRadn_bo
+
+		if calc_mbruto()
+			// minimalna bruto osnova
+			nMRadn_bo := min_bruto( nRadn_bo, _usati )
+		endif
+
 		// ukupno minimalna bruto osnova
 		nUMRadn_bo += nMRadn_bo
 

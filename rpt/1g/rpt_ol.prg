@@ -1190,14 +1190,25 @@ do while !eof()
 		
 		// tipovi primanja koji ne ulaze u bruto osnovicu
 		if ( nTP_off > 0 )
-			nBruto := bruto_osn( ( nNeto - nTP_off ), ;
-				cTipRada, nL_odb ) 
-		else
-			nBruto := bruto_osn( nNeto, cTipRada, nL_odb ) 
+			nNeto := ( nNeto - nTP_off )
 		endif
 		
-		// minimalni bruto
-		nMBruto := min_bruto( nBruto, field->usati )
+		nBruto := bruto_osn( nNeto, cTipRada, nL_odb ) 
+
+		nMBruto := nBruto
+
+		// prvo provjeri hoces li racunati mbruto
+		if calc_mbruto()
+			// minimalni bruto
+			nMBruto := min_bruto( nBruto, field->usati )
+		endif
+
+		// ovo preskoci, nema ovdje GIP-a
+		if nMBruto <= 0
+			select ld
+			skip
+			loop
+		endif
 
 		// bruto primanja u uslugama ili dobrima
 		// za njih posebno izracunaj bruto osnovicu

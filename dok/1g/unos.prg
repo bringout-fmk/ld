@@ -451,7 +451,11 @@ if gVarObracun == "2"
 	
 	nMinBO := _UBruto
 	if cTipRada $ " #I#N"
-		nMinBO := min_bruto( _UBruto, _USati )
+		if _I01 = 0
+			// ne racunaj min.bruto osnovu
+		else
+			nMinBO := min_bruto( _UBruto, _USati )
+		endif
 	endif
 
 	// ukupni doprinosi IZ place

@@ -1,5 +1,19 @@
 #include "ld.ch"
 
+
+// ------------------------------------------
+// da li ce se racunati min.bruto
+// ------------------------------------------
+function calc_mbruto()
+local lRet := .t.
+
+if ld->I01 = 0
+	lRet := .f.
+endif
+
+return lRet 
+
+
 // -----------------------------------------------
 // preracunava postojeci iznos na bruto iznos
 // -----------------------------------------------
@@ -188,6 +202,10 @@ return lRet
 function bruto_osn( nIzn, cTipRada, nLOdb, nSKoef, cTrosk )
 local nBrt := 0
 
+if nIzn <= 0
+	return nBrt
+endif
+
 if nLOdb = nil
 	nLOdb := 0
 endif
@@ -351,6 +369,10 @@ local nMBO
 local nParSati
 local nTmpSati
 
+if nBruto <= 0
+	return nBruto
+endif
+
 // sati iz parametara obracuna
 nParSati := parobr->k1
 
@@ -381,6 +403,10 @@ local nRet
 local nMNO
 local nParSati
 local nTmpSati
+
+if nNeto <= 0
+	return nNeto
+endif
 
 // sati iz parametara obracuna
 nParSati := parobr->k1

@@ -368,8 +368,10 @@ if gPrBruto $ "D#X"
 	nBoMin := nBo
 
 	if cRTipRada $ " #I#N"
-		// minimalni bruto
-		nBoMin := min_bruto( nBo, ld->usati )
+		if calc_mbruto()
+			// minimalni bruto
+			nBoMin := min_bruto( nBo, ld->usati )
+		endif
 	endif
 
 	// bruto placa iz neta...

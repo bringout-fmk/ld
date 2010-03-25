@@ -67,7 +67,7 @@ return
 // ---------------------------------------------
 static function _ins_tbl( cRadnik, cIdRj, cObrZa, cIme, nSati, nPrim, ;
 		nBruto, nDoprIz, nDopPio, ;
-		nDopZdr, nDopNez, nOporDoh, nLOdb, nPorez, nNeto, ;
+		nDopZdr, nDopNez, nOporDoh, nLOdb, nPorez, nNetoBp, nNeto, ;
 		nOdbici, nIsplata, nDop4, nDop5, nDop6 )
 
 local nTArea := SELECT()
@@ -82,6 +82,7 @@ replace obr_za with cObrZa
 replace naziv with cIme
 replace sati with nSati
 replace neto with nNeto
+replace netobp with nNetoBp
 replace prim with nPrim
 replace bruto with nBruto
 replace dop_iz with nDoprIz
@@ -115,6 +116,7 @@ AADD(aDbf,{ "NAZIV", "C", 20, 0 })
 AADD(aDbf,{ "SATI", "N", 12, 2 })
 AADD(aDbf,{ "PRIM", "N", 12, 2 })
 AADD(aDbf,{ "NETO", "N", 12, 2 })
+AADD(aDbf,{ "NETOBP", "N", 12, 2 })
 AADD(aDbf,{ "BRUTO", "N", 12, 2 })
 AADD(aDbf,{ "DOP_IZ", "N", 12, 2 })
 AADD(aDbf,{ "DOP_PIO", "N", 12, 2 })
@@ -240,6 +242,7 @@ cLine := ppv_header( cRadnik, cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
 
 nUSati := 0
 nUNeto := 0
+nUNetoBP := 0
 nUPrim := 0
 nUBruto := 0
 nUDoprPio := 0
@@ -288,6 +291,9 @@ do while !EOF()
 	@ prow(), pcol()+1 SAY STR(izn_por,12,2)
 	nUPorez += izn_por
 	
+	@ prow(), pcol()+1 SAY STR(netobp,12,2)
+	nUNetobp += netobp
+
 	@ prow(), pcol()+1 SAY STR(neto,12,2)
 	nUNeto += neto
 
@@ -341,6 +347,7 @@ enddo
 @ prow(), pcol()+1 SAY STR(nUDoprIz,12,2)
 @ prow(), pcol()+1 SAY STR(nULicOdb,12,2)
 @ prow(), pcol()+1 SAY STR(nUPorez,12,2)
+@ prow(), pcol()+1 SAY STR(nUNetoBP,12,2)
 @ prow(), pcol()+1 SAY STR(nUNeto,12,2)
 @ prow(), pcol()+1 SAY STR(nUOdbici,12,2)
 @ prow(), pcol()+1 SAY STR(nUIsplata,12,2)
@@ -403,6 +410,7 @@ AADD( aLines, { REPLICATE("-", 12) } )
 AADD( aLines, { REPLICATE("-", 12) } )
 AADD( aLines, { REPLICATE("-", 12) } )
 AADD( aLines, { REPLICATE("-", 12) } )
+AADD( aLines, { REPLICATE("-", 12) } )
 
 if !EMPTY(cDop1)
 	AADD( aLines, { REPLICATE("-", 12) } )
@@ -436,26 +444,27 @@ AADD( aTxt, { "Bruto plata", "(5 x koef.)", "", "6" })
 AADD( aTxt, { "Doprinos", "iz place", "( 31% )", "7" })
 AADD( aTxt, { "Licni odbici", "", "", "8" })
 AADD( aTxt, { "Porez", "na dohodak", "10%", "9" })
-AADD( aTxt, { "Neto", "plata", "(6-7-9)", "10" })
-AADD( aTxt, { "Odbici", "", "", "11" })
-AADD( aTxt, { "Za isplatu", "", "(10+11)", "12" })
+AADD( aTxt, { "Neto", "plata", "(6-7)", "10" })
+AADD( aTxt, { "Na", "ruke", "(6-7-9)", "11" })
+AADD( aTxt, { "Odbici", "", "", "12" })
+AADD( aTxt, { "Za isplatu", "", "(11+12)", "13" })
 if !EMPTY(cDop1)
-	AADD( aTxt, { "Doprinos", "1", get_d_proc(cDop1), "13" })
+	AADD( aTxt, { "Doprinos", "1", get_d_proc(cDop1), "14" })
 endif
 if !EMPTY(cDop2)
-	AADD( aTxt, { "Doprinos", "2", get_d_proc(cDop2), "14" })
+	AADD( aTxt, { "Doprinos", "2", get_d_proc(cDop2), "15" })
 endif
 if !EMPTY(cDop3)
-	AADD( aTxt, { "Doprinos", "3", get_d_proc(cDop3), "15" })
+	AADD( aTxt, { "Doprinos", "3", get_d_proc(cDop3), "16" })
 endif
 if !EMPTY(cDop4)
-	AADD( aTxt, { "Doprinos", "4", get_d_proc(cDop4), "16" })
+	AADD( aTxt, { "Doprinos", "4", get_d_proc(cDop4), "17" })
 endif
 if !EMPTY(cDop5)
-	AADD( aTxt, { "Doprinos", "5", get_d_proc(cDop5), "17" })
+	AADD( aTxt, { "Doprinos", "5", get_d_proc(cDop5), "18" })
 endif
 if !EMPTY(cDop6)
-	AADD( aTxt, { "Doprinos", "6", get_d_proc(cDop6), "18" })
+	AADD( aTxt, { "Doprinos", "6", get_d_proc(cDop6), "19" })
 endif
 
 for i := 1 to LEN( aLines )
@@ -538,6 +547,8 @@ static function fill_data( cRj, cGodina, cMjesec, cMjesecDo, ;
 local i
 local cPom
 local lInRS := .f.
+local nNetoBP := 0
+local nUNetobp := 0
 
 select ld
 
@@ -593,6 +604,7 @@ do while !eof()
 	nL_odb := 0
 	nPorez := 0
 	nIsplata := 0
+	nUNetobp := 0
 
 	do while !eof() .and. field->idradn == cT_radnik
 
@@ -674,8 +686,12 @@ do while !eof()
 		// bruto pojedinacno za radnika
 		nBrPoj := nBrutoST - nTrosk
 
-		// minimalni bruto
-		nMBrutoST := min_bruto( nBrPoj, ld->usati )
+		nMBrutoST := nBrPoj
+
+		if calc_mbruto()
+			// minimalni bruto
+			nMBrutoST := min_bruto( nBrPoj, ld->usati )
+		endif
 		
 		// ukupni bruto
 		nBruto += nBrPoj
@@ -696,6 +712,8 @@ do while !eof()
 		nPorez += nPorPoj
 	
 
+		nNetoBp := ( nBrPoj - nDoprIz )
+
 		// neto isplata
 		nNeto := ( nBrPoj - nDoprIz - nPorPoj )
 		
@@ -703,6 +721,7 @@ do while !eof()
 		nNeto := min_neto( nNeto, ld->usati )
 		
 		nUNeto += nNeto
+		nUNetobp += nNetoBp
 
 		// ocitaj doprinose, njihove iznose
 		if !EMPTY(cDoprPio)
@@ -753,6 +772,7 @@ do while !eof()
 		0, ;
 		nL_Odb, ;
 		nPorez, ;
+		nUNetobp, ;
 		nUNeto, ;
 		nOdbici, ;
 		nIsplata, ;
