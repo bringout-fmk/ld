@@ -537,10 +537,15 @@ save screen to cScreen
 clear screen
 
 cJODRep := ALLTRIM( gJODRep )
+cT_Path := "C:\"
+
+if !EMPTY( gJODTemplate )
+	cT_Path := ALLTRIM( gJODTemplate )
+endif
 
 // stampanje labele
 cCmdLine := "java -jar " + cJODRep + " " + ;
-	"c:\" + cOdtName + " c:\data.xml " + cOutput
+	cT_Path + cOdtName + " c:\data.xml " + cOutput
 
 run &cCmdLine
 
