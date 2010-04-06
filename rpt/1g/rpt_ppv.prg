@@ -65,9 +65,10 @@ return
 // ---------------------------------------------
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
-static function _ins_tbl( cRadnik, cIdRj, cObrZa, cIme, nSati, nPrim, ;
-		nBruto, nDoprIz, nDopPio, ;
+static function _ins_tbl( cRadnik, cIdRj, cObrZa, cIme, nSati, nR_sati, ;
+		nB_sati, nPrim, nBruto, nDoprIz, nDopPio, ;
 		nDopZdr, nDopNez, nOporDoh, nLOdb, nPorez, nNetoBp, nNeto, ;
+		nR_neto, nB_neto, ;
 		nOdbici, nIsplata, nDop4, nDop5, nDop6 )
 
 local nTArea := SELECT()
@@ -81,7 +82,11 @@ replace idradn with cRadnik
 replace obr_za with cObrZa
 replace naziv with cIme
 replace sati with nSati
+replace b_sati with nB_Sati
+replace r_sati with nR_Sati
 replace neto with nNeto
+replace b_neto with nB_Neto
+replace r_neto with nR_Neto
 replace netobp with nNetoBp
 replace prim with nPrim
 replace bruto with nBruto
@@ -114,8 +119,12 @@ AADD(aDbf,{ "IDRADN", "C", 6, 0 })
 AADD(aDbf,{ "OBR_ZA", "C", 15, 0 })
 AADD(aDbf,{ "NAZIV", "C", 20, 0 })
 AADD(aDbf,{ "SATI", "N", 12, 2 })
+AADD(aDbf,{ "R_SATI", "N", 12, 2 })
+AADD(aDbf,{ "B_SATI", "N", 12, 2 })
 AADD(aDbf,{ "PRIM", "N", 12, 2 })
 AADD(aDbf,{ "NETO", "N", 12, 2 })
+AADD(aDbf,{ "R_NETO", "N", 12, 2 })
+AADD(aDbf,{ "B_NETO", "N", 12, 2 })
 AADD(aDbf,{ "NETOBP", "N", 12, 2 })
 AADD(aDbf,{ "BRUTO", "N", 12, 2 })
 AADD(aDbf,{ "DOP_IZ", "N", 12, 2 })
@@ -155,6 +164,7 @@ local cDoprZdr := "80"
 local cDoprNez := "90"
 local cDoprD4 := cDoprD5 := cDoprD6 := SPACE(2)
 local cObracun := gObracun
+local cM4_prim := SPACE(100)
 
 // kreiraj pomocnu tabelu
 cre_tmp_tbl()
@@ -189,6 +199,9 @@ endif
 @ m_x + 11, m_y + 2 SAY " Sifra dodatnog doprinosa 5 : " GET cDoprD5
 @ m_x + 12, m_y + 2 SAY " Sifra dodatnog doprinosa 6 : " GET cDoprD6
 
+@ m_x + 14, m_y + 2 SAY "Izdvojena primanja za M4 (npr. 18;24;):" ;
+	GET cM4_prim PICT "@S20"
+
 read
 	
 clvbox()
@@ -208,7 +221,8 @@ ld_sort( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, cObracun )
 
 // nafiluj podatke obracuna
 fill_data( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
-	cDoprPio, cDoprZdr, cDoprNez, cObracun, cDoprD4, cDoprD5, cDoprD6 )
+	cDoprPio, cDoprZdr, cDoprNez, cObracun, cDoprD4, cDoprD5, cDoprD6, ;
+	cM4_prim )
 
 // printaj izvjestaj
 ppv_print( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
@@ -256,6 +270,10 @@ nUPorez := 0
 nUOdbici := 0
 nULicOdb := 0
 nUIsplata := 0
+nUR_sati := 0
+nUR_izn := 0
+nUB_sati := 0
+nUB_izn := 0
 
 nRbr := 0
 nPoc := 10
@@ -291,7 +309,7 @@ do while !EOF()
 	@ prow(), pcol()+1 SAY STR(izn_por,12,2)
 	nUPorez += izn_por
 	
-	@ prow(), pcol()+1 SAY STR(netobp,12,2)
+	@ prow(), nNBP_pt := pcol()+1 SAY STR(netobp,12,2)
 	nUNetobp += netobp
 
 	@ prow(), pcol()+1 SAY STR(neto,12,2)
@@ -331,6 +349,30 @@ do while !EOF()
 	if !EMPTY( cDop6 )
 		@ prow(), pcol()+1 SAY STR(dop_6,12,2)
 		nUDoprD6 += dop_6
+	endif
+
+	if ( field->b_neto <> 0 )
+
+		// ovo je za drugi red izvjestaja...
+		// redovan rad
+		?
+		@ prow(), nPoc - 3 SAY "r: " + STR(field->r_sati,12,2)
+		@ prow(), nNBP_pt SAY STR(field->r_neto,12,2)
+	
+		nUR_sati += field->r_sati
+		nUR_izn += field->r_neto
+
+		// bolovanja ...
+		?
+		@ prow(), nPoc -3 SAY "b: " + STR(field->b_sati,12,2)
+		@ prow(), nNBP_pt SAY STR(field->b_neto,12,2)
+		
+		nUB_sati += field->b_sati
+		nUB_izn += field->b_neto
+
+	else
+		nUR_sati += field->sati
+		nUR_izn += field->netobp
 	endif
 
 	++nCount
@@ -374,6 +416,21 @@ endif
 
 if !EMPTY(cDop6)
 	@ prow(), pcol()+1 SAY STR(nUDoprD6,12,2)
+endif
+
+// ako ima bolovanja itd...
+if ( nUB_izn <> 0 )
+
+	// redovan rad
+	? 
+	@ prow(), nPoc - 3 SAY "r: " + STR( nUR_sati , 12, 2 )
+	@ prow(), nNBP_pt SAY STR( nUR_izn , 12, 2 )
+	
+	// bolovanja
+	? 
+	@ prow(), nPoc - 3 SAY "b: " + STR( nUB_sati , 12, 2 )
+	@ prow(), nNBP_pt SAY STR( nUB_izn , 12, 2 )
+
 endif
 
 ? cLine
@@ -543,12 +600,18 @@ return
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
 static function fill_data( cRj, cGodina, cMjesec, cMjesecDo, ;
-	cRadnik, cDoprPio, cDoprZdr, cDoprNez, cObracun, cDop4, cDop5, cDop6 )
+	cRadnik, cDoprPio, cDoprZdr, cDoprNez, cObracun, cDop4, cDop5, cDop6, ;
+	cM4_prim )
 local i
 local cPom
 local lInRS := .f.
 local nNetoBP := 0
 local nUNetobp := 0
+local o
+local nR_s_off
+local nR_i_off
+local nB_s_off
+local nB_i_off
 
 select ld
 
@@ -589,7 +652,11 @@ do while !eof()
 	select ld
 
 	nSati := 0
+	nR_sati := 0
+	nB_sati := 0
 	nNeto := 0
+	nR_neto := 0
+	nB_neto := 0
 	nUNeto := 0
 	nPrim := 0
 	nBruto := 0
@@ -605,6 +672,14 @@ do while !eof()
 	nPorez := 0
 	nIsplata := 0
 	nUNetobp := 0
+	nR_s_off := 0
+	nR_i_off := 0
+	nB_s_off := 0
+	nB_i_off := 0
+	nURad_izn := 0
+	nUBol_izn := 0
+	nUR_sati := 0
+	nUB_sati := 0
 
 	do while !eof() .and. field->idradn == cT_radnik
 
@@ -639,6 +714,23 @@ do while !eof()
 			nPrKoef := radn->sp_koef
 		endif
 		
+		// bolovanje i redovan rad, sati, iznosi
+		nB_i_off := 0
+		nB_s_off := 0
+		nR_i_off := 0
+		nR_s_off := 0
+
+		if !EMPTY( cM4_prim ) 
+     		   for o:=1 to 60
+       			cPom := IF( o>9, STR(o,2), "0"+STR(o,1) )
+       			if ld->( FIELDPOS( "I" + cPom ) ) <= 0
+         			EXIT
+       			endif
+       			nB_i_off += IF( cPom $ cM4_prim, LD->&("I"+cPom), 0 )
+       			nB_s_off += IF( cPom $ cM4_prim, LD->&("S"+cPom), 0 )
+     		   next
+   		endif
+
 		// primanja ?
 		nPrim += field->uneto
 		
@@ -655,9 +747,26 @@ do while !eof()
 		nLOdbitak := field->ulicodb
 		nL_odb += nLOdbitak
 
+		if nB_i_off <> 0
+			nR_s_off := ( field->usati - nB_s_off )
+			nR_i_off := ( field->uneto - nB_i_off )
+		endif
+
+		// totali za bolovanje i radne sate
+		nUR_sati += nR_s_off
+		nUB_sati += nB_s_off
+
 		// bruto sa troskovima 
 		nBrutoST := bruto_osn( ld->uneto, cTipRada, ld->ulicodb, nPrKoef, cTrosk ) 
 		
+
+		// bruto bolovanja
+		nBr_bol := bruto_osn( nB_i_off, cTipRada, ;
+			ld->ulicodb, nPrKoef, cTrosk )
+		// bruto rada
+		nBr_rad := bruto_osn( nR_i_off, cTipRada, ;
+			ld->ulicodb, nPrKoef, cTrosk )
+
 		nTrosk := 0
 
 		// ugovori o djelu
@@ -682,7 +791,6 @@ do while !eof()
 			
 		endif
 
-
 		// bruto pojedinacno za radnika
 		nBrPoj := nBrutoST - nTrosk
 
@@ -700,6 +808,13 @@ do while !eof()
 		nDoprIz := u_dopr_iz( nMBrutoST , cTipRada )
 		nUDopIz += nDoprIz
 
+		// doprinos za bol i rad...
+		nDop_rad := u_dopr_iz( nBr_rad, cTipRada )
+		nDop_bol := u_dopr_iz( nBr_bol, cTipRada )
+
+		nURad_izn += ( nBr_rad - nDop_rad )
+		nUBol_izn += ( nBr_bol - nDop_bol )
+
 		// osnovica za porez
 		nPorOsnP := ( nBrPoj - nDoprIz ) - nLOdbitak
 		
@@ -710,8 +825,8 @@ do while !eof()
 		// porez je ?
 		nPorPoj := izr_porez( nPorOsnP, "B" )
 		nPorez += nPorPoj
-	
-
+		
+		// neto bez poreza
 		nNetoBp := ( nBrPoj - nDoprIz )
 
 		// neto isplata
@@ -763,6 +878,8 @@ do while !eof()
 		cObr_za, ;
 		cT_rnaziv, ;
 		nSati, ;
+		nUR_sati, ;
+		nUB_sati, ;
 		nPrim, ;
 		nBruto, ;
 		nUDopIZ,;
@@ -774,6 +891,8 @@ do while !eof()
 		nPorez, ;
 		nUNetobp, ;
 		nUNeto, ;
+		nURad_izn, ;
+		nUBol_izn, ;
 		nOdbici, ;
 		nIsplata, ;
 		nIDoprD4, ;
