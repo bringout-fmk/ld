@@ -627,6 +627,8 @@ do while !eof()
 		loop
 	endif
 
+	altd()
+
 	cT_radnik := field->idradn
 
 	lInRS := in_rs(radn->idopsst, radn->idopsrad) 
@@ -747,9 +749,13 @@ do while !eof()
 		nLOdbitak := field->ulicodb
 		nL_odb += nLOdbitak
 
+		// radni sati ukupni
 		if nB_i_off <> 0
 			nR_s_off := ( field->usati - nB_s_off )
 			nR_i_off := ( field->uneto - nB_i_off )
+		else
+			nR_s_off := ( field->usati )
+			nR_i_off := ( field->uneto )
 		endif
 
 		// totali za bolovanje i radne sate
