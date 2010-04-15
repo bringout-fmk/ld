@@ -59,13 +59,16 @@ else
 	seek str(cGodina,4)+str(cMjesec,2)+cRadnik
 endif
 
+
+
 return
 
 
 // ---------------------------------------------
 // upisivanje podatka u pomocnu tabelu za rpt
 // ---------------------------------------------
-static function _ins_tbl( cRadnik, cIdRj, cObrZa, cIme, nSati, nR_sati, ;
+static function _ins_tbl( nGodina, nMjesec, cRadnik, cIdRj, cObrZa, cIme, ;
+		nSati, nR_sati, ;
 		nB_sati, nPrim, nBruto, nDoprIz, nDopPio, ;
 		nDopZdr, nDopNez, nOporDoh, nLOdb, nPorez, nNetoBp, nNeto, ;
 		nR_neto, nB_neto, ;
@@ -77,6 +80,8 @@ O_R_EXP
 select r_export
 append blank
 
+replace godina with nGodina
+replace mjesec with nMjesec
 replace idrj with cIdRj
 replace idradn with cRadnik
 replace obr_za with cObrZa
@@ -115,6 +120,8 @@ static function cre_tmp_tbl()
 local aDbf := {}
 
 AADD(aDbf,{ "IDRJ", "C", 2, 0 })
+AADD(aDbf,{ "GODINA", "N", 4, 0 })
+AADD(aDbf,{ "MJESEC", "N", 2, 0 })
 AADD(aDbf,{ "IDRADN", "C", 6, 0 })
 AADD(aDbf,{ "OBR_ZA", "C", 15, 0 })
 AADD(aDbf,{ "NAZIV", "C", 20, 0 })
@@ -141,7 +148,6 @@ AADD(aDbf,{ "ODBICI", "N", 12, 2 })
 AADD(aDbf,{ "ISPLATA", "N", 12, 2 })
 
 t_exp_create( aDbf )
-// index on ......
 
 return
 
@@ -165,6 +171,7 @@ local cDoprNez := "90"
 local cDoprD4 := cDoprD5 := cDoprD6 := SPACE(2)
 local cObracun := gObracun
 local cM4_prim := SPACE(100)
+local cTotal := "N"
 
 // kreiraj pomocnu tabelu
 cre_tmp_tbl()
@@ -177,7 +184,7 @@ cMjesecDo := cMjesec
 // otvori tabele
 o_tables()
 
-Box("#PREGLED PLATA ZA VISE MJESECI (M4)", 15, 75)
+Box("#PREGLED PLATA ZA VISE MJESECI (M4)", 16, 75)
 
 @ m_x + 1, m_y + 2 SAY "Radne jedinice: " GET cRj PICT "@!S25"
 @ m_x + 2, m_y + 2 SAY "Za mjesece od:" GET cMjesec pict "99"
@@ -202,6 +209,9 @@ endif
 @ m_x + 14, m_y + 2 SAY "Izdvojena primanja za M4 (npr. 18;24;):" ;
 	GET cM4_prim PICT "@S20"
 
+@ m_x + 16, m_y + 2 SAY "Prikazati ukupno za sve mjesece (D/N)" ;
+	GET cTotal PICT "@!" VALID cTotal $ "DN"
+
 read
 	
 clvbox()
@@ -222,14 +232,310 @@ ld_sort( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, cObracun )
 // nafiluj podatke obracuna
 fill_data( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
 	cDoprPio, cDoprZdr, cDoprNez, cObracun, cDoprD4, cDoprD5, cDoprD6, ;
-	cM4_prim )
+	cM4_prim, cTotal )
 
-// printaj izvjestaj
-ppv_print( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
-	cDoprPio, cDoprZdr, cDoprNez, cDoprD4, cDoprD5, cDoprD6 )
+if cTotal == "N"
+	// printaj izvjestaj
+	ppv_print( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
+		cDoprPio, cDoprZdr, cDoprNez, cDoprD4, cDoprD5, cDoprD6 )
+else
+	// printaj izvjestaj
+	ppv_total( cRj, cGodina, cMjesec, cMjesecDo, cRadnik, ;
+		cDoprPio, cDoprZdr, cDoprNez, cDoprD4, cDoprD5, cDoprD6 )
+endif
 
 return
 
+
+
+// ----------------------------------------------
+// stampa pregleda plata za vise mjeseci - total
+// ----------------------------------------------
+static function ppv_total( cRj, cGodina, cMjOd, cMjDo, cRadnik, ;
+	cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
+
+local cT_radnik := ""
+local cLine := ""
+
+altd()
+O_R_EXP
+select r_export
+index on STR(godina,4) + STR(mjesec,2) to "1" 
+go top
+
+START PRINT CRET
+?
+? "#%LANDS#"
+P_COND2
+
+ppv_zaglavlje(cRj, cGodina, cMjOd, cMjDo, cRadnik )
+
+cLine := ppv_header( cRadnik, cDop1, cDop2, cDop3, cDop4, cDop5, cDop6 )
+
+nUSati := 0
+nUNeto := 0
+nUNetoBP := 0
+nUPrim := 0
+nUBruto := 0
+nUDoprPio := 0
+nUDoprZdr := 0
+nUDoprNez := 0
+nUDoprD4 := 0
+nUDoprD5 := 0
+nUDoprD6 := 0
+nUDoprIZ := 0
+nUPorez := 0
+nUOdbici := 0
+nULicOdb := 0
+nUIsplata := 0
+nUR_sati := 0
+nUR_izn := 0
+nUB_sati := 0
+nUB_izn := 0
+
+nTUSati := 0
+nTUNeto := 0
+nTUNetoBP := 0
+nTUPrim := 0
+nTUBruto := 0
+nTUDoprPio := 0
+nTUDoprZdr := 0
+nTUDoprNez := 0
+nTUDoprD4 := 0
+nTUDoprD5 := 0
+nTUDoprD6 := 0
+nTUDoprIZ := 0
+nTUPorez := 0
+nTUOdbici := 0
+nTULicOdb := 0
+nTUIsplata := 0
+nTUR_sati := 0
+nTUR_izn := 0
+nTUB_sati := 0
+nTUB_izn := 0
+
+nRbr := 0
+nPoc := 10
+nCount := 0
+
+do while !EOF()
+
+	nSeek_god := field->godina
+	nSeek_mj := field->mjesec
+
+	nUSati := 0
+	nUPrim := 0
+	nUBruto := 0
+	nUDoprIz := 0
+	nULicOdb := 0
+	nUPorez := 0
+	nUNetobp := 0
+	nUNeto := 0
+	nUOdbici := 0
+	nUIsplata := 0
+	nUDoprPio := 0
+	nUDoprZdr := 0
+	nUDoprNez := 0
+	nUDoprD4 := 0
+	nUDoprD5 := 0
+	nUDoprD6 := 0
+	nUR_sati := 0
+	nUR_izn := 0
+	nUB_sati := 0
+	nUB_izn := 0
+
+	do while !EOF() .and. field->godina = nSeek_god .and. ;
+		field->mjesec = nSeek_mj
+
+		// saberi sve za jedan mjesec
+		// svi radnici, sve radne jedinice
+
+		nUSati += sati
+		nUPrim += prim
+		nUBruto += bruto
+		nUDoprIz += dop_iz
+		nULicOdb += l_odb
+		nUPorez += izn_por
+		nUNetobp += netobp
+		nUNeto += neto
+		nUOdbici += odbici
+		nUIsplata += isplata
+		nUDoprPio += dop_pio
+		nUDoprZdr += dop_zdr
+		nUDoprNez += dop_nez
+		nUDoprD4 += dop_4
+		nUDoprD5 += dop_5
+		nUDoprD6 += dop_6
+		
+		if ( field->b_neto <> 0 )
+			nUR_sati += field->r_sati
+			nUR_izn += field->r_neto
+			nUB_sati += field->b_sati
+			nUB_izn += field->b_neto
+
+		else
+			nUR_sati += field->sati
+			nUR_izn += field->netobp
+		endif
+	
+		skip
+	enddo
+	
+	? STR(++nRbr, 4) + "."
+
+	@ prow(), pcol()+1 SAY PADR( ALLTRIM(STR(nSeek_god, 4)), 7)
+
+	@ prow(), pcol()+1 SAY PADR( nazmjeseca(nSeek_mj, nSeek_god, ;
+		.f., .t. ), 20 )
+
+	@ prow(), nPoc:=pcol()+1 SAY STR(nUSati,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nUPrim,12,2) 
+	
+	@ prow(), pcol()+1 SAY STR(nUBruto,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nUDopriz,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nULicOdb,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nUPorez,12,2)
+	
+	@ prow(), nNBP_pt := pcol()+1 SAY STR(nUNetobp,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nUNeto,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nUOdbici,12,2)
+
+	@ prow(), pcol()+1 SAY STR(nUIsplata,12,2)
+	
+	if !EMPTY(cDop1)
+		@ prow(), pcol()+1 SAY STR(nUDoprPio,12,2)
+	endif
+
+	if !EMPTY(cDop2)
+		@ prow(), pcol()+1 SAY STR(nUDoprZdr,12,2)
+	endif
+
+	if !EMPTY(cDop3)
+		@ prow(), pcol()+1 SAY STR(nUDoprNez,12,2)
+	endif
+	
+	if !EMPTY( cDop4 )
+		@ prow(), pcol()+1 SAY STR(nUDoprD4,12,2)
+	endif
+	
+	if !EMPTY( cDop5 )
+		@ prow(), pcol()+1 SAY STR(nUDoprD5,12,2)
+	endif
+	
+	if !EMPTY( cDop6 )
+		@ prow(), pcol()+1 SAY STR(nUDoprD6,12,2)
+	endif
+
+	nTUSati += nUsati
+	nTUPrim += nUprim
+	nTUBruto += nUbruto
+	nTUDoprIz += nUdopriz
+	nTULicOdb += nULicOdb
+	nTUPorez += nUPorez
+	nTUNetobp += nUNetobp
+	nTUNeto += nUneto
+	nTUOdbici += nUodbici
+	nTUIsplata += nUisplata
+	nTUDoprPio += nUDoprpio
+	nTUDoprZdr += nUDoprzdr
+	nTUDoprNez += nUDoprnez
+	nTUDoprD4 += nUDoprD4
+	nTUDoprD5 += nUDoprD5
+	nTUDoprD6 += nUDoprD6
+		
+	if ( field->b_neto <> 0 )
+
+		// ovo je za drugi red izvjestaja...
+		// redovan rad
+		?
+		@ prow(), nPoc - 3 SAY "r: " + STR(nUR_sati,12,2)
+		@ prow(), nNBP_pt SAY STR(nUR_neto,12,2)
+	
+		nTUR_sati += nUR_sati
+		nTUR_izn += nUR_neto
+
+		// bolovanja ...
+		?
+		@ prow(), nPoc -3 SAY "b: " + STR(nUb_sati,12,2)
+		@ prow(), nNBP_pt SAY STR(nUb_neto,12,2)
+		
+		nTUB_sati += nUb_sati
+		nTUB_izn += nUb_neto
+
+	else
+		nTUR_sati += nUSati
+		nTUR_izn += nUNetobp
+	endif
+
+	++nCount
+
+enddo
+
+? cLine
+
+? "UKUPNO:"
+@ prow(), nPoc SAY STR(nTUSati,12,2)
+@ prow(), pcol()+1 SAY STR(nTUPrim,12,2)
+@ prow(), pcol()+1 SAY STR(nTUBruto,12,2)
+@ prow(), pcol()+1 SAY STR(nTUDoprIz,12,2)
+@ prow(), pcol()+1 SAY STR(nTULicOdb,12,2)
+@ prow(), pcol()+1 SAY STR(nTUPorez,12,2)
+@ prow(), pcol()+1 SAY STR(nTUNetoBP,12,2)
+@ prow(), pcol()+1 SAY STR(nTUNeto,12,2)
+@ prow(), pcol()+1 SAY STR(nTUOdbici,12,2)
+@ prow(), pcol()+1 SAY STR(nTUIsplata,12,2)
+
+if !EMPTY(cDop1)
+	@ prow(), pcol()+1 SAY STR(nTUDoprPio,12,2)
+endif
+
+if !EMPTY(cDop2)
+	@ prow(), pcol()+1 SAY STR(nTUDoprZdr,12,2)
+endif
+
+if !EMPTY(cDop3)
+	@ prow(), pcol()+1 SAY STR(nTUDoprNez,12,2)
+endif
+
+if !EMPTY(cDop4)
+	@ prow(), pcol()+1 SAY STR(nTUDoprD4,12,2)
+endif
+
+if !EMPTY(cDop5)
+	@ prow(), pcol()+1 SAY STR(nTUDoprD5,12,2)
+endif
+
+if !EMPTY(cDop6)
+	@ prow(), pcol()+1 SAY STR(nTUDoprD6,12,2)
+endif
+
+// ako ima bolovanja itd...
+if ( nUB_izn <> 0 )
+
+	// redovan rad
+	? 
+	@ prow(), nPoc - 3 SAY "r: " + STR( nTUR_sati , 12, 2 )
+	@ prow(), nNBP_pt SAY STR( nTUR_izn , 12, 2 )
+	
+	// bolovanja
+	? 
+	@ prow(), nPoc - 3 SAY "b: " + STR( nTUB_sati , 12, 2 )
+	@ prow(), nNBP_pt SAY STR( nTUB_izn , 12, 2 )
+
+endif
+
+? cLine
+
+FF
+END PRINT
+
+return
 
 
 // ----------------------------------------------
@@ -601,7 +907,7 @@ return
 // ---------------------------------------------------------
 static function fill_data( cRj, cGodina, cMjesec, cMjesecDo, ;
 	cRadnik, cDoprPio, cDoprZdr, cDoprNez, cObracun, cDop4, cDop5, cDop6, ;
-	cM4_prim )
+	cM4_prim, cTotal )
 local i
 local cPom
 local lInRS := .f.
@@ -612,6 +918,10 @@ local nR_s_off
 local nR_i_off
 local nB_s_off
 local nB_i_off
+
+if cTotal == nil
+	cTotal := "N"
+endif
 
 select ld
 
@@ -626,8 +936,6 @@ do while !eof()
 		skip
 		loop
 	endif
-
-	altd()
 
 	cT_radnik := field->idradn
 
@@ -696,7 +1004,10 @@ do while !eof()
 			skip
 			loop
 		endif
-		
+	
+		nF_mj := field->mjesec
+		nF_god := field->godina
+
 		cObr_za := ALLTRIM(STR(ld->mjesec)) + "/" + ;
 			ALLTRIM(STR(ld->godina))
 
@@ -873,13 +1184,77 @@ do while !eof()
 			nIDoprD6 += round2(nMBrutoST * nDoprD6 / 100, gZaok2)
 		endif
 
+		if cTotal == "D"
+			// ubaci u tabelu podatke
+			_ins_tbl( nF_god, ;
+				nF_mj, ;
+				cT_radnik, ;
+				cId_rj, ;
+				cObr_za, ;
+				cT_rnaziv, ;
+				nSati, ;
+				nUR_sati, ;
+				nUB_sati, ;
+				nPrim, ;
+				nBruto, ;
+				nUDopIZ,;
+				nIDoprPIO, ;
+				nIDoprZDR, ;
+				nIDoprNEZ, ;
+				0, ;
+				nL_Odb, ;
+				nPorez, ;
+				nUNetobp, ;
+				nUNeto, ;
+				nURad_izn, ;
+				nUBol_izn, ;
+				nOdbici, ;
+				nIsplata, ;
+				nIDoprD4, ;
+				nIDoprD5, ;
+				nIDoprD6 )
+		
+			// resetuj varijable
+			nSati := 0
+			nR_sati := 0
+			nB_sati := 0
+			nNeto := 0
+			nR_neto := 0
+			nB_neto := 0
+			nUNeto := 0
+			nPrim := 0
+			nBruto := 0
+			nUDopIz := 0
+			nIDoprPio := 0
+			nIDoprZdr := 0
+			nIDoprNez := 0
+			nIDoprD4 := 0
+			nIDoprD5 := 0
+			nIDoprD6 := 0
+			nOdbici := 0
+			nL_odb := 0
+			nPorez := 0
+			nIsplata := 0
+			nUNetobp := 0
+			nR_s_off := 0
+			nR_i_off := 0
+			nB_s_off := 0
+			nB_i_off := 0
+			nURad_izn := 0
+			nUBol_izn := 0
+			nUR_sati := 0
+			nUB_sati := 0
+
+		endif
+
 		select ld
 		skip
 
 	enddo
 
-	// ubaci u tabelu podatke
-	_ins_tbl( cT_radnik, ;
+	if cTotal == "N"
+	   // ubaci u tabelu podatke
+	   _ins_tbl( 0, 0, cT_radnik, ;
 		cId_rj, ;
 		cObr_za, ;
 		cT_rnaziv, ;
@@ -904,7 +1279,8 @@ do while !eof()
 		nIDoprD4, ;
 		nIDoprD5, ;
 		nIDoprD6 )
-				
+	endif
+
 enddo
 
 return
