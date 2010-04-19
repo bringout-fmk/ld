@@ -449,24 +449,24 @@ do while !EOF()
 	nTUDoprD5 += nUDoprD5
 	nTUDoprD6 += nUDoprD6
 		
-	if ( field->b_neto <> 0 )
+	if ( nUb_izn <> 0 )
 
 		// ovo je za drugi red izvjestaja...
 		// redovan rad
 		?
 		@ prow(), nPoc - 3 SAY "r: " + STR(nUR_sati,12,2)
-		@ prow(), nNBP_pt SAY STR(nUR_neto,12,2)
+		@ prow(), nNBP_pt SAY STR(nUR_izn,12,2)
 	
 		nTUR_sati += nUR_sati
-		nTUR_izn += nUR_neto
+		nTUR_izn += nUR_izn
 
 		// bolovanja ...
 		?
 		@ prow(), nPoc -3 SAY "b: " + STR(nUb_sati,12,2)
-		@ prow(), nNBP_pt SAY STR(nUb_neto,12,2)
+		@ prow(), nNBP_pt SAY STR(nUb_izn,12,2)
 		
 		nTUB_sati += nUb_sati
-		nTUB_izn += nUb_neto
+		nTUB_izn += nUb_izn
 
 	else
 		nTUR_sati += nUSati
@@ -516,7 +516,7 @@ if !EMPTY(cDop6)
 endif
 
 // ako ima bolovanja itd...
-if ( nUB_izn <> 0 )
+if ( nTUB_izn <> 0 )
 
 	// redovan rad
 	? 
