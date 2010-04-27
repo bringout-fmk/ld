@@ -80,7 +80,7 @@ return
 static function _ins_tbl( cRadnik, cIdRj, cTipRada, cNazIspl, dDatIsplate, ;
 		nMjesec, nMjisp, cIsplZa, cVrsta, ;
 		nGodina, nPrihod, ;
-		nPrihOst, nBruto, nMBruto, nDop_u_st, nDopPio, ;
+		nPrihOst, nBruto, nMBruto, nTrosk, nDop_u_st, nDopPio, ;
 		nDopZdr, nDopNez, nDop_uk, nNeto, nKLO, ;
 		nLOdb, nOsn_por, nIzn_por, nUk, nUSati, nIzn1, nIzn2, ;
 		nIzn3, nIzn4, nIzn5 )
@@ -107,6 +107,7 @@ replace prihod with nPrihod
 replace prihost with nPrihOst
 replace bruto with nBruto
 replace mbruto with nMBruto
+replace trosk with nTrosk
 replace dop_u_st with nDop_u_st
 replace dop_pio with nDopPio
 replace dop_zdr with nDopZdr
@@ -164,6 +165,7 @@ AADD(aDbf,{ "PRIHOD", "N", 12, 2 })
 AADD(aDbf,{ "PRIHOST", "N", 12, 2 })
 AADD(aDbf,{ "BRUTO", "N", 12, 2 })
 AADD(aDbf,{ "MBRUTO", "N", 12, 2 })
+AADD(aDbf,{ "TROSK", "N", 12, 2 })
 AADD(aDbf,{ "DOP_U_ST", "N", 12, 2 })
 AADD(aDbf,{ "DOP_PIO", "N", 12, 2 })
 AADD(aDbf,{ "DOP_ZDR", "N", 12, 2 })
@@ -279,12 +281,12 @@ endif
 @ m_x + 12, col()+1 SAY "JID: " GET cPredJMB
 @ m_x + 13, m_y + 2 SAY "Adresa: " GET cPredAdr pict "@S30"
 
-@ m_x + 15, m_y + 2 SAY "(1) OLP-1021 / (2) GIP-1022: " GET cTipRpt ;
-	VALID cTipRpt $ "12" 
+@ m_x + 15, m_y + 2 SAY "(1) OLP-1021 / (2) GIP-1022 / (3) AOP:" GET cTipRpt ;
+	VALID cTipRpt $ "123" 
 
 @ m_x + 15, col() + 2 SAY "def.rj" GET cRJDef 
 
-@ m_x + 15, col() + 2 SAY "stampa/export (S/E)?" GET cWinPrint ;
+@ m_x + 15, col() + 2 SAY "st./exp.(S/E)?" GET cWinPrint ;
 	VALID cWinPrint $ "SE" PICT "@!" 
 
 read
@@ -517,19 +519,22 @@ return
 static function _xml_print( cTip )
 local cOdtName := ""
 local cOutput := "c:\ld_out.odt"
+local cJavaStart := ALLTRIM( gJavaStart )
 
 if __xml == 0
 	return
 endif
 
 // napuni xml fajl
-_fill_xml()
+_fill_xml( cTip )
 
 do case
 	case cTip == "1"
 		cOdtName := "ld_olp.odt"
 	case cTip == "2"
 		cOdtName := "ld_gip.odt"
+	case cTip == "3"
+		cOdtName := "ld_aop.odt"
 endcase
 
 save screen to cScreen
@@ -544,7 +549,7 @@ if !EMPTY( gJODTemplate )
 endif
 
 // stampanje labele
-cCmdLine := "java -jar " + cJODRep + " " + ;
+cCmdLine := cJavaStart + " " + cJODRep + " " + ;
 	cT_Path + cOdtName + " c:\data.xml " + cOutput
 
 run &cCmdLine
@@ -809,11 +814,14 @@ return
 // --------------------------------------------
 // filuje xml fajl sa podacima izvjestaja
 // --------------------------------------------
-static function _fill_xml()
+static function _fill_xml( cTip )
 local nTArea := SELECT()
 local nT_prih := 0
 local nT_pros := 0
 local nT_bruto := 0
+local nT_mbruto := 0
+local nT_trosk := 0
+local nT_bbtr := 0
 local nT_bbd := 0
 local nT_neto := 0
 local nT_poro := 0
@@ -868,6 +876,9 @@ do while !EOF()
 	nT_prih := 0
 	nT_pros := 0
 	nT_bruto := 0
+	nT_mbruto := 0
+	nT_trosk := 0
+	nT_bbtr := 0
 	nT_bbd := 0
 	nT_neto := 0
 	nT_poro := 0
@@ -888,9 +899,15 @@ do while !EOF()
 		replace field->dop_uk with field->dop_pio + ;
 			field->dop_nez + field->dop_zdr
 
-		replace field->osn_por with ( field->bruto - field->dop_uk ) - ;
-			field->l_odb
-	
+		if cTip == "3"
+			replace field->osn_por with ;
+				( field->mbruto - field->dop_zdr )
+		else
+			replace field->osn_por with ;
+				( field->bruto - field->dop_uk ) - ;
+				field->l_odb
+		endif
+
 		// ako je neoporeziv radnik, nema poreza
 		if !radn_oporeziv( field->idradn, field->idrj ) .or. ;
 			field->osn_por < 0 
@@ -903,10 +920,17 @@ do while !EOF()
 			replace field->izn_por with 0
 		endif
 
-		replace field->neto with (field->bruto - field->dop_uk) - ;
-			field->izn_por
+		if cTip == "3"
+			replace field->neto with ;
+				((field->mbruto - field->dop_zdr) - ;
+				field->izn_por ) + field->trosk
+		else
+			replace field->neto with ;
+				(field->bruto - field->dop_uk) - ;
+				field->izn_por
+		endif
 	
-		if field->tiprada $ " #I#N#" 
+		if cTip <> "3" .and. field->tiprada $ " #I#N#" 
 			replace field->neto with ;
 				min_neto( field->neto , field->sati )
 		endif
@@ -925,6 +949,8 @@ do while !EOF()
 		xml_node("prihod", STR( field->prihod, 12, 2 ) ) 
 		xml_node("prih_o", STR( field->prihost, 12, 2 ) )
 		xml_node("bruto", STR( field->bruto, 12, 2 ) )
+		xml_node("trosk", STR( field->trosk, 12, 2 ) )
+		xml_node("bbtr", STR( field->bruto - field->trosk, 12, 2 ) )
 		xml_node("do_us", STR( field->dop_u_st, 12, 2 ) )
 		xml_node("do_uk", STR( field->dop_uk, 12, 2 ) )
 		xml_node("do_pio", STR( field->dop_pio, 12, 2 ) )
@@ -945,6 +971,8 @@ do while !EOF()
 		nT_prih += field->prihod
 		nT_pros += field->prihost
 		nT_bruto += field->bruto
+		nT_trosk += field->trosk
+		nT_bbtr += ( field->bruto - field->trosk )
 		nT_bbd += ( field->bruto - field->dop_uk )
 		nT_neto += field->neto
 		nT_poro += field->osn_por
@@ -966,6 +994,8 @@ do while !EOF()
 	xml_node("prihod", STR( nT_prih, 12, 2 ) )
 	xml_node("prih_o", STR( nT_pros, 12, 2 ) )
 	xml_node("bruto", STR( nT_bruto, 12, 2 ) )
+	xml_node("trosk", STR( nT_trosk, 12, 2 ) )
+	xml_node("bbtr", STR( nT_bbtr, 12, 2 ) )
 	xml_node("bbd", STR( nT_bbd, 12, 2 ) )
 	xml_node("neto", STR( nT_neto, 12, 2 ) )
 	xml_node("p_izn", STR( nT_pori, 12, 2 ) )
@@ -1036,10 +1066,12 @@ local nTp2 := 0
 local nTp3 := 0
 local nTp4 := 0
 local nTp5 := 0
+local nTrosk := 0
 local nIDopr10 := 0000.00000
 local nIDopr11 := 0000.00000
 local nIDopr12 := 0000.00000
 local nIDopr1X := 0000.00000 
+local lInRS := .f.
 
 // dodatni tipovi primanja
 if cTp1 == nil
@@ -1089,6 +1121,7 @@ do while !eof()
 	endif
 	
 	cTipRada := g_tip_rada( ld->idradn, ld->idrj )
+	lInRS := in_rs(radn->idopsst, radn->idopsrad) 
 
 	// samo pozicionira bazu PAROBR na odgovarajuci zapis
 	ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ld->idrj )
@@ -1096,15 +1129,24 @@ do while !eof()
 	select radn
 	seek cT_radnik
 	
-	if !( cTipRada $ " #I#N") 
-		select ld
-		skip
-		loop
+	if cRptTip == "3"
+		if ( cTipRada $ " #I#N")
+			select ld
+			skip
+			loop
+		endif
+	else
+		if !( cTipRada $ " #I#N")
+			select ld
+			skip
+			loop
+		endif
 	endif
 
 	select ld
 
 	nBruto := 0
+	nTrosk := 0
 	nBrDobra := 0
 	nDoprStU := 0
 	nDopPio := 0
@@ -1133,20 +1175,29 @@ do while !eof()
 			skip
 			loop
 		endif
-
+	
 		// radna jedinica
 		cRadJed := ld->idrj
 
 		// uvijek provjeri tip rada, ako ima vise obracuna
 		cTipRada := g_tip_rada( ld->idradn, ld->idrj )
-		
+		cTrosk := radn->trosk
+		lInRS := in_rs(radn->idopsst, radn->idopsrad) 
+	
+		if cRptTip == "3"
+			if ( cTipRada $ " #I#N")
+				skip
+				loop
+			endif
+		else
+			if !( cTipRada $ " #I#N")
+				skip
+				loop
+			endif
+		endif
+
 		ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ;
 				ld->idrj )
-		
-		if !( cTipRada $ " #I#N") 
-			skip
-			loop
-		endif
 		
 		nPrDobra := 0
 		nTP_off := 0
@@ -1207,6 +1258,33 @@ do while !eof()
 			// minimalni bruto
 			nMBruto := min_bruto( nBruto, field->usati )
 		endif
+		
+		// ugovori o djelu
+		if cTipRada == "U" .and. cTrosk <> "N"
+			
+			nTrosk := ROUND2( nMBruto * (gUgTrosk / 100), gZaok2 )
+			
+			if lInRs == .t.
+				nTrosk := 0
+			endif
+			
+		endif
+
+		// autorski honorar
+		if cTipRada == "A" .and. cTrosk <> "N"
+			
+			nTrosk := ROUND2( nMBruto * (gAhTrosk / 100), gZaok2 )
+			
+			if lInRs == .t.
+				nTrosk := 0
+			endif
+			
+		endif
+
+		if cRptTip == "3"
+			// ovo je bruto iznos
+			nMBruto := ( nBruto - nTrosk )
+		endif
 
 		// ovo preskoci, nema ovdje GIP-a
 		if nMBruto <= 0
@@ -1222,10 +1300,10 @@ do while !eof()
 		endif
 		
 		// ocitaj doprinose, njihove iznose
-		nDopr10 := Ocitaj( F_DOPR , cDopr10 , "iznos" , .t. )
-		nDopr11 := Ocitaj( F_DOPR , cDopr11 , "iznos" , .t. )
-		nDopr12 := Ocitaj( F_DOPR , cDopr12 , "iznos" , .t. )
-		nDopr1X := Ocitaj( F_DOPR , cDopr1X , "iznos" , .t. )
+		nDopr10 := get_dopr( cDopr10, cTipRada )
+		nDopr11 := get_dopr( cDopr11, cTipRada )
+		nDopr12 := get_dopr( cDopr12, cTipRada )
+		nDopr1X := get_dopr( cDopr1X, cTipRada )
 
 		// izracunaj doprinose
 		nIDopr10 := ROUND( nMBruto * nDopr10 / 100 , 4 )
@@ -1239,8 +1317,12 @@ do while !eof()
 		//nDoprIz := u_dopr_iz( nMBruto, cTipRada )
 		
 		// osnovica za porez
-		nPorOsn := ( nBruto - nIDopr1X ) - nL_odb
-		
+		if cRptTip == "3"
+			nPorOsn := ( nMBruto - nIDopr1X ) - nL_odb
+		else
+			nPorOsn := ( nBruto - nIDopr1X ) - nL_odb
+		endif
+
 		// ako je neoporeziv radnik, nema poreza
 		if !radn_oporeziv( radn->id, ld->idrj ) .or. ;
 			( nBruto - nIDopr1X ) < nL_odb
@@ -1253,8 +1335,13 @@ do while !eof()
 		select ld
 	
 		// na ruke je
-		nNaRuke := ROUND( nBruto - nIDopr1X - nPorez, 2 ) 
-		
+		if cRptTip == "3"
+			nNaRuke := ROUND( (nMBruto - nIDopr1X - nPorez) ;
+				+ nTrosk, 2 ) 
+		else
+			nNaRuke := ROUND( nBruto - nIDopr1X - nPorez, 2 ) 
+		endif
+
 		nIsplata := nNaRuke
 
 		// da li se radi o minimalcu ?
@@ -1303,6 +1390,7 @@ do while !eof()
 				nBrDobra, ;
 				nBruto, ;
 				nMBruto, ;
+				nTrosk, ;
 				nDopr1X,;
 				nIDopr10, ;
 				nIDopr11, ;
