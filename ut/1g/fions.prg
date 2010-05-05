@@ -60,7 +60,6 @@ return (nil)
  *  \param cIdRj - id radna jedinica
  */
 function ParOBr(nMjesec,nGodina,cObr,cIdRj)
-*{
 local nNaz
 local nRec1:=0
 local nRec2:=0
@@ -81,23 +80,30 @@ cMj := STR(nMjesec, 2)
 cGod := STR(nGodina, 4)
 
 select parobr
-seek cMj+cGod+cObr
+seek cMj + cGod + cObr
 
 if !FOUND() .or. EOF()
+
 	// ponovo pretrazi ali bez godine
 	// ima godina = prazan zapis !!!
-	nRet := 0
+	
+	nRet := 2
+	
 	select parobr
-	seek cMj+SPACE(4)+cObr
+	go top
+	seek cMj + SPACE(4) + cObr
+	
+	if field->id <> cMj
+		nRet := 0
+		skip -1
+	endif
 endif
 
-IF !FOUND() .or. EOF()
-	SKIP -1
-ENDIF
+if IzFMKINI("LD","VrBodaPoRJ","N",KUMPATH) == "D"
 
-IF IzFMKINI("LD","VrBodaPoRJ","N",KUMPATH)=="D"
 	nRec1:=RECNO()
-   	DO WHILE !EOF() .and. id==cMj .and. godina==cGod
+   	
+	DO WHILE !EOF() .and. id==cMj .and. godina==cGod
      		IF lViseObr .and. cObr<>obr
       			SKIP 1
 			LOOP
@@ -121,6 +127,7 @@ IF IzFMKINI("LD","VrBodaPoRJ","N",KUMPATH)=="D"
 ENDIF
 
 SELECT (nArr)
+
 return nRet
 
 

@@ -197,14 +197,22 @@ Box(,21,77)
 	ESC_BCR
 
 	// da li postoje uneseni parametri obracuna ?
-	if ParObr( cMjesec, cGodina, IF(lViseObr, cObracun, nil), cIdRj ) == 0
-
+	nO_Ret := ParObr( cMjesec, cGodina, IF(lViseObr, cObracun, nil), ;
+		cIdRj )
+	
+	if nO_ret = 0
+		
 		msgbeep("Ne postoje uneseni parametri obracuna za " + ;
 			STR(cMjesec,2) + "/" + STR(cGodina,4) + " !!")
 		
 		boxc()
 		return
 
+	elseif nO_ret = 2
+		
+		msgbeep("Ne postoje uneseni parametri obracuna za "+ ;
+			STR(cMjesec,2) + "/" + STR(cGodina,4) + " !!" + ;
+			"#Koristit cu postojece parametre.")
 	endif
 	
 	select radn
