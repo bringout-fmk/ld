@@ -2300,6 +2300,17 @@ FUNCTION SortPrez(cId)
 RETURN cVrati
 
 
+// ---------------------------------
+// ---------------------------------
+FUNCTION SortIme(cId)
+ LOCAL cVrati:="", nArr:=SELECT()
+ SELECT RADN
+ HSEEK cId
+ cVrati:=BHSORT(ime+naz+imerod)+id
+ SELECT (nArr)
+RETURN cVrati
+
+
 // --------------------------------
 // --------------------------------
 FUNCTION SortVar(cId)

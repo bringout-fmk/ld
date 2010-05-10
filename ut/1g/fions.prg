@@ -768,6 +768,7 @@ static function stRadniSati()
 local nCnt
 local cTxt := ""
 local cLine := ""
+local aSati
 
 select radsat
 set order to tag "1"
@@ -804,6 +805,8 @@ cLine += REPLICATE("-", 6)
 ? cTxt
 ? cLine
 
+aSati := {}
+
 nCnt := 0
 do while !EOF() 
 
@@ -812,15 +815,24 @@ do while !EOF()
 		loop
 	endif
 
-	? PADL( ALLTRIM(STR(++ nCnt)), 4) + "."
-	
-	@ prow(), pcol() + 1 SAY idradn
-	@ prow(), pcol() + 1 SAY PADR( g_naziv( idradn ), 25 )
-	@ prow(), pcol() + 1 SAY sati
-	@ prow(), pcol() + 1 SAY status
+	AADD( aSati, { idradn, PADR( g_naziv( idradn ), 25 ), sati, status } )
 	
 	skip
 enddo
+
+// sada istampaj
+// napravi sort po ime+prezime
+ASORT( aSati,,,{|x,y| x[2] < y[2] } )
+
+for i:=1 to LEN( aSati )
+	
+	? PADL( ALLTRIM( STR( ++ nCnt )), 4 ) + "."
+	@ prow(), pcol()+1 SAY aSati[i, 1]
+	@ prow(), pcol()+1 SAY aSati[i, 2]
+	@ prow(), pcol()+1 SAY aSati[i, 3]
+	@ prow(), pcol()+1 SAY aSati[i, 4]
+
+next
 
 ? cLine
 

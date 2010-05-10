@@ -139,6 +139,7 @@ function get_siht( lInfo, nGodina, nMjesec, cIdRadn, cGroup )
 local nTArea := SELECT()
 local cFilter := ""
 local nLineLen := 100
+local nVar := 1
 
 if pcount() <= 1
 	
@@ -162,7 +163,11 @@ if !EMPTY( cIdRadn )
 	nLineLen := 80
 endif
 
-sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
+if lInfo == .t.
+	nVar := 0
+endif
+
+sort_siht( nGodina, nMjesec, cIdRadn, cGroup, nVar )
 set order to tag "2"
 go top
 
@@ -241,6 +246,8 @@ local nGodina
 local cGroup
 local cIdRadn
 local nCol := 12
+local aSiht
+local i
 
 // nema parametara unesenih
 nMjesec := gMjesec
@@ -277,6 +284,8 @@ nT_trazl := 0
 
 nCnt := 0
 
+aSiht := {}
+
 // zavrti se po radnicima...
 do while !EOF()
 
@@ -299,21 +308,36 @@ do while !EOF()
   
   enddo
 
-  // ispisi ukupno
-  ? PADL( ALLTRIM( STR( ++nCnt, 4 )) + ".", 5 )
-  @ prow(), pcol()+1 SAY PADR( _rad_ime( cId_radn ), 20 )
-  @ prow(), nCol := pcol()+1 SAY STR(nT_sati, 12, 2)
-  @ prow(), pcol()+1 SAY STR(nT_nsati, 12, 2)
-  @ prow(), pcol()+1 SAY STR(nT_razl, 12, 2)
+  AADD( aSiht, { PADR(_rad_ime(cId_radn), 20), STR(nT_sati,12,2), ;
+  	STR(nT_nsati, 12, 2), STR(nT_razl, 12, 2) } )
 
 enddo
 
-? REPLICATE("-", nLineLen )
-? "UKUPNO SATI: "
-@ prow(), nCol SAY STR( nT_tsati, 12, 2 )
-@ prow(), pcol()+1 SAY STR( nT_tnsati, 12, 2 )
-@ prow(), pcol()+1 SAY STR( nT_trazl, 12, 2 )
-? REPLICATE("-", nLineLen )
+if LEN( aSiht ) > 0
+
+  // napravi sortiranje
+  ASORT( aSiht,,,{|x,y| x[1] < y[1] } )
+
+  // sada ispisi
+  for i:=1 to len( aSiht )
+
+	// ispisi ukupno
+  	? PADL( ALLTRIM( STR( ++nCnt, 4 )) + ".", 5 )
+  	@ prow(), pcol()+1 SAY aSiht[i, 1]
+  	@ prow(), nCol := pcol()+1 SAY aSiht[i, 2]
+  	@ prow(), pcol()+1 SAY aSiht[i, 3]
+  	@ prow(), pcol()+1 SAY aSiht[i, 4]
+
+  next
+
+  ? REPLICATE("-", nLineLen )
+  ? "UKUPNO SATI: "
+  @ prow(), nCol SAY STR( nT_tsati, 12, 2 )
+  @ prow(), pcol()+1 SAY STR( nT_tnsati, 12, 2 )
+  @ prow(), pcol()+1 SAY STR( nT_trazl, 12, 2 )
+  ? REPLICATE("-", nLineLen )
+
+endif
 
 FF
 END PRINT
@@ -328,8 +352,12 @@ return
 // ------------------------------------------------------------
 // sortiranje sihtarice
 // ------------------------------------------------------------
-function sort_siht( nGodina, nMjesec, cIdRadn, cGroup )
+function sort_siht( nGodina, nMjesec, cIdRadn, cGroup, nVar )
 local cFilter
+
+if nVar == nil
+	nVar := 0
+endif
 
 cFilter := "godina =" + STR( nGodina )  
 cFilter += " .and. mjesec = " + STR( nMjesec )
@@ -347,6 +375,12 @@ O_RADSIHT
 select radsiht
 set filter to &cFilter
 go top
+
+if nVar == 1
+	index on idkonto + SortIme(idradn) + str(godina,4) + str(mjesec,2) ;
+		tag "2"
+	go top
+endif
 
 return
 
