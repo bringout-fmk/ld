@@ -752,10 +752,83 @@ do case
 			delete
 			return DE_REFRESH
 		endif
-		
+	
+	case CH == K_CTRL_P
+		stRadniSati()
+		return DE_CONT
 endcase
 
 return DE_CONT
+
+
+// -----------------------------------------------
+// printanje sadrzaja radnih sati
+// -----------------------------------------------
+static function stRadniSati()
+local nCnt
+local cTxt := ""
+local cLine := ""
+
+select radsat
+set order to tag "1"
+go top
+
+START PRINT CRET
+
+?
+P_COND
+
+cTxt += PADR("r.br",5)
+cTxt += SPACE(1)
+cTxt += PADR("id", 6)
+cTxt += SPACE(1)
+cTxt += PADR("naziv radnika", 25)
+cTxt += SPACE(1)
+cTxt += PADR("radni sati", 10)
+cTxt += SPACE(1)
+cTxt += PADR("status", 6)
+
+cLine += REPLICATE("-", 5)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 6)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 25)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 10)
+cLine += SPACE(1)
+cLine += REPLICATE("-", 6)
+
+? "Pregled radnih sati:"
+
+? cLine
+? cTxt
+? cLine
+
+nCnt := 0
+do while !EOF() 
+
+	if field->sati = 0
+		skip
+		loop
+	endif
+
+	? PADL( ALLTRIM(STR(++ nCnt)), 4) + "."
+	
+	@ prow(), pcol() + 1 SAY idradn
+	@ prow(), pcol() + 1 SAY PADR( g_naziv( idradn ), 25 )
+	@ prow(), pcol() + 1 SAY sati
+	@ prow(), pcol() + 1 SAY status
+	
+	skip
+enddo
+
+? cLine
+
+FF
+END PRINT
+
+return
+
 
 
 
