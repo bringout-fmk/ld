@@ -253,7 +253,8 @@ do case
 	
 	// republika srpska
 	case cTipRada == "R"
-		nBrt := ROUND2( (nIzn - 24) / 0.63848 , gZaok2)
+		nTmp := ROUND( ( nLOdb * parobr->k5 ), 2 )
+		nBrt := ROUND2( (nIzn - nTmp) / parobr->k6 , gZaok2)
 	
 	// ugovor o djelu i autorski honorar
 	case cTipRada $ "A#U"
@@ -331,7 +332,12 @@ do case
 	
 	// republika srpska
 	case cTipRada == "R"
-		cPrn := ALLTRIM(STR(nNeto)) + " - 24 / 0.63848 =" 
+		
+		nTmp := ROUND( ( nLOdb * parobr->k5 ), 2 )
+
+		cPrn := "( " + ALLTRIM(STR(nNeto)) + " - " + ;
+			ALLTRIM(STR( nTmp )) + " ) / " + ;
+			ALLTRIM(STR( parobr->k6 )) + " =" 
 	
 	// ugovor o djelu
 	case cTipRada $ "A#U"
