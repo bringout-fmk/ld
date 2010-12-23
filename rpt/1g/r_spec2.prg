@@ -535,9 +535,15 @@ ENDIF
    // beneficirani radnici
    if UBenefOsnovu()
  	
+	cFFTmp := gBFForm
+	gBFForm := STRTRAN( gBFForm, "_", "" )
+ 	
 	nPojBrBenef := bruto_osn( nNetoOsn - IF(!EMPTY(gBFForm),&gBFForm,0), cRTR, nKoefLO, nRSpr_koef )
  	
  	nBrutoOsBenef += nPojBrBenef
+
+	gBFForm := cFFtmp
+
    endif
  
 
@@ -556,7 +562,9 @@ ENDIF
 
  SELECT DOPR
  GO TOP
- 
+
+ altd()
+
  DO WHILE !EOF()
    
    IF DOPR->poopst=="1" .and. lPDNE

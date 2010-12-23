@@ -1,7 +1,11 @@
 #include "ld.ch"
 
+
+// ------------------------------------
+// pregled primanja
+// ------------------------------------
 function PregPrim()
-*{
+
 local nC1:=20
 
 cIdRadn:=space(_LR_)
