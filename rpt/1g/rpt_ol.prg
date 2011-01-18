@@ -425,7 +425,7 @@ return cDay
 // -------------------------------------
 // vraca vrstu isplate
 // -------------------------------------
-static function g_v_ispl( cId )
+function g_v_ispl( cId )
 local cIspl := "Plata"
 
 if cId == "1"

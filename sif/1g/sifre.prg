@@ -643,6 +643,23 @@ return PostojiSifra(F_OPS, 1, 10, 65, ;
 *}
 
 
+// vraca PU code opstine
+function g_ops_code( cId )
+local nTArea := SELECT()
+local cRet := ""
+O_OPS
+select ops
+go top
+seek cId
+if FOUND()
+	cRet := field->idj
+endif
+
+select (nTArea)
+return cRet
+
+
+
 function P_Kred(cId,dx,dy)
 *{
 local nArr

@@ -38,6 +38,8 @@ if gVarObracun == "2"
 	AADD(opcexe,{|| r_obr_list() })
 	AADD(opc,"P. akontacije poreza (obrasci ASD i AUG)")
 	AADD(opcexe,{|| r_ak_list() })
+	AADD(opc,"M. mjesecni obrazac MIP-1023")
+	AADD(opcexe,{|| r_mip_obr() })
 	
 	AADD(opc,"E. poreska kartica : export")
 	AADD(opcexe,{|| pk_export() })
