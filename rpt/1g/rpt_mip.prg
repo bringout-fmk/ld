@@ -4,6 +4,7 @@
 static __mj
 static __god
 static __xml := 0
+static __ispl_s := 0
 
 // ---------------------------------------------------------
 // sortiranje tabele LD
@@ -52,10 +53,10 @@ return
 static function _ins_tbl( cRadnik, cIdRj, nGodina, nMjesec, ;
 		cTipRada, cVrIspl, cR_ime, cR_jmb, cR_opc, dDatIsplate, ;
 		nSati, nSatiB, nSatiT, nStUv, nBruto, nO_prih, nU_opor, ;
-		nU_d_pio, nU_d_zdr, nU_d_dod, nU_d_nez, nU_d_iz, ;
+		nU_d_pio, nU_d_zdr, nU_d_pms, nU_d_nez, nU_d_iz, ;
 		nU_dn_pio, nU_dn_zdr, nU_dn_nez, nU_dn_dz, ;
 		nUm_prih, nKLO, nLODB, nOsn_por, nIzn_por, ;
-		cR_rmj, nU_d_pms )
+		cR_rmj )
 
 local nTArea := SELECT()
 
@@ -82,7 +83,7 @@ replace o_prih with nO_prih
 replace u_opor with nU_opor
 replace u_d_pio with nU_d_pio
 replace u_d_zdr with nU_d_zdr
-replace u_d_dod with nU_d_dod
+replace u_d_pms with nU_d_pms
 replace u_d_nez with nU_d_nez
 replace u_dn_pio with nU_dn_pio
 replace u_dn_zdr with nU_dn_zdr
@@ -95,7 +96,6 @@ replace l_odb with nLODB
 replace osn_por with nOsn_por
 replace izn_por with nIzn_por
 replace r_rmj with cR_rmj
-replace u_d_pms with nU_d_pms
 
 select (nTArea)
 return
@@ -127,7 +127,6 @@ AADD(aDbf,{ "O_PRIH", "N", 12, 2 })
 AADD(aDbf,{ "U_OPOR", "N", 12, 2 })
 AADD(aDbf,{ "U_D_PIO", "N", 12, 2 })
 AADD(aDbf,{ "U_D_ZDR", "N", 12, 2 })
-AADD(aDbf,{ "U_D_DOD", "N", 12, 2 })
 AADD(aDbf,{ "U_D_NEZ", "N", 12, 2 })
 AADD(aDbf,{ "U_DN_PIO", "N", 12, 2 })
 AADD(aDbf,{ "U_DN_ZDR", "N", 12, 2 })
@@ -182,6 +181,7 @@ local cTP_bol := PADR("18;", 100)
 local cObracun := gObracun
 local cWinPrint := "E"
 local nOper := 1
+local cIsplSaberi := "D"
 
 // kreiraj pomocnu tabelu
 mip_tmp_tbl()
@@ -193,6 +193,7 @@ cGod := gGodina
 cPredNaz := SPACE(50)
 cPredJMB := SPACE(13)
 cPredSDJ := SPACE(20)
+dDatPodn := DATE()
 
 nPorGodina := 2011
 nBrZahtjeva := 1
@@ -214,7 +215,12 @@ RPar("x7",@cTp_bol)
 cPredJMB := IzFmkIni("Specif","MatBr","--",KUMPATH)
 cPredJMB := PADR(cPredJMB, 13)
 
-Box("#MIP OBRAZAC ZA RADNIKE", 17, 75)
+// period za tekuci mjesec od dana do dana
+dD_start := DATE()
+dD_end := DATE()
+_fix_d_per( cMj, cGod, @dD_start, @dD_end )
+
+Box("#MIP OBRAZAC ZA RADNIKE", 18, 75)
 
 @ m_x + 1, m_y + 2 SAY "Radne jedinice: " GET cRj PICT "@!S25"
 @ m_x + 2, m_y + 2 SAY "Za period:" GET cMj pict "99"
@@ -235,25 +241,28 @@ endif
 
 @ m_x + 8, m_y + 2 SAY "   Doprinos iz pio: " GET cDopr10 
 @ m_x + 8, col() + 2 SAY "na pio: " GET cDopr20
-
 @ m_x + 9, m_y + 2 SAY "   Doprinos iz zdr: " GET cDopr11
 @ m_x + 9, col() + 2 SAY "na zdr: " GET cDopr21
-
+@ m_x + 9, col() + 2 SAY "dod.dopr.na zdr: " GET cDopr2D PICT "@S10"
 @ m_x + 10, m_y + 2 SAY "   Doprinos iz nez: " GET cDopr12
 @ m_x + 10, col() + 2 SAY "na nez: " GET cDopr22
-
 @ m_x + 11, m_y + 2 SAY "Doprinos iz ukupni: " GET cDopr1X
-
-@ m_x + 12, m_y + 2 SAY " dod.doprinosi zdr: " GET cDoprDod PICT "@S15"
-@ m_x + 12, col() + 2 SAY "dod. na zdr: " GET cDopr2D PICT "@S15"
-
+@ m_x + 12, m_y + 2 SAY " dod.dopr. benef.: " GET cDoprDod PICT "@S30"
 @ m_x + 14, m_y + 2 SAY "Naziv preduzeca: " GET cPredNaz pict "@S30"
 @ m_x + 14, col()+1 SAY "JID: " GET cPredJMB
 @ m_x + 15, m_y + 2 SAY "Sifra djelatnosti: " GET cPredSDJ pict "@S20"
-
-@ m_x + 16, m_y + 2 SAY "Def.rj" GET cRJDef 
-
+@ m_x + 16, m_y + 2 SAY "Default RJ" GET cRJDef 
+@ m_x + 16, col() + 2 SAY "Sabrati isplate za isti mj ?" GET cIsplSaberi ;
+	VALID cIsplSaberi $ "DN" PICT "@!"
+@ m_x + 17, m_y + 2 SAY "Stampa/Export ?" GET cWinPrint PICT "@!" ;
+	VALID cWinPrint $ "ES"
 read
+
+if cWinPrint == "E"
+	@ m_x + 18, m_y + 2 SAY "Datum podnosenja:" GET dDatPodn
+read
+
+endif
 
 dPer := DATE()
 // daj period od - do
@@ -272,7 +281,17 @@ endif
 // staticke
 __mj := cMj
 __god := cGod
-__xml := 1
+
+if cWinPrint == "S"
+	__xml := 1
+else
+	__xml := 0
+endif
+
+// saberi isplate
+if cIsplSaberi == "D"
+	__ispl_s := 1
+endif
 
 // upisi vrijednosti
 select params
@@ -293,9 +312,305 @@ mip_fill_data( cRj, cRjDef, cGod, cMj, cRadnik, ;
 
 // stampa izvjestaja xml/oo3
 
-_xml_print()
+if __xml == 1
+	_xml_print()
+else
+	nBrZahtjeva := g_br_zaht()
+	_xml_export()
+	msgbeep("Obradjeno " + ALLTRIM(STR(nBrZahtjeva)) + " zahtjeva.")
+endif
 
 return
+
+
+// -------------------------------------------------------
+// vraca dStart i dEnd za tekuci mjesec
+// -------------------------------------------------------
+static function _fix_d_per( nMj, nGod, dStart, dEnd )
+local cTmp := ""
+
+cTmp := "01"
+cTmp += "."
+cTmp += PADL( ALLTRIM(STR(nMj)), 2, "0" )
+cTmp += "."
+cTmp += ALLTRIM( STR(nGod) )
+
+dStart := CTOD( cTmp )
+
+cTmp := g_day( nMj )
+cTmp += "."
+cTmp += PADL( ALLTRIM(STR(nMj)), 2, "0" )
+cTmp += "."
+cTmp += ALLTRIM( STR(nGod) )
+
+dEnd := CTOD( cTmp )
+
+return
+
+
+// ------------------------------------
+// header za export
+// ------------------------------------
+static function _xml_head()
+local cStr := '<?xml version="1.0" encoding="UTF-8"?><PaketniUvozObrazaca xmlns="urn:PaketniUvozObrazaca_V1_0.xsd">'
+
+xml_head( .t., cStr )
+
+return
+
+
+// ----------------------------------------
+// export xml-a
+// ----------------------------------------
+static function _xml_export()
+local cMsg
+
+if __xml == 1
+	return
+endif
+
+// napuni xml fajl
+_fill_e_xml()
+
+cMsg := "Export xml datoteke zavrsen. Datoteka se nalazi#"
+cMsg += "na lokaciji c:\export.xml#"
+cMsg += "Potrebno promjeniti naziv xml fajla u TIN.xml gdje je#"
+cMsg += "TIN id broj preduzeca, zatim zipovati fajl u TIN.zip."
+
+msgbeep( cMsg )
+
+return
+
+
+
+// --------------------------------------------
+// filuje xml fajl sa podacima za export
+// --------------------------------------------
+static function _fill_e_xml()
+local nTArea := SELECT()
+local nU_dn_pio
+local nU_dn_zdr
+local nU_dn_nez
+local nU_dn_dz
+local nU_prih
+local nU_dopr
+local nU_lodb
+local nU_porez
+
+// otvori xml za upis
+open_xml( "c:\export.xml" )
+
+// upisi header
+_xml_head()
+
+// ovo ne treba zato sto je u headeru sadrzan ovaj prvi sub-node !!!
+// <paketniuvozobrazaca>
+//xml_subnode("PaketniUvozObrazaca", .f.)
+
+// <podacioposlodavcu>
+xml_subnode("PodaciOPoslodavcu", .f. )
+
+ // naziv firme
+ xml_node( "JIBPoslodavca", ALLTRIM(cPredJmb) )
+ xml_node( "NazivPoslodavca", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+ xml_node( "BrojZahtjeva", STR( nBrZahtjeva ) )
+ xml_node( "DatumPodnosenja", xml_date( dDatPodn ) )
+
+xml_subnode("PodaciOPoslodavcu", .t. )
+
+select r_export
+set order to tag "1"
+go top
+
+nU_dn_pio := 0
+nU_dn_zdr := 0
+nU_dn_nez := 0
+nU_dn_dz := 0
+nU_prih := 0
+nU_dopr := 0
+nU_lodb := 0
+nU_porez := 0
+
+
+xml_subnode("Obrazac1023", .f.)
+
+// dio1
+xml_subnode("Dio1", .f.)
+	
+  xml_node("JibJmb", ALLTRIM(cPredJmb) )
+  xml_node("Naziv", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+  xml_node("DatumUpisa", xml_date(dDatPodn) )
+  xml_node("BrojUposlenih", STR( nBrZahtjeva ) )
+  xml_node("PeriodOd", xml_date( dD_start ) )
+  xml_node("PeriodDo", xml_date( dD_end ) )
+  xml_node("SifraDjelatnosti", ALLTRIM(cPredSDJ) )
+
+xml_subnode("Dio1", .t.)
+// dio1
+
+// dio2
+xml_subnode("Dio2", .f.)
+
+do while !EOF()
+	
+	// po radniku
+	cT_radnik := field->idradn
+	
+	// pronadji radnika u sifrarniku
+	select radn
+	seek cT_radnik
+
+	select r_export
+		
+	nCnt := 0
+
+	nR_sati := 0
+	nR_satib := 0
+	nR_satit := 0
+	nO_prih := 0
+	nBruto := 0
+	nU_opor := 0
+	nU_d_zdr := 0
+	nU_d_pio := 0
+	nU_d_nez := 0
+	nU_d_iz := 0
+	nU_d_pms := 0
+	nUm_prih := 0
+	nR_klo := 0
+	nL_odb := 0
+	nOsnPor := 0
+	nIznPor := 0
+	
+	do while !EOF() .and. field->idradn == cT_radnik
+		
+		cVr_ispl := field->vr_ispl
+		cR_jmb := field->r_jmb
+		cR_ime := field->r_ime
+		dD_ispl := field->d_isp
+
+		nR_sati += field->r_sati
+		nR_satib += field->r_satib
+		nR_satit += field->r_satit
+		nBruto += field->bruto
+		nO_prih += field->o_prih
+		nU_opor += field->u_opor
+		nU_d_zdr += field->u_d_zdr
+		nU_d_pio += field->u_d_pio
+		nU_d_nez += field->u_d_nez
+		nU_d_iz += field->u_d_iz
+		nU_d_pms += field->u_d_pms
+		nUm_prih += field->um_prih
+		nR_klo += field->r_klo
+		nL_odb += field->l_odb
+		nOsnPor += field->osn_por
+		nIznPor += field->izn_por
+		nR_stuv := field->r_stuv
+		cR_rmj := field->r_rmj
+		cR_opc := field->r_opc
+
+		nU_dn_pio += field->u_dn_pio
+		nU_dn_zdr += field->u_dn_zdr
+		nU_dn_nez += field->u_dn_pio
+		nU_dn_dz += field->u_dn_dz
+		nU_prih += field->u_opor
+		nU_dopr += field->u_d_iz
+		nU_lodb += field->l_odb
+		nU_porez += field->izn_por
+	
+		skip
+	enddo
+
+	xml_subnode("PodaciOPrihodima", .f.)
+
+	xml_node("VrstaIsplate", ;
+		strkzn( ALLTRIM(cVr_ispl), "8", "U" ))
+	xml_node("Jmb", ALLTRIM(cR_jmb) )
+	xml_node("ImePrezime", ;
+		strkzn( ALLTRIM(cR_ime), "8", "U" ))
+	xml_node("DatumIsplate", xml_date(dD_ispl) )
+	xml_node("RadniSati", ;
+		STR( nR_sati, 12, 2 ) ) 
+	xml_node("RadniSatiBolovanje", ;
+		STR( nR_satib, 12, 2 ) ) 
+	xml_node("BrutoPlaca", STR( nBruto, 12, 2 ) )
+	xml_node("KoristiIDrugiOporeziviPrihodi", ;
+		STR( nO_prih, 12, 2 ) )
+	xml_node("UkupanPrihod", ;
+		STR( nU_opor, 12, 2 ) )
+	xml_node("IznosPIO", ;
+		STR( nU_d_pio, 12, 2 ) )
+	xml_node("IznosZO", ;
+		STR( nU_d_zdr, 12, 2 ) )
+	xml_node("IznosNezaposlenost", ;
+		STR( nU_d_nez, 12, 2 ) )
+	xml_node("Doprinosi", STR( nU_d_iz , 12, 2 ) )
+	xml_node("PrihodUmanjenZaDoprinose", ;
+		STR( nUm_prih , 12, 2 ) )
+	xml_node("FaktorLicnogOdbitka", ;
+		STR( nR_klo, 12, 2 ) )
+	xml_node("IznosLicnogOdbitka", STR( nL_odb, 12, 2 ) )
+	xml_node("OsnovicaPoreza", STR( nOsnpor, 12, 2 ) )
+	xml_node("IznosPoreza", STR( nIznpor, 12, 2 ) )
+	xml_node("OpcinaPrebivalista", ALLTRIM( cR_opc ) )
+
+	cTmp := "false"
+
+	if nR_satit > 0
+		cTmp := "true"
+	
+	   // true or false
+	   xml_node("BeneficiraniStaz", ALLTRIM( cTmp ) )
+
+	   xml_node("RadniSatiUT", STR( nR_satit, 12, 2) )
+	   xml_node("StepenUvecanja", STR( nR_stuv, 12, 0 ) )
+	   xml_node("SifraRadnogMjestaUT", cR_rmj  )
+	   xml_node("DoprinosiPIOMIOzaUT", ;
+		STR( nU_d_pms, 12, 2)  )
+	
+	endif		
+		
+	xml_subnode("PodaciOPrihodima", .t.)
+	
+enddo
+
+xml_subnode("Dio2", .t.)
+// kraj dio2
+
+// dio3
+xml_subnode("Dio3", .f.)
+   xml_node("PIO", STR( nU_dn_pio, 12, 2) ) 
+   xml_node("ZO", STR( nU_dn_zdr, 12, 2) ) 
+   xml_node("OsiguranjeOdNezaposlenosti", STR( nU_dn_nez, 12, 2) ) 
+   xml_node("DodatniDoprinosiZO", STR( nU_dn_dz, 12, 2) ) 
+   xml_node("Prihod", STR( nU_prih, 12, 2) ) 
+   xml_node("Doprinosi", STR( nU_dopr, 12, 2) ) 
+   xml_node("LicniOdbici", STR( nU_lodb, 12, 2) ) 
+   xml_node("Porez", STR( nU_porez, 12, 2) ) 
+xml_subnode("Dio3", .t.)
+// dio3
+
+// dio4
+xml_subnode("Dio4IzjavaPoslodavca", .f.)
+xml_node("JibJmbPoslodavca", ALLTRIM(cPredJmb) )
+xml_node("DatumUnosa", xml_date( dDatPodn ) )
+xml_node("NazivPoslodavca", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+xml_subnode("Dio4IzjavaPoslodavca", .t.)
+// dio4
+
+cOperacija := "Prijava_od_strane_poreznog_obveznika"
+xml_subnode("Dokument", .f.)
+  xml_node("Operacija",  cOperacija )
+xml_subnode("Dokument", .t.)
+	
+
+xml_subnode("Obrazac1023", .t. )
+
+// zatvori <PaketniUvoz...>
+xml_subnode("PaketniUvozObrazaca", .t.)
+
+select (nTArea)
+return
+
 
 
 // --------------------------------------
@@ -357,17 +672,6 @@ cCmdLine := "start " + cOOStart + " " + cOOParam + " " + cOutput
 run &cCmdLine
 
 restore screen from cScreen
-
-return
-
-
-// ------------------------------------
-// header za export
-// ------------------------------------
-static function _xml_head()
-local cStr := '<?xml version="1.0" encoding="UTF-8"?><PaketniUvozObrazaca xmlns="urn:PaketniUvozObrazaca_V1_0.xsd">'
-
-xml_head( .t., cStr )
 
 return
 
@@ -461,7 +765,7 @@ do while !EOF()
 	nU_opor := 0
 	nU_d_pio := 0
 	nU_d_zdr := 0
-	nU_d_dod := 0
+	nU_d_pms := 0
 	nU_d_nez := 0
 	nU_d_iz := 0
 	nUm_prih := 0
@@ -469,7 +773,6 @@ do while !EOF()
 	nR_klo := 0
 	nOsn_por := 0
 	nIzn_por := 0
-	nU_d_pms := 0
 
 	// provrti obracune
 	do while !EOF() .and. field->idradn == cT_radnik
@@ -485,7 +788,6 @@ do while !EOF()
 		nU_d_pio += field->u_d_pio
 		nU_d_zdr += field->u_d_zdr
 		nU_d_nez += field->u_d_nez
-		nU_d_dod += field->u_d_dod
 		nU_d_iz += field->u_d_iz
 		nUm_prih += field->um_prih
 		nL_odb += field->l_odb
@@ -496,7 +798,7 @@ do while !EOF()
 
 		skip
 	enddo
-
+	
 	xml_node("d_isp", DTOC(dD_isp) )
 	xml_node("r_sati", STR( nR_sati, 12, 2 ) ) 
 	xml_node("r_satib", STR( nR_satiB, 12, 2 ) ) 
@@ -508,7 +810,7 @@ do while !EOF()
 	xml_node("u_d_pio", STR( nU_d_pio, 12, 2 ) )
 	xml_node("u_d_nez", STR( nU_d_nez, 12, 2 ) )
 	xml_node("u_d_zdr", STR( nU_d_zdr, 12, 2 ) )
-	xml_node("u_d_dod", STR( nU_d_dod, 12, 2 ) )
+	xml_node("u_d_pms", STR( nU_d_pms, 12, 2 ) )
 	xml_node("u_d_iz", STR( nU_d_iz, 12, 2 ) )
 	xml_node("um_prih", STR( nUm_prih, 12, 2 ) )
 	xml_node("r_klo", STR( nR_klo, 5, 2 ) )
@@ -516,7 +818,6 @@ do while !EOF()
 	xml_node("osn_por", STR( nOsn_por, 12, 2 ) )
 	xml_node("izn_por", STR( nIzn_por, 12, 2 ) )
 	xml_node("r_rmj", cR_rmj )
-	xml_node("u_d_pms", STR( nU_d_pms, 12, 2 ) )
 	
 	xml_subnode("radnik", .t.)
 		
@@ -576,6 +877,12 @@ do while !eof()
 		skip
 		loop
 	endif
+	
+	if ld_date( field->godina, field->mjesec ) > ;
+		ld_date( cGod, cMj )   
+		skip
+		loop
+	endif
 
 	cT_radnik := field->idradn
 	nGodina := field->godina
@@ -614,11 +921,10 @@ do while !eof()
 	nU_opor := 0
 	nU_d_pio := 0
 	nU_d_zdr := 0
-	nU_d_dod := 0
+	nU_dn_dz := 0
 	nU_d_nez := 0
 	nU_dn_pio := 0
 	nU_dn_zdr := 0
-	nU_dn_dz := 0
 	nU_dn_nez := 0
 	nU_d_iz := 0
 	nUm_prih := 0
@@ -645,8 +951,12 @@ do while !eof()
 			skip
 			loop
 		endif
-
-		altd()
+		
+		if ld_date( field->godina, field->mjesec ) > ;
+			ld_date( cGod, cMj ) 
+			skip
+			loop
+		endif
 
 		// radna jedinica
 		cRadJed := ld->idrj
@@ -728,28 +1038,6 @@ do while !eof()
 			nMBruto := min_bruto( nBruto, field->usati )
 		endif
 		
-		// ugovori o djelu
-		if cTipRada == "U" .and. cTrosk <> "N"
-			
-			nTrosk := ROUND2( nMBruto * (gUgTrosk / 100), gZaok2 )
-			
-			if lInRs == .t.
-				nTrosk := 0
-			endif
-			
-		endif
-
-		// autorski honorar
-		if cTipRada == "A" .and. cTrosk <> "N"
-			
-			nTrosk := ROUND2( nMBruto * (gAhTrosk / 100), gZaok2 )
-			
-			if lInRs == .t.
-				nTrosk := 0
-			endif
-			
-		endif
-
 		// ovo preskoci, nema ovdje GIP-a
 		if nMBruto <= 0
 			select ld
@@ -763,6 +1051,21 @@ do while !eof()
 			nBrDobra := bruto_osn( nPrDobra, cTipRada, nL_odb )
 		endif
 		
+		nBr_benef := 0
+
+		// beneficirani radnici
+   		if UBenefOsnovu()
+ 			// promjeni parametre za benef. primanja
+			cFFTmp := gBFForm
+			gBFForm := STRTRAN( gBFForm, "_", "" )
+ 	
+			nBr_Benef := bruto_osn( nNeto - ;
+				IF(!EMPTY(gBFForm),&gBFForm,0), ;
+				cTipRada, nL_odb )
+			// vrati parametre
+			gBFForm := cFFtmp
+   		endif
+ 
 		// ocitaj doprinose, njihove iznose
 		nDopr10 := get_dopr( cDopr10, cTipRada )
 		nDopr11 := get_dopr( cDopr11, cTipRada )
@@ -786,19 +1089,37 @@ do while !eof()
 		
 		// dodatni doprinosi iz 
 		if !EMPTY( cDoprDod )
+
 			aD_Dopr := TokToNiz( cDoprDod, ";" )
+			
 			for m:=1 to LEN(aD_dopr)
 				nDoprTmp := get_dopr( aD_dopr[m], cTipRada )
-				nU_d_dod += ROUND( nMBruto * nDoprTmp / 100, 4)
+				if "BENEF" $ dopr->naz
+					nU_d_pms += ;
+					  ROUND( nBr_benef * nDoprTmp / 100, 4)
+			
+				else
+					nU_d_pms += ;
+					  ROUND( nMBruto * nDoprTmp / 100, 4)
+				endif
+
 			next
 		endif
 	
 		// dodatni doprinosi na 
 		if !EMPTY( cDopr2D )
+			
 			aD2_Dopr := TokToNiz( cDopr2D, ";" )
+			
 			for c:=1 to LEN(aD2_dopr)
 				nDoprTmp := get_dopr( aD2_dopr[c], cTipRada )
-				nU_dn_dz += ROUND( nMBruto * nDoprTmp / 100, 4)
+				if "BENEF" $ dopr->naz
+					nU_dn_dz += ;
+					   ROUND( nBr_benef * nDoprTmp / 100, 4)
+				else
+					nU_dn_dz += ;
+					   ROUND( nMBruto * nDoprTmp / 100, 4)
+				endif
 			next
 		endif
 
@@ -876,7 +1197,7 @@ do while !eof()
 			nU_opor, ;
 			nU_d_pio, ;
 			nU_d_zdr, ;
-			nU_d_dod, ;
+			nU_d_pms, ;
 			nU_d_nez, ;
 			nU_d_iz, ;
 			nU_dn_pio, ;
@@ -888,8 +1209,7 @@ do while !eof()
 			nL_odb, ;
 			nPorOsn, ;
 			nPorez, ;
-			cR_rmj, ;
-			nU_d_pms )
+			cR_rmj )
 	
 		select ld
 		skip

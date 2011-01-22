@@ -388,7 +388,7 @@ return
 // ------------------------------------------
 // vraca koliko dana ima u mjesecu
 // ------------------------------------------
-static function g_day( nMonth )
+function g_day( nMonth )
 local cDay := "31"
 do case
 	case nMonth = 1
@@ -457,7 +457,7 @@ return cOperacija
 // -----------------------------------------------
 // vraca broj zahtjeva
 // -----------------------------------------------
-static function g_br_zaht()
+function g_br_zaht()
 local nTArea := SELECT()
 local cT_radnik 
 local nCnt
