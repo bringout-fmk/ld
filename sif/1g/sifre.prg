@@ -101,6 +101,11 @@ if radn->(FIELDPOS("AKTIVAN")) <> 0
 	AADD(ImeKol, { "Aktivan?",{|| aktivan}, "aktivan" } )
 endif
 
+if radn->(FIELDPOS("BEN_SRMJ")) <> 0
+	AADD(ImeKol, { "Benef.sifra",{|| ben_srmj}, "ben_srmj" } )
+endif
+
+
 Kol:={}
 
 for i:=1 to LEN(ImeKol)

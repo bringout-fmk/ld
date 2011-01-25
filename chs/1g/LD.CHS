@@ -36,6 +36,7 @@ A SP_KOEF   N 5 2
 A OPOR      C 1 0
 A TROSK     C 1 0
 A AKTIVAN   C 1 0
+A BEN_SRMJ  C 20 0
 
 *_RADN
 A KMINRAD   N 5 2

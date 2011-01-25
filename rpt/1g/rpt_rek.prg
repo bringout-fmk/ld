@@ -1873,13 +1873,47 @@ nBO:=0
 return
 
 
-
+// ------------------------------------------
+// da li radnik ide u benef osnovu
+// ------------------------------------------
 function UBenefOsnovu()
 if radn->k4 == "BF"
 	return .t.
 endif
 
 return .f.
+
+
+// ----------------------------------------
+// vraca benef stepen za radnika
+// ----------------------------------------
+function BenefStepen()
+local nRet := 0
+local nTArea := SELECT()
+local cTmp
+
+select radn
+
+cTmp := ALLTRIM( radn->k3 )
+
+if EMPTY( cTmp )
+	select (nTArea)
+	return ""
+endif
+
+O_KBENEF
+select kbenef
+go top
+seek cTmp
+
+if FOUND()
+	nRet := field->iznos
+endif
+
+select (nTArea)
+
+return nRet
+
 
 
 

@@ -562,8 +562,8 @@ do while !EOF()
 	   xml_node("BeneficiraniStaz", ALLTRIM( cTmp ) )
 
 	   xml_node("RadniSatiUT", STR( nR_satit, 12, 2) )
-	   xml_node("StepenUvecanja", STR( nR_stuv, 12, 0 ) )
-	   xml_node("SifraRadnogMjestaUT", cR_rmj  )
+	   xml_node("StepenUvecanja", STR( nR_stuv, 12, 0 ) + "/12")
+	   xml_node("SifraRadnogMjestaUT", ALLTRIM( cR_rmj )  )
 	   xml_node("DoprinosiPIOMIOzaUT", ;
 		STR( nU_d_pms, 12, 2)  )
 	
@@ -759,6 +759,7 @@ do while !EOF()
 	nR_satib := 0
 	nR_satit := 0
 	cStuv := ""
+	nR_StUv := 0
 	cR_rmj := ""
 	nBruto := 0
 	nO_prih := 0
@@ -782,6 +783,8 @@ do while !EOF()
 		nR_sati += field->r_sati
 		nR_satit += field->r_satit
 		nR_satib += field->r_satib
+		nR_stuv := field->r_stuv
+		cR_rmj := field->r_rmj
 		nBruto += field->bruto
 		nO_prih += field->o_prih
 		nU_opor += field->u_opor
@@ -799,6 +802,8 @@ do while !EOF()
 		skip
 	enddo
 	
+	cStUv := ALLTRIM(STR(nR_Stuv,12,0)) + "/12"
+
 	xml_node("d_isp", DTOC(dD_isp) )
 	xml_node("r_sati", STR( nR_sati, 12, 2 ) ) 
 	xml_node("r_satib", STR( nR_satiB, 12, 2 ) ) 
@@ -1055,7 +1060,18 @@ do while !eof()
 
 		// beneficirani radnici
    		if UBenefOsnovu()
- 			// promjeni parametre za benef. primanja
+ 			
+			// sati beneficiranog su sati redovnog rada
+			nSatiT := nSati
+
+			// benef.stepen
+			nStUv := benefstepen()
+		
+			if radn->(FIELDPOS("BEN_SRMJ")) <> 0
+				cR_rmj := ALLTRIM( radn->ben_srmj )
+			endif
+
+			// promjeni parametre za benef. primanja
 			cFFTmp := gBFForm
 			gBFForm := STRTRAN( gBFForm, "_", "" )
  	
