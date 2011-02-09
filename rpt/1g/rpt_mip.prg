@@ -182,6 +182,7 @@ local cObracun := gObracun
 local cWinPrint := "E"
 local nOper := 1
 local cIsplSaberi := "D"
+local cNule := "N"
 
 // kreiraj pomocnu tabelu
 mip_tmp_tbl()
@@ -251,9 +252,11 @@ endif
 @ m_x + 14, m_y + 2 SAY "Naziv preduzeca: " GET cPredNaz pict "@S30"
 @ m_x + 14, col()+1 SAY "JID: " GET cPredJMB
 @ m_x + 15, m_y + 2 SAY "Sifra djelatnosti: " GET cPredSDJ pict "@S20"
-@ m_x + 16, m_y + 2 SAY "Default RJ" GET cRJDef 
+@ m_x + 16, m_y + 2 SAY "Def.RJ" GET cRJDef 
 @ m_x + 16, col() + 2 SAY "Sabrati isplate za isti mj ?" GET cIsplSaberi ;
 	VALID cIsplSaberi $ "DN" PICT "@!"
+@ m_x + 16, col() + 2 SAY "obracun 0 ?" GET cNule ;
+	VALID cNule $ "DN" PICT "@!"
 @ m_x + 17, m_y + 2 SAY "Stampa/Export ?" GET cWinPrint PICT "@!" ;
 	VALID cWinPrint $ "ES"
 read
@@ -308,7 +311,8 @@ mip_sort( cRj, cGod, cMj, cRadnik, cObracun )
 // nafiluj podatke obracuna
 mip_fill_data( cRj, cRjDef, cGod, cMj, cRadnik, ;
 	cPrimDobra, cTP_off, cTP_bol, cDopr10, cDopr11, cDopr12, ;
-	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun )
+	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun, ;
+	cNule )
 
 // stampa izvjestaja xml/oo3
 
@@ -412,7 +416,7 @@ xml_subnode("PodaciOPoslodavcu", .f. )
 
  // naziv firme
  xml_node( "JIBPoslodavca", ALLTRIM(cPredJmb) )
- xml_node( "NazivPoslodavca", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+ xml_node( "NazivPoslodavca", strkznutf8( ALLTRIM(cPredNaz), "8" ) )
  xml_node( "BrojZahtjeva", STR( nBrZahtjeva ) )
  xml_node( "DatumPodnosenja", xml_date( dDatPodn ) )
 
@@ -510,7 +514,7 @@ do while !EOF()
 
 		nU_dn_pio += field->u_dn_pio
 		nU_dn_zdr += field->u_dn_zdr
-		nU_dn_nez += field->u_dn_pio
+		nU_dn_nez += field->u_dn_nez
 		nU_dn_dz += field->u_dn_dz
 		nU_prih += field->u_opor
 		nU_dopr += field->u_d_iz
@@ -639,6 +643,10 @@ if __xml == 0
 	return
 endif
 
+if FERASE(cOutput) <> 0
+	//
+endif
+
 // napuni xml fajl
 _fill_xml()
 
@@ -662,6 +670,11 @@ cCmdLine := cJavaStart + " " + cJODRep + " " + ;
 run &cCmdLine
 
 clear screen
+
+if !FILE(cOutput)
+	msgbeep("greska pri kreiranju izlaznog fajla !")
+	return
+endif
 
 cOOStart := '"' + ALLTRIM( gOOPath ) + ALLTRIM( gOOWriter ) + '"'
 cOOParam := ""
@@ -690,7 +703,7 @@ xml_head()
 xml_subnode("mip", .f.)
 
 // naziv firme
-xml_node( "p_naz", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+xml_node( "p_naz", strkznutf8( ALLTRIM(cPredNaz), "8" ) )
 xml_node( "p_jmb", ALLTRIM(cPredJmb) )
 xml_node( "p_sdj", ALLTRIM(cPredSDJ) )
 xml_node( "p_per", g_por_per() )
@@ -854,7 +867,7 @@ return cRet
 // ---------------------------------------------------------
 function mip_fill_data( cRj, cRjDef, cGod, cMj, ;
 	cRadnik, cPrimDobra, cTP_off, cTP_bol, cDopr10, cDopr11, cDopr12, ;
-	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun )
+	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun, cNule )
 
 
 local i
@@ -1044,7 +1057,7 @@ do while !eof()
 		endif
 		
 		// ovo preskoci, nema ovdje GIP-a
-		if nMBruto <= 0
+		if nMBruto <= 0 .and. cNule == "N"
 			select ld
 			skip
 			loop

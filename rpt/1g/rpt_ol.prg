@@ -525,6 +525,8 @@ if __xml == 0
 	return
 endif
 
+ferase(cOutput)
+
 // napuni xml fajl
 _fill_xml( cTip )
 
@@ -555,6 +557,11 @@ cCmdLine := cJavaStart + " " + cJODRep + " " + ;
 run &cCmdLine
 
 clear screen
+
+if !FILE(cOutput)
+	msgbeep("greska pri kreiranju izlaznog fajla !")
+	return
+endif
 
 cOOStart := '"' + ALLTRIM( gOOPath ) + ALLTRIM( gOOWriter ) + '"'
 cOOParam := ""
@@ -616,7 +623,7 @@ xml_subnode("PodaciOPoslodavcu", .f. )
 
  // naziv firme
  xml_node( "JIBPoslodavca", ALLTRIM(cPredJmb) )
- xml_node( "NazivPoslodavca", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+ xml_node( "NazivPoslodavca", strkznutf8( ALLTRIM(cPredNaz), "8" ) )
  xml_node( "BrojZahtjeva", STR( nBrZahtjeva ) )
  xml_node( "DatumPodnosenja", xml_date( dDatPodnosenja ) )
 
@@ -842,7 +849,7 @@ xml_head()
 xml_subnode("rpt", .f.)
 
 // naziv firme
-xml_node( "p_naz", strkzn( ALLTRIM(cPredNaz), "8", "U" ) )
+xml_node( "p_naz", strkznutf8( ALLTRIM(cPredNaz), "8" ) )
 xml_node( "p_adr", strkzn( ALLTRIM(cPredAdr), "8", "U" ) )
 xml_node( "p_jmb", ALLTRIM(cPredJmb) )
 xml_node( "p_per", g_por_per() )
