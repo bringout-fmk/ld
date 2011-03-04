@@ -281,8 +281,8 @@ endif
 @ m_x + 12, col()+1 SAY "JID: " GET cPredJMB
 @ m_x + 13, m_y + 2 SAY "Adresa: " GET cPredAdr pict "@S30"
 
-@ m_x + 15, m_y + 2 SAY "(1) OLP-1021 / (2) GIP-1022 / (3) AOP:" GET cTipRpt ;
-	VALID cTipRpt $ "123" 
+@ m_x + 15, m_y + 2 SAY "(1) OLP-1021 / (2) GIP-1022 / (3,4) AOP:" GET cTipRpt ;
+	VALID cTipRpt $ "1234" 
 
 @ m_x + 15, col() + 2 SAY "def.rj" GET cRJDef 
 
@@ -537,6 +537,8 @@ do case
 		cOdtName := "ld_gip.odt"
 	case cTip == "3"
 		cOdtName := "ld_aop.odt"
+	case cTip == "4"
+		cOdtName := "ld_aop2.odt"
 endcase
 
 save screen to cScreen
@@ -906,7 +908,7 @@ do while !EOF()
 		replace field->dop_uk with field->dop_pio + ;
 			field->dop_nez + field->dop_zdr
 
-		if cTip == "3"
+		if cTip $ "3#4"
 			replace field->osn_por with ;
 				( field->mbruto - field->dop_zdr )
 		else
@@ -927,7 +929,7 @@ do while !EOF()
 			replace field->izn_por with 0
 		endif
 
-		if cTip == "3"
+		if cTip $ "3#4"
 			replace field->neto with ;
 				((field->mbruto - field->dop_zdr) - ;
 				field->izn_por ) + field->trosk
@@ -937,7 +939,8 @@ do while !EOF()
 				field->izn_por
 		endif
 	
-		if cTip <> "3" .and. field->tiprada $ " #I#N#" 
+		if (cTip <> "3" .or. cTip <> "4" ) .and. ;
+			field->tiprada $ " #I#N#" 
 			replace field->neto with ;
 				min_neto( field->neto , field->sati )
 		endif
@@ -1136,7 +1139,7 @@ do while !eof()
 	select radn
 	seek cT_radnik
 	
-	if cRptTip == "3"
+	if cRptTip $ "3#4"
 		if ( cTipRada $ " #I#N")
 			select ld
 			skip
@@ -1191,7 +1194,7 @@ do while !eof()
 		cTrosk := radn->trosk
 		lInRS := in_rs(radn->idopsst, radn->idopsrad) 
 	
-		if cRptTip == "3"
+		if cRptTip $ "3#4"
 			if ( cTipRada $ " #I#N")
 				skip
 				loop
@@ -1288,7 +1291,7 @@ do while !eof()
 			
 		endif
 
-		if cRptTip == "3"
+		if cRptTip $ "3#4"
 			// ovo je bruto iznos
 			nMBruto := ( nBruto - nTrosk )
 		endif
@@ -1324,7 +1327,7 @@ do while !eof()
 		//nDoprIz := u_dopr_iz( nMBruto, cTipRada )
 		
 		// osnovica za porez
-		if cRptTip == "3"
+		if cRptTip $ "3#4"
 			nPorOsn := ( nMBruto - nIDopr1X ) - nL_odb
 		else
 			nPorOsn := ( nBruto - nIDopr1X ) - nL_odb
@@ -1342,7 +1345,7 @@ do while !eof()
 		select ld
 	
 		// na ruke je
-		if cRptTip == "3"
+		if cRptTip $ "3#4"
 			nNaRuke := ROUND( (nMBruto - nIDopr1X - nPorez) ;
 				+ nTrosk, 2 ) 
 		else
