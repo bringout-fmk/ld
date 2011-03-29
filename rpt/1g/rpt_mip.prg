@@ -1152,9 +1152,9 @@ do while !eof()
 			next
 		endif
 
-		nUM_prih := ( nMBruto - nU_d_iz )
+		nUM_prih := ( nBruto - nU_d_iz )
 
-		nPorOsn := ( nMBruto - nU_d_iz ) - nL_odb
+		nPorOsn := ( nBruto - nU_d_iz ) - nL_odb
 
 		// ako je neoporeziv radnik, nema poreza
 		if !radn_oporeziv( radn->id, ld->idrj ) .or. ;
@@ -1168,7 +1168,7 @@ do while !eof()
 		select ld
 	
 		// na ruke je
-		nNaRuke := ROUND( nMBruto - nU_d_iz - nPorez + nTrosk, 2 )
+		nNaRuke := ROUND( nBruto - nU_d_iz - nPorez + nTrosk, 2 )
 
 		nIsplata := nNaRuke
 
@@ -1178,7 +1178,7 @@ do while !eof()
 		endif
 
 		nO_prih := nBrDobra
-		nU_opor := ( nMBruto - nBrDobra )
+		nU_opor := ( nBruto - nBrDobra )
 
 		cVrstaIspl := ""
 		dDatIspl := DATE()
