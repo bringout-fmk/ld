@@ -658,6 +658,7 @@ AADD(aDBf,{ 'TIPRADA'             , 'C' ,   1 ,  2 })
 AADD(aDBf,{ 'OPOR'                , 'C' ,   1 ,  2 })
 AADD(aDBf,{ 'TROSK'               , 'C' ,   1 ,  2 })
 AADD(aDBf,{ 'VAROBR'              , 'C' ,   1 ,  0 })
+AADD(aDBf,{ 'V_ISPL'              , 'C' ,   2 ,  0 })
 
 if !file(KUMPATH+'LD.DBF')
 	DBCREATE2(KUMPATH+'LD.DBF',aDbf)

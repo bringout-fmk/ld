@@ -321,7 +321,7 @@ if __xml == 1
 else
 	nBrZahtjeva := g_br_zaht()
 	_xml_export()
-	msgbeep("Obradjeno " + ALLTRIM(STR(nBrZahtjeva)) + " zahtjeva.")
+	msgbeep("Obradjeno " + ALLTRIM(STR(nBrZahtjeva)) + " radnika.")
 endif
 
 return
@@ -417,7 +417,7 @@ xml_subnode("PodaciOPoslodavcu", .f. )
  // naziv firme
  xml_node( "JIBPoslodavca", ALLTRIM(cPredJmb) )
  xml_node( "NazivPoslodavca", strkznutf8( ALLTRIM(cPredNaz), "8" ) )
- xml_node( "BrojZahtjeva", STR( nBrZahtjeva ) )
+ xml_node( "BrojZahtjeva", STR( 1 ) )
  xml_node( "DatumPodnosenja", xml_date( dDatPodn ) )
 
 xml_subnode("PodaciOPoslodavcu", .t. )
@@ -1185,7 +1185,7 @@ do while !eof()
 		cObr := " "
 		nMjIspl := 0
 		cIsplZa := ""
-		cVrstaIspl := ""
+		cVrstaIspl := "1"
 		
 		if lViseObr
 			cObr := field->obr
@@ -1206,6 +1206,12 @@ do while !eof()
 					@cIsplZa, @cVrstaIspl )
 		endif
 
+		// vrstu isplate cu uzeti iz LD->V_ISPL
+		if EMPTY( field->v_ispl )
+			cVrstaIspl := "1"
+		else
+			cVrstaIspl := ALLTRIM( field->v_ispl )
+		endif
 
 		_ins_tbl( cT_radnik, ;
 			cRadJed, ;
