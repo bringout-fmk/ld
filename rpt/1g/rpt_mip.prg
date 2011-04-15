@@ -178,6 +178,7 @@ local cDopr2D := SPACE(100)
 local cDoprDod := SPACE(100)
 local cTP_off := SPACE(100)
 local cTP_bol := PADR("18;", 100)
+local cBolPreko := PADR("18;24;", 100)
 local cObracun := gObracun
 local cWinPrint := "E"
 local nOper := 1
@@ -212,6 +213,7 @@ RPar("i1",@cPredNaz)
 RPar("x9",@cPredSDJ)  
 RPar("x8",@cDoprDod)  
 RPar("x7",@cTp_bol)  
+RPar("x6",@cBolPreko)  
 
 cPredJMB := IzFmkIni("Specif","MatBr","--",KUMPATH)
 cPredJMB := PADR(cPredJMB, 13)
@@ -221,7 +223,7 @@ dD_start := DATE()
 dD_end := DATE()
 _fix_d_per( cMj, cGod, @dD_start, @dD_end )
 
-Box("#MIP OBRAZAC ZA RADNIKE", 18, 75)
+Box("#MIP OBRAZAC ZA RADNIKE", 20, 75)
 
 @ m_x + 1, m_y + 2 SAY "Radne jedinice: " GET cRj PICT "@!S25"
 @ m_x + 2, m_y + 2 SAY "Za period:" GET cMj pict "99"
@@ -239,30 +241,32 @@ endif
 	GET cTP_off pict "@S30"
 @ m_x + 7, m_y + 2 SAY "Izdvojena primanja (bolovanje):" ;
 	GET cTP_bol pict "@S30"
+@ m_x + 8, m_y + 2 SAY "Sifre bolovanja preko 42 dana:" ;
+	GET cBolPreko pict "@S30"
 
-@ m_x + 8, m_y + 2 SAY "   Doprinos iz pio: " GET cDopr10 
-@ m_x + 8, col() + 2 SAY "na pio: " GET cDopr20
-@ m_x + 9, m_y + 2 SAY "   Doprinos iz zdr: " GET cDopr11
-@ m_x + 9, col() + 2 SAY "na zdr: " GET cDopr21
-@ m_x + 9, col() + 2 SAY "dod.dopr.na zdr: " GET cDopr2D PICT "@S10"
-@ m_x + 10, m_y + 2 SAY "   Doprinos iz nez: " GET cDopr12
-@ m_x + 10, col() + 2 SAY "na nez: " GET cDopr22
-@ m_x + 11, m_y + 2 SAY "Doprinos iz ukupni: " GET cDopr1X
-@ m_x + 12, m_y + 2 SAY " dod.dopr. benef.: " GET cDoprDod PICT "@S30"
-@ m_x + 14, m_y + 2 SAY "Naziv preduzeca: " GET cPredNaz pict "@S30"
-@ m_x + 14, col()+1 SAY "JID: " GET cPredJMB
-@ m_x + 15, m_y + 2 SAY "Sifra djelatnosti: " GET cPredSDJ pict "@S20"
-@ m_x + 16, m_y + 2 SAY "Def.RJ" GET cRJDef 
-@ m_x + 16, col() + 2 SAY "Sabrati isplate za isti mj ?" GET cIsplSaberi ;
+@ m_x + 9, m_y + 2 SAY "   Doprinos iz pio: " GET cDopr10 
+@ m_x + 9, col() + 2 SAY "na pio: " GET cDopr20
+@ m_x + 10, m_y + 2 SAY "   Doprinos iz zdr: " GET cDopr11
+@ m_x + 10, col() + 2 SAY "na zdr: " GET cDopr21
+@ m_x + 10, col() + 2 SAY "dod.dopr.na zdr: " GET cDopr2D PICT "@S10"
+@ m_x + 11, m_y + 2 SAY "   Doprinos iz nez: " GET cDopr12
+@ m_x + 11, col() + 2 SAY "na nez: " GET cDopr22
+@ m_x + 12, m_y + 2 SAY "Doprinos iz ukupni: " GET cDopr1X
+@ m_x + 13, m_y + 2 SAY " dod.dopr. benef.: " GET cDoprDod PICT "@S30"
+@ m_x + 15, m_y + 2 SAY "Naziv preduzeca: " GET cPredNaz pict "@S30"
+@ m_x + 15, col()+1 SAY "JID: " GET cPredJMB
+@ m_x + 16, m_y + 2 SAY "Sifra djelatnosti: " GET cPredSDJ pict "@S20"
+@ m_x + 17, m_y + 2 SAY "Def.RJ" GET cRJDef 
+@ m_x + 17, col() + 2 SAY "Sabrati isplate za isti mj ?" GET cIsplSaberi ;
 	VALID cIsplSaberi $ "DN" PICT "@!"
-@ m_x + 16, col() + 2 SAY "obracun 0 ?" GET cNule ;
+@ m_x + 17, col() + 2 SAY "obracun 0 ?" GET cNule ;
 	VALID cNule $ "DN" PICT "@!"
-@ m_x + 17, m_y + 2 SAY "Stampa/Export ?" GET cWinPrint PICT "@!" ;
+@ m_x + 18, m_y + 2 SAY "Stampa/Export ?" GET cWinPrint PICT "@!" ;
 	VALID cWinPrint $ "ES"
 read
 
 if cWinPrint == "E"
-	@ m_x + 18, m_y + 2 SAY "Datum podnosenja:" GET dDatPodn
+	@ m_x + 19, m_y + 2 SAY "Datum podnosenja:" GET dDatPodn
 read
 
 endif
@@ -302,6 +306,7 @@ WPar("i1", cPredNaz)
 WPar("x9", cPredSDJ)  
 WPar("x8", cDoprDod)  
 WPar("x7", cTP_bol)  
+WPar("x6", cBolPreko)  
 
 select ld
 
@@ -310,7 +315,7 @@ mip_sort( cRj, cGod, cMj, cRadnik, cObracun )
 
 // nafiluj podatke obracuna
 mip_fill_data( cRj, cRjDef, cGod, cMj, cRadnik, ;
-	cPrimDobra, cTP_off, cTP_bol, cDopr10, cDopr11, cDopr12, ;
+	cPrimDobra, cTP_off, cTP_bol, cBolPreko, cDopr10, cDopr11, cDopr12, ;
 	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun, ;
 	cNule )
 
@@ -555,24 +560,25 @@ do while !EOF()
 	xml_node("IznosLicnogOdbitka", STR( nL_odb, 12, 2 ) )
 	xml_node("OsnovicaPoreza", STR( nOsnpor, 12, 2 ) )
 	xml_node("IznosPoreza", STR( nIznpor, 12, 2 ) )
-	xml_node("OpcinaPrebivalista", ALLTRIM( cR_opc ) )
 
 	cTmp := "false"
 
 	if nR_satit > 0
 		cTmp := "true"
 	
-	   // true or false
-	   xml_node("BeneficiraniStaz", ALLTRIM( cTmp ) )
-
 	   xml_node("RadniSatiUT", STR( nR_satit, 12, 2) )
-	   xml_node("StepenUvecanja", STR( nR_stuv, 12, 0 ) + "/12")
+	   xml_node("StepenUvecanja", STR( nR_stuv, 12, 0 ) )
 	   xml_node("SifraRadnogMjestaUT", ALLTRIM( cR_rmj )  )
 	   xml_node("DoprinosiPIOMIOzaUT", ;
 		STR( nU_d_pms, 12, 2)  )
 	
+	   // true or false
+	   xml_node("BeneficiraniStaz", ALLTRIM( cTmp ) )
+
 	endif		
 		
+	xml_node("OpcinaPrebivalista", ALLTRIM( cR_opc ) )
+	
 	xml_subnode("PodaciOPrihodima", .t.)
 	
 enddo
@@ -866,12 +872,14 @@ return cRet
 // napuni podatke u pomocnu tabelu za izvjestaj
 // ---------------------------------------------------------
 function mip_fill_data( cRj, cRjDef, cGod, cMj, ;
-	cRadnik, cPrimDobra, cTP_off, cTP_bol, cDopr10, cDopr11, cDopr12, ;
+	cRadnik, cPrimDobra, cTP_off, cTP_bol, cBolPreko, cDopr10, ;
+	cDopr11, cDopr12, ;
 	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun, cNule )
 
 
 local i
 local b
+local c
 local t
 local o
 local cPom
@@ -1001,6 +1009,9 @@ do while !eof()
 		ParObr( ld->mjesec, ld->godina, IF(lViseObr, ld->obr,), ;
 				ld->idrj )
 		
+		// puni fond sati za ovaj mjesec
+		nFondSati := parobr->k1
+
 		nPrDobra := 0
 		nTP_off := 0
 
@@ -1033,12 +1044,43 @@ do while !eof()
        			nTP_bol += IF( cPom $ cTP_bol, LD->&("S"+cPom), 0 )
      		   next
    		endif
+		
+		// provjeri da li ima bolovanja preko 42 dana
+		// ili trudnickog bolovanja
+		
+		lImaBPreko := .f.
+
+		if !EMPTY( cBolPreko ) 
+     		   
+		   for c:=1 to 60
+       			cPom := IF( c>9, STR(c,2), "0"+STR(c,1) )
+       			if ld->( FIELDPOS( "S" + cPom ) ) <= 0
+         			EXIT
+       			endif
+       			
+			if cPom $ cBolPreko .and. ;
+				LD->&("S"+cPom) <> 0
+				
+				lImaBPreko := .t.
+				exit
+			endif
+
+     		   next
+
+   		endif
 	
 		nNeto := field->uneto
 		nKLO := g_klo( field->ulicodb )
 		nL_odb := field->ulicodb
 		nSati := field->usati
 		nSatiB := nTP_bol
+		
+		if lImaBPreko
+			// uzmi puni fond sati
+			nSati := nFondSati
+			nSatiB := nFondSati
+		endif
+		
 		nSatiT := 0
 		
 		// tipovi primanja koji ne ulaze u bruto osnovicu
