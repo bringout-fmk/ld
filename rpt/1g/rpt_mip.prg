@@ -56,7 +56,7 @@ static function _ins_tbl( cRadnik, cIdRj, nGodina, nMjesec, ;
 		nU_d_pio, nU_d_zdr, nU_d_pms, nU_d_nez, nU_d_iz, ;
 		nU_dn_pio, nU_dn_zdr, nU_dn_nez, nU_dn_dz, ;
 		nUm_prih, nKLO, nLODB, nOsn_por, nIzn_por, ;
-		cR_rmj )
+		cR_rmj, lBolPreko )
 
 local nTArea := SELECT()
 
@@ -96,6 +96,13 @@ replace l_odb with nLODB
 replace osn_por with nOsn_por
 replace izn_por with nIzn_por
 replace r_rmj with cR_rmj
+
+// bolovanje preko 42 dana ili slicno
+if lBolPreko = .t.
+	replace bol_preko with "1"
+else
+	replace bol_preko with "0"
+endif
 
 select (nTArea)
 return
@@ -140,12 +147,13 @@ AADD(aDbf,{ "OSN_POR", "N", 12, 2 })
 AADD(aDbf,{ "IZN_POR", "N", 12, 2 })
 AADD(aDbf,{ "R_RMJ", "C", 20, 0 })
 AADD(aDbf,{ "U_D_PMS", "N", 12, 2 })
+AADD(aDbf,{ "BOL_PREKO", "C", 1, 0 })
 
 t_exp_create( aDbf )
 
 O_R_EXP
 // index on ......
-index on idradn + STR(godina,4) + STR(mjesec,2) tag "1"
+index on idradn + STR(godina,4) + STR(mjesec,2) + vr_ispl tag "1"
 
 return
 
@@ -184,6 +192,7 @@ local cWinPrint := "E"
 local nOper := 1
 local cIsplSaberi := "D"
 local cNule := "N"
+local cMipView := "N"
 
 // kreiraj pomocnu tabelu
 mip_tmp_tbl()
@@ -218,10 +227,6 @@ RPar("x6",@cBolPreko)
 cPredJMB := IzFmkIni("Specif","MatBr","--",KUMPATH)
 cPredJMB := PADR(cPredJMB, 13)
 
-// period za tekuci mjesec od dana do dana
-dD_start := DATE()
-dD_end := DATE()
-_fix_d_per( cMj, cGod, @dD_start, @dD_end )
 
 Box("#MIP OBRAZAC ZA RADNIKE", 20, 75)
 
@@ -261,6 +266,8 @@ endif
 	VALID cIsplSaberi $ "DN" PICT "@!"
 @ m_x + 17, col() + 2 SAY "obracun 0 ?" GET cNule ;
 	VALID cNule $ "DN" PICT "@!"
+@ m_x + 17, col() + 2 SAY "pregled ?" GET cMipView ;
+	VALID cMipView $ "DN" PICT "@!"
 @ m_x + 18, m_y + 2 SAY "Stampa/Export ?" GET cWinPrint PICT "@!" ;
 	VALID cWinPrint $ "ES"
 read
@@ -270,6 +277,11 @@ if cWinPrint == "E"
 read
 
 endif
+
+// period za tekuci mjesec od dana do dana
+dD_start := DATE()
+dD_end := DATE()
+_fix_d_per( cMj, cGod, @dD_start, @dD_end )
 
 dPer := DATE()
 // daj period od - do
@@ -319,8 +331,12 @@ mip_fill_data( cRj, cRjDef, cGod, cMj, cRadnik, ;
 	cDopr1X, cDopr20, cDopr21, cDopr22, cDoprDod, cDopr2D, cObracun, ;
 	cNule )
 
-// stampa izvjestaja xml/oo3
+// pregled tabele prije exporta
+if cMipView == "D"
+	mip_view()
+endif
 
+// stampa izvjestaja xml/oo3
 if __xml == 1
 	_xml_print()
 else
@@ -496,7 +512,7 @@ do while !EOF()
 		cR_jmb := field->r_jmb
 		cR_ime := field->r_ime
 		dD_ispl := field->d_isp
-
+		
 		nR_sati += field->r_sati
 		nR_satib += field->r_satib
 		nR_satit += field->r_satit
@@ -525,7 +541,16 @@ do while !EOF()
 		nU_dopr += field->u_d_iz
 		nU_lodb += field->l_odb
 		nU_porez += field->izn_por
-	
+		
+		// ako je isti radnik kao i ranije
+		// i bolovanje preko 42 dana
+		// uzmi puni fond sati sa stavke bolovanja
+		// bol_preko = "1"
+		if field->bol_preko == "1"
+			nR_sati := field->r_sati
+			nR_satib := field->r_satib
+		endif
+		
 		skip
 	enddo
 
@@ -1286,7 +1311,8 @@ do while !eof()
 			nL_odb, ;
 			nPorOsn, ;
 			nPorez, ;
-			cR_rmj )
+			cR_rmj, ;
+			lImaBPreko )
 	
 		select ld
 		skip
