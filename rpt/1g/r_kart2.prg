@@ -115,7 +115,7 @@ for i:=1 to cLDPolja
 			//endif
 			
 			? cLMSK + tippr->id + "-" + ;
-				PADR( cTPNAZ, LEN( tippr->naz ) ), tippr->opis
+				PADR( cTPNAZ, LEN( tippr->naz ) ), sh_tp_opis( tippr->id, radn->id )
 			nC1:=pcol()
 			
 			if tippr->fiksan $ "DN"

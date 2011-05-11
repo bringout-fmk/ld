@@ -2,7 +2,6 @@
 
 
 function ShowKreditor(cKreditor)
-*{
 local nArr
 nArr:=SELECT()
 
@@ -20,29 +19,24 @@ endif
 
 select (nArr)
 return
-*}
 
 
 function ShowPPDef()
-*{
 
 ? SPACE(5) + Lokal("Obracunski radnik:") + SPACE(35) + Lokal("SEF SLUZBE:")
 ?
 ? SPACE(5) + "__________________" + SPACE(35) + "__________________"
 
 return
-*}
 
 
 function ShowPPFakultet()
-*{
  
 ? SPACE(5) + Lokal("Likvidator:       ") + SPACE(35) + Lokal("Dekan fakulteta:  ")
 ?
 ? SPACE(5) + "__________________" + SPACE(35) + "__________________"
 
 return
-*}
 
 
 /*! \fn ShiwHiredFromTo(dHiredFrom, dHiredTo)
@@ -277,4 +271,45 @@ function Decimala(cPic)
  LOCAL nPom := ATTOKEN( ALLTRIM(cPic) , "." , 2 )
 RETURN IF( nPom<1 , 0 ,  LEN( SUBSTR( ALLTRIM(cPic) , nPom ) )  )
 
+
+// ------------------------------------
+// vraca opis tipa primanja
+// ------------------------------------
+function sh_tp_opis( cIdTipPr, cRadn  )
+local cRet
+
+cRet := tippr->opis
+
+if "##" $ cRet
+	cRet := _opis_param( cRet, cRadn )	
+endif
+
+return cRet
+
+
+// ---------------------------------------
+// vraca opis iz parametra
+// ---------------------------------------
+static function _opis_param( cRet, cRadn )
+local cVal := ""
+local nTArea := SELECT()
+private cF_Tmp
+
+// opis je ##S9##
+// prvo ukini znakove "##"
+cF_Tmp := STRTRAN( cRet, "#", "" )
+
+// ako ne postoji polje...
+if radn->(FIELDPOS(cF_Tmp)) = 0
+	return cVal
+endif
+
+select radn
+seek cRadn
+
+select (nTArea)
+
+cVal := radn->(&cF_Tmp)
+
+return cVal
 

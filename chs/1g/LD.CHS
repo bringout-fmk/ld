@@ -37,6 +37,15 @@ A OPOR      C 1 0
 A TROSK     C 1 0
 A AKTIVAN   C 1 0
 A BEN_SRMJ  C 20 0
+A S1 C 10 0
+A S2 C 10 0
+A S3 C 10 0
+A S4 C 10 0
+A S5 C 10 0
+A S6 C 10 0
+A S7 C 10 0
+A S8 C 10 0
+A S9 C 10 0
 
 *_RADN
 A KMINRAD   N 5 2
@@ -51,6 +60,15 @@ A N2        N  12 2
 A N3        N  12 2
 A KLO       N 5 2
 A TIPRADA   C 1 0
+A S1 C 10 0
+A S2 C 10 0
+A S3 C 10 0
+A S4 C 10 0
+A S5 C 10 0
+A S6 C 10 0
+A S7 C 10 0
+A S8 C 10 0
+A S9 C 10 0
 
 *LD
 A BRBOD    N 10 0
