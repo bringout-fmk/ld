@@ -32,7 +32,11 @@ else
 	AADD(opcexe, {|| MsgBeep(cZabrana)})
 endif
 
+AADD(opc, "5. specifikacija kredita po kreditorima")
+AADD(opcexe, {|| sp_kredita()})
+
 Menu_SC("kred")
+
 return
 
 *}

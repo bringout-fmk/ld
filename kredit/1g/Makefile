@@ -3,7 +3,7 @@ MODUL=ld_1kre
 
 SRCDOSROOT=$(BASEDOS)\\fmk\\ld\\kredit\\1g\\
 
-PRGS=krediti.prg mnu_kred.prg
+PRGS=krediti.prg mnu_kred.prg sp_kred.prg
 CS=
 ASMS=
 
