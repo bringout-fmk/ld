@@ -148,6 +148,7 @@ AADD(aDbf,{ "IZN_POR", "N", 12, 2 })
 AADD(aDbf,{ "R_RMJ", "C", 20, 0 })
 AADD(aDbf,{ "U_D_PMS", "N", 12, 2 })
 AADD(aDbf,{ "BOL_PREKO", "C", 1, 0 })
+AADD(aDbf,{ "PRINT", "C", 1, 0 })
 
 t_exp_create( aDbf )
 
@@ -478,6 +479,11 @@ xml_subnode("Dio2", .f.)
 
 do while !EOF()
 	
+	if field->print == "X"
+		skip 
+		loop
+	endif
+
 	// po radniku
 	cT_radnik := field->idradn
 	
@@ -508,6 +514,11 @@ do while !EOF()
 	
 	do while !EOF() .and. field->idradn == cT_radnik
 		
+		if field->print == "X"
+			skip 
+			loop
+		endif
+	
 		cVr_ispl := field->vr_ispl
 		cR_jmb := field->r_jmb
 		cR_ime := field->r_ime
@@ -756,6 +767,11 @@ go top
 // saberi totale...
 do while !EOF()
 	
+	if field->print == "X"
+		skip
+		loop
+	endif
+
 	++ nZaposl
 	nU_prih += field->u_opor
 	nU_dopr += field->u_d_iz
@@ -788,6 +804,11 @@ nCnt := 0
 
 do while !EOF()
 	
+	if field->print == "X"
+		skip 
+		loop
+	endif
+
 	// po radniku
 	cT_radnik := field->idradn
 	
@@ -822,6 +843,11 @@ do while !EOF()
 	// provrti obracune
 	do while !EOF() .and. field->idradn == cT_radnik
 		
+		if field->print == "X"
+			skip 
+			loop
+		endif
+	
 		// za obrazac i treba zadnja isplata
 		dD_isp := field->d_isp
 		nR_sati += field->r_sati

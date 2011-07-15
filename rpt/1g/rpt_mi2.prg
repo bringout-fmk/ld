@@ -21,6 +21,7 @@ AADD(ImeKol,{ "Opcina", {|| PADR( r_opc, 3 ) } })
 AADD(ImeKol,{ "Sati", {|| r_sati } })
 AADD(ImeKol,{ "Sati b.", {|| r_satib } })
 AADD(ImeKol,{ "Bruto", {|| bruto } })
+AADD(ImeKol,{ "print", {|| print }, "print", {|| .t.}, {|| .t.} })
 
 Kol:={}
 for i:=1 to LEN(ImeKol)
@@ -31,7 +32,7 @@ Box(,20,77)
 
 @ m_x+17,m_y+2 SAY "<F2> Ispravi stavku                           "
 @ m_x+18,m_y+2 SAY "<c-T> Brisi stavku     "
-@ m_x+19,m_y+2 SAY ""
+@ m_x+19,m_y+2 SAY "<SPACE> markiraj stavku za stampu"
 @ m_x+20,m_y+2 SAY "               "
 
 ObjDbedit("R_EXPORT",20,77,{|| EdMIP()},"","Pregled tabele za gen.mip obrasca", , , , {|| if(bol_preko == "1", .t., .f.) } , 4)
@@ -61,6 +62,16 @@ do case
 	case Ch==K_F2 
 		// ispravi stavku
 		return EditItem()
+
+	case Ch==ASC(" ") .or. Ch==K_ENTER
+		
+		if EMPTY( field->print )
+			replace field->print with "X"
+		else
+			replace field->print with ""
+		endif
+
+		return DE_REFRESH
 
 endcase
 
