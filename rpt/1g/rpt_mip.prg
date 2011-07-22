@@ -558,8 +558,14 @@ do while !EOF()
 		// uzmi puni fond sati sa stavke bolovanja
 		// bol_preko = "1"
 		if field->bol_preko == "1"
+			
 			nR_sati := field->r_sati
 			nR_satib := field->r_satib
+			
+			if nR_satiT <> 0
+				nR_satiT := field->r_sati
+			endif
+
 		endif
 		
 		skip

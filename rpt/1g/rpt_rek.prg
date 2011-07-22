@@ -1898,7 +1898,7 @@ cTmp := ALLTRIM( radn->k3 )
 
 if EMPTY( cTmp )
 	select (nTArea)
-	return ""
+	return 0
 endif
 
 O_KBENEF
