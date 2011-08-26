@@ -1027,6 +1027,8 @@ do while !eof()
 	cR_opc := ""
 	cR_rmj := ""
 
+	altd()
+
 	do while !EOF() .and. field->idradn == cT_radnik 
 	
 		if ld_date( field->godina, field->mjesec ) < ;
@@ -1071,6 +1073,7 @@ do while !eof()
 
 		nPrDobra := 0
 		nTP_off := 0
+		nTP_bol := 0
 
    		if !EMPTY( cPrimDobra ) 
      		   for t:=1 to 60
