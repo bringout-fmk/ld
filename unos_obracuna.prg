@@ -303,8 +303,10 @@ Box(,21,77)
 	read
 	
 	if lRadniSati
+		nTArea := SELECT()
 		nSatiPreth := 0
 		nSatiPreth := FillRadSati( cIdRadn, _radSat )
+		select (nTArea)
 	endif
 	
 	if gSihtarica=="D"
@@ -388,6 +390,8 @@ if gVarObracun == "2"
 		
 		select tippr
 		seek cTp
+		
+		select (nTArea)
 		
 		if tippr->uneto == "D"
 			_nakn_opor += &(xVar)

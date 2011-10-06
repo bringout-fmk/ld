@@ -245,8 +245,6 @@ if IzFmkIni("LD","Rekap_ZaIsplatuRasclanitiPoTekRacunima","N",KUMPATH)=="D" .and
 	PoTekRacunima()
 endif
 
-nstr()
-
 ? cTpLine
 
 nPosY := 60
@@ -265,8 +263,6 @@ if !lGusto
 endif
 
 ProizvTP()
-
-nstr()
 
 if cRTipRada $ "A#U"
 
@@ -303,7 +299,6 @@ cLinija := cDoprLine
 // obracunaj i prikazi doprinose
 obr_doprinos( @nDopr, @nDopr2, cRTipRada )
 
-nstr()
 
 // oporezivi dohodak
 nTOporDoh := nURadn_bo - nUDoprIz
@@ -319,7 +314,6 @@ nTOporDoh := nURadn_bo - nUDoprIz
 ? Lokal("4. LICNI ODBICI UKUPNO")
 @ prow(), 60 SAY nULOdbitak PICT gPici
 
-nstr()
 
 nPorOsn := nURadn_bo - nUDoprIz - nULOdbitak
 
@@ -328,6 +322,7 @@ nPorOsn := nURadn_bo - nUDoprIz - nULOdbitak
 ? Lokal("5. OSNOVICA ZA OBRACUN POREZA NA PLATU (1-2-4)")
 @ prow(), 60 SAY nPorOsn PICT gPici
 ? cMainLine
+
 
 private nPor
 private nPor2 
@@ -486,7 +481,7 @@ return
 
 
 static function nstr()
-if prow() > 52 + gpStranica
+if prow() > 64 + gpStranica
 	FF
 endif
 return

@@ -114,3 +114,151 @@ cLine += SPACE(1)
 cLine += REPLICATE("-",18)
 return cLine
 
+
+
+// ----------------------------
+// Porezi i Doprinosi Iz Sezone
+// ---------------------------------------------------------------------
+// Ova procedura ispituje da li je za izracunavanje poreza i doprinosa
+// u izvjestaju potrebno koristiti sifrarnike iz sezone. Ako se ustanovi
+// da ovi sifrarnici postoje u sezoni 'MMGGGG' podrazumijeva se da njih
+// treba koristiti za izvjestaj. U tom slucaju zatvaraju se postojeci
+// sifrarnici POR i DOPR iz radnog podrucja, a umjesto njih otvaraju se
+// sezonski.
+// ---------------------------------------------------------------------
+// cG - izvjestajna godina, cM - izvjestajni mjesec
+// ---------------------------------------------------------------------
+// Ukoliko izvjestaj koristi baze POR i/ili DOPR, one moraju biti
+// otvorene prije pokretanje ove procedure.
+// Ovu proceduru najbolje je pozivati odmah nakon upita za izvjestajnu
+// godinu i mjesec (prije toga nema svrhe), a prije glavne izvjestajne
+// petlje.
+// ---------------------------------------------------------------------
+function PoDoIzSez( cG, cM )
+local nArr := SELECT()
+local cPath
+local aSez
+local i
+local cPom
+local lPor
+local lDopr
+local cPorDir
+local cDoprDir
+
+if ( cG == nil .or. cM == nil )
+	return
+endif
+
+if VALTYPE(cG) == "N"
+	cG := STR(cG, 4, 0)
+endif
+
+if VALTYPE(cM) == "N"
+	cM := PADL(ALLTRIM(STR(cM)), 2, "0")
+endif
+
+altd()
+
+cPath := SIFPATH
+aSez := ASezona2( cPath, cG )
+
+if LEN( aSez ) < 1
+	return
+endif
+
+lPor := .f.
+lDopr := .f.
+cPorDir := ""
+cDoprDir := ""
+
+for i:=1 to LEN(aSez)
+	cPom := TRIM(aSez[i, 1])
+    	if LEFT(cPom, 2) >= cM
+      		if FILE(cpath+cPom+"\POR.DBF")
+        		lPor     := .t.
+        		cPorDir  := cPom
+      		endif
+      		if FILE(cpath+cPom+"\DOPR.DBF")
+        		lDopr    := .t.
+        		cDoprDir := cPom
+      		endif
+    	else
+      		exit
+    	endif
+next
+
+if lPor
+	SELECT (F_POR)
+	USE
+    	USE (cPath+cPorDir+"\POR")
+	SET ORDER TO TAG "ID"
+	
+	if reccount() = 0
+		// ako je sifrarnik prazan, vrati se na 
+		// tekuci
+		select F_POR
+		use
+		O_POR
+	endif
+
+endif
+
+if lDopr
+	SELECT (F_DOPR)
+	USE
+    	USE (cPath+cDoprDir+"\DOPR") 
+	SET ORDER TO TAG "ID"
+	if reccount() = 0
+		// ako je sifrarnik prazan, vrati se na 
+		// tekuci
+		select F_DOPR
+		use
+		O_DOPR
+	endif
+
+endif
+
+select (nArr)
+return
+
+
+
+function ASezona2( cPath, cG, cFajl)
+local aSez
+local i
+local cPom
+  
+if cFajl == NIL
+	cFajl := ""
+endif
+
+aSez := DIRECTORY(cPath+"*.","DV")
+
+for i:=LEN(aSez) to 1 step -1
+	if aSez[i,1]=="." .or. aSez[i,1]==".."
+      		ADEL(aSez,i)
+      		ASIZE(aSez,LEN(aSez)-1)
+    	endif
+next
+
+for i:=LEN(aSez) to 1 step -1
+	cPom := TRIM(aSez[i,1])
+    	if LEN(cPom)<>6 .or. RIGHT(cPom,4)<>cG .or.;
+       		!EMPTY(cFajl) .and. !FILE(cPath+cPom+"\"+cFajl)
+      		ADEL(aSez,i)
+      		ASIZE(aSez,LEN(aSez)-1)
+    	endif
+next
+ASORT( aSez ,,, { |x,y| x[1] > y[1] } )
+return aSez
+
+
+function Cijelih(cPic)
+ LOCAL nPom := ATTOKEN( ALLTRIM(cPic) , "." , 2 ) - 2
+RETURN IF( nPom<1 , LEN(ALLTRIM(cPic)) , nPom )
+
+function Decimala(cPic)
+ LOCAL nPom := ATTOKEN( ALLTRIM(cPic) , "." , 2 )
+RETURN IF( nPom<1 , 0 ,  LEN( SUBSTR( ALLTRIM(cPic) , nPom ) )  )
+
+

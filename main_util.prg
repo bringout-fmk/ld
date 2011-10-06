@@ -348,10 +348,26 @@ return cPrn
 function min_bruto( nBruto, nSati )
 local nRet
 local nMBO
+local nParSati
+local nTmpSati
 
-nMBO := ROUND2( nSati * parobr->m_br_sat, gZaok2 )
+// sati iz parametara obracuna
+nParSati := parobr->k1
 
-nRet := MAX( nBruto, nMBO )
+// puno radno vrijeme ili rad na 4 sata
+if (nSati = nParSati) .or. (nParSati/2 = nSati) .or. (radn->k1 == "M")
+	
+	nTmpSati := nSati
+	
+	if radn->k1 == "M"
+		nTmpSati := nSati * 2
+	endif
+
+	nMBO := ROUND2( nTmpSati * parobr->m_br_sat, gZaok2 )
+	nRet := MAX( nBruto, nMBO )
+else
+	nRet := nBruto
+endif
 
 return nRet
 
@@ -363,10 +379,26 @@ return nRet
 function min_neto( nNeto, nSati )
 local nRet
 local nMNO
+local nParSati
+local nTmpSati
 
-nMNO := ROUND2( nSati * parobr->m_net_sat, gZaok2 )
+// sati iz parametara obracuna
+nParSati := parobr->k1
 
-nRet := MAX( nNeto, nMNO )
+// ako je rad puni ili rad na 4 sata
+if (nParSati = nSati) .or. (nParSati/2 = nSati) .or. (radn->k1 == "M")
+
+	nTmpSati := nSati
+
+	if radn->k1 == "M"
+		nTmpSati := nSati * 2
+	endif
+
+	nMNO := ROUND2( nTmpSati * parobr->m_net_sat, gZaok2 )
+	nRet := MAX( nNeto, nMNO )
+else
+	nRet := nNeto
+endif
 
 return nRet
 

@@ -1,6 +1,6 @@
 #include "ld.ch"
 
-static DUZ_STRANA := 64
+static DUZ_STRANA := 70
 
 // -------------------------------------------------
 // nova varijanta kartica plate
@@ -86,51 +86,69 @@ for i:=1 to cLDPolja
 			// je: REDOVAN RAD BOD #RADN->N1 -> naci RADN->N1
 			// i ispisati REDOVAN RAD BOD 12.0
 			
-			nDJ:=at("#",tippr->naz)
-			cTPNaz:=tippr->naz
+			nDJ := AT( "#", tippr->naz )
+			cDJ := RIGHT( ALLTRIM(tippr->naz), nDJ + 1 )
+			cTPNaz := tippr->naz
 			
-			if nDJ <> 0
-				
-				RSati:=_s&cPom
-				
-				nRSTmp := bruto_osn( _i&cPom, cRTipRada, ;
-					nLicOdbitak )
+			// NEPOTREBNO, ALI IPAK OSTAVLJAM 'KOD'
 
-				@ prow(),60+LEN(cLMSK) SAY nRsTmp pict gpici
-				@ prow()+1,0 SAY Lokal("Odbici od bruta: ")
+			//if nDJ <> 0
 				
-				@ prow(), pcol()+48 SAY "-" + ;
-					ALLTRIM(STR(( nRSTmp -_i&cPom)))
+			//	RSati:=_s&cPom
+				
+			//	nRSTmp := bruto_osn( _i&cPom, cRTipRada, ;
+			//		nLicOdbitak )
 
-				if type(cPom)="C"
-					cTPNaz := LEFT(tippr->naz,nDJ-1) + &nPom
-				elseif type(cPom)="N"
-					cTPNAZ := LEFT(tippr->naz,nDJ-1) + ;
-						alltrim(str( &cPom ))
-				endif
-			endif
+			//	@ prow(),60+LEN(cLMSK) SAY nRsTmp pict gpici
+			//	@ prow()+1,0 SAY Lokal("Odbici od bruta: ")
+				
+			//	@ prow(), pcol()+48 SAY "-" + ;
+			//		ALLTRIM(STR(( nRSTmp -_i&cPom)))
+
+			//	if type( cDJ ) = "C"
+			//		cTPNaz := LEFT( tippr->naz, nDJ-1 ) + ;
+			//			&cDJ
+			//	elseif type( cDJ ) = "N"
+			//		cTPNAZ := LEFT( tippr->naz, nDJ-1 ) + ;
+			//			alltrim(str( &cDJ ))
+			//	endif
+			//endif
 			
-			? cLMSK+tippr->id+"-"+padr(cTPNAZ,len(tippr->naz)),tippr->opis
+			? cLMSK + tippr->id + "-" + ;
+				PADR( cTPNAZ, LEN( tippr->naz ) ), tippr->opis
 			nC1:=pcol()
 			
 			if tippr->fiksan $ "DN"
 				
-				@ prow(),pcol()+8 SAY _s&cPom  pict gpics
+				@ prow(),pcol()+8 SAY _s&cPom pict gpics
 				?? " s"
+				
+				nPom := _calc_tpr( _i&cPom )
+				@ prow(),60+LEN(cLMSK) say nPom pict gpici
+
 				
 				if tippr->id=="01" .and. lRadniSati
 					
-					nRRSati:=_s&cPom
-					
-					@ prow(),60+LEN(cLMSK) SAY _i&cPom * parobr->k3/100 pict gpici
-					@ prow()+1,0 SAY Lokal("Odbici od bruta: ")
-					@ prow(), pcol()+48 SAY "-" + ALLTRIM(STR((_i&cPom * (parobr->k3)/100)-_i&cPom))
-				else
-					
-					nPom := _calc_tpr( _i&cPom )
-					
-					@ prow(),60+LEN(cLMSK) say nPom pict gpici
+					nRRSati := _s&cPom
+				
 				endif
+
+				// UKIDA SE, ALI OSTAVLJAM 'KOD'
+
+				//	nRSTmp := bruto_osn( _i&cPom, ;
+				//		cRTipRada, ;
+				//		nLicOdbitak )
+	
+				//	@ prow(),60+LEN(cLMSK) SAY nRSTmp pict gpici
+				//	@ prow()+1,0 SAY Lokal("Odbici od bruta: ")
+				//	@ prow(), pcol()+48 SAY "-" + ;
+				//		ALLTRIM(STR(nRSTmp - _i&cPom))
+				//else
+					
+				//	nPom := _calc_tpr( _i&cPom )
+					
+				//	@ prow(),60+LEN(cLMSK) say nPom pict gpici
+				//endif
 			
 			elseif tippr->fiksan=="P"
 				
@@ -298,7 +316,7 @@ endif
 
 if lRadniSati
 	? Lokal("NAPOMENA: Ostaje da se plati iz preraspodjele radnog vremena ")
-	?? ALLTRIM(STR((ld->radsat)-nRRSati))  + Lokal(" sati.")
+	?? ALLTRIM(STR((ld->radsat) - nRRSati))  + Lokal(" sati.")
 	? Lokal("          Uplaceno za tekuci mjesec: " + " sati.")
 	? Lokal("          Ostatak predhodnih obracuna: ") + GetStatusRSati(cIdRadn) + SPACE(1) + Lokal("sati")
 	?
@@ -361,8 +379,6 @@ if gPrBruto $ "D#X"
 	
 	IF lSkrivena
 		? cMainLine
-	ELSE
-		?
 	ENDIF
 	
 	// razrada doprinosa ....
@@ -476,7 +492,7 @@ if gPrBruto $ "D#X"
 		
 		endif
 		
-		if !lSkrivena .and. prow()>57+gPStranica
+		if !lSkrivena .and. prow()>64+gPStranica
 			FF
 		endif
 		
@@ -603,7 +619,7 @@ if gPrBruto $ "D#X"
 
 	? cMainLine
 
-	if !lSkrivena .and. prow()>55+gPStranica
+	if !lSkrivena .and. prow() > 64 + gPStranica
 		FF
 	endif
 

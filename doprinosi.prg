@@ -106,8 +106,8 @@ endif
 
 do while !eof()
 
-	if prow()>55+gpStranica
-     		FF
+	if prow()>64+gpStranica
+     		//FF
   	endif
 
   	// ako je BENEF i ako je osnova 0 preskoci ovaj doprinos
@@ -239,8 +239,8 @@ do while !eof()
         			
 				skip
         			
-				if prow()>62+gPStranica
-					FF
+				if prow()>64+gPStranica
+					//FF
 				endif
       			enddo 
 			
@@ -364,8 +364,8 @@ do while !eof()
 
   	skip
   	
-	if prow()>56+gPStranica
-		FF
+	if prow()>64+gPStranica
+		//FF
 	endif
 	
 enddo

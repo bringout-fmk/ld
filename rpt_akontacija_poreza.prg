@@ -597,7 +597,6 @@ do while !eof() .and. field->godina = cGodina .and. ;
 
 	cT_radnik := field->idradn
 
-	// ako nije to taj radnik
 	if !EMPTY( cRadnik )
 		if cT_radnik <> cRadnik
 			skip
