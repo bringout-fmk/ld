@@ -31,6 +31,11 @@ if _chk_sif == .t.
 	f18_sif_data( @_a_sif, @_a_ctrl )
 endif
 
+O_RADN
+select radn
+set order to tag "ID"
+f18_sif_check( @_a_sif, @_a_ctrl )
+
 // provjeri ld podatke
 f18_ld_data( @_a_data, @_a_ctrl )
 
