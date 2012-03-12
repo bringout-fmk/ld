@@ -60,12 +60,12 @@ Box(, 2, 60 )
 
 do while !EOF()
 	
-	_firma := field->idfirma
+	_firma := field->idrj
 	_mjesec := field->mjesec
 	_godina := field->godina
 	_radnik := field->idradn
-	_stavka := _firma + ", " + _godina + ", " + ;
-		_mjesec + ", " + _radnik
+	_stavka := _firma + ", " + STR(_godina,4) + ", " + ;
+		STR(_mjesec,2) + ", " + _radnik
 
 	if EMPTY( _godina )
 		skip
@@ -77,6 +77,8 @@ do while !EOF()
 	// kontrolni broj
 	++ _n_c_stavke
 	_n_c_iznos += ( field->uneto + field->i01 )
+
+	skip
 
 enddo
 
