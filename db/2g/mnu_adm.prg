@@ -23,6 +23,8 @@ AADD(opc, "1. instalacija db-a ")
 AADD(opcexe, {|| goModul:oDataBase:install()})
 AADD(opc, "2. security")
 AADD(opcexe, {|| MnuSecMain()})
+AADD(opc, "3. pregled podataka za F18")
+AADD(opcexe, {|| f18_test_data()})
 
 Menu_SC("adm")
 
