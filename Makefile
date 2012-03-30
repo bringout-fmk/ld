@@ -13,6 +13,7 @@ liball:
 	make -C porkart
 	make -C ahon
 	make -C por
+	make -C siht
 	make -C 1g exe
 	
 cleanall:	
@@ -28,6 +29,7 @@ cleanall:
 	make -C ahon clean
 	make -C porkart clean
 	make -C por clean
+	make -C siht clean
 	make -C 1g clean
 
 ld:   cleanall  liball
