@@ -22,6 +22,7 @@ static __djl_broj
 static __op_jmb
 static __op_ime
 
+
 // ------------------------------------------
 // obrazac JS3400
 // ------------------------------------------
@@ -80,14 +81,14 @@ private cHistory:=" "
 private aHistory:={}
 
 RPar("i1",@cPredNaz)
-RPar("i2",@cPredAdr)
-RPar("i3",@cPredJMB)
-RPar("i4",@cPredOpc)
-RPar("i5",@cPredTel)
-RPar("i6",@cPredEml)
-RPar("i7",@cDjlBroj)
-RPar("i8",@cOpJmb)
-RPar("i9",@cOpIme)
+RPar("j2",@cPredAdr)
+RPar("j3",@cPredJMB)
+RPar("j4",@cPredOpc)
+RPar("j5",@cPredTel)
+RPar("j6",@cPredEml)
+RPar("j7",@cDjlBroj)
+RPar("j8",@cOpJmb)
+RPar("j9",@cOpIme)
 
 
 Box("#JS-3400", 22, 75)
@@ -180,14 +181,14 @@ __op_ime := cOpIme
 // upisi parametre...
 select params
 WPar("i1",cPredNaz)
-WPar("i2",cPredAdr)
-WPar("i3",cPredJMB)
-WPar("i4",cPredOpc)
-WPar("i5",cPredTel)
-WPar("i6",cPredEml)
-WPar("i7",cDjlBroj)
-WPar("i8",cOpJmb)
-WPar("i9",cOpIme)
+WPar("j2",cPredAdr)
+WPar("j3",cPredJMB)
+WPar("j4",cPredOpc)
+WPar("j5",cPredTel)
+WPar("j6",cPredEml)
+WPar("j7",cDjlBroj)
+WPar("j8",cOpJmb)
+WPar("j9",cOpIme)
 
 select ld
 
@@ -340,17 +341,17 @@ xml_head()
 xml_subnode("rpt", .f.)
 
 // naziv firme
-xml_node( "p_naz", to_xml_encoding( ALLTRIM(cPredNaz) ) )
-xml_node( "p_adr", to_xml_encoding( ALLTRIM(cPredAdr) ) )
+xml_node( "p_naz", strkznutf8( ALLTRIM(cPredNaz), "8" ) )
+xml_node( "p_adr", strkznutf8( ALLTRIM(cPredAdr), "8" ) )
 xml_node( "p_jmb", ALLTRIM(cPredJmb) )
 xml_node( "p_opc", ALLTRIM(cPredOpc) )
 xml_node( "p_tel", ALLTRIM(cPredTel) )
-xml_node( "p_eml", ALLTRIM(cPredEml) )
+xml_node( "p_eml", strkznutf8( ALLTRIM(cPredEml), "8" ) )
 xml_node( "p_per", g_por_per() )
 xml_node( "datum", DTOC( __datum ) )
-xml_node( "pod_ime", to_xml_encoding( ALLTRIM( __op_ime ) ) )
-xml_node( "pod_jmb", to_xml_encoding( ALLTRIM( __op_jmb ) ) )
-xml_node( "dj_broj", to_xml_encoding( ALLTRIM( __djl_broj ) ) )
+xml_node( "pod_ime", strkznutf8( ALLTRIM( __op_ime ), "8" ) )
+xml_node( "pod_jmb", strkznutf8( ALLTRIM( __op_jmb ), "8" ) )
+xml_node( "dj_broj", strkznutf8( ALLTRIM( __djl_broj ), "8" ) )
 
 select r_export
 set order to tag "1"
@@ -414,9 +415,9 @@ do while !EOF()
     // subnode radnik
     xml_subnode("radnik", .f.)
 
-      xml_node("ime", to_xml_encoding( ALLTRIM(radn->ime) + ;
+      xml_node("ime", strkznutf8( ALLTRIM(radn->ime) + ;
         " (" + ALLTRIM(radn->imerod) + ;
-        ") " + ALLTRIM(radn->naz) ) )
+        ") " + ALLTRIM(radn->naz), "8" ) )
 
       xml_node("os_od", ALLTRIM( g_osig( nOsig_od, "1" ) ) )
       xml_node("os_do", ALLTRIM( g_osig( nOsig_do, "2" ) ) )
