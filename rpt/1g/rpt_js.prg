@@ -74,16 +74,21 @@ dDatPodnosenja := DATE()
 // otvori tabele
 ol_o_tbl()
 
-// upisi parametre...
-//cPredNaz := HB_UTF8TOSTR( fetch_metric( "obracun_plata_preduzece_naziv", NIL, cPredNaz ) )
-//cPredAdr := HB_UTF8TOSTR( fetch_metric( "obracun_plata_preduzece_adresa", NIL, cPredAdr ) )
-//cPredJMB := HB_UTF8TOSTR( fetch_metric( "obracun_plata_preduzece_id_broj", NIL, cPredJMB ) )
-//cPredOpc := HB_UTF8TOSTR( fetch_metric( "obracun_plata_preduzece_opcina", NIL, cPredOpc ) )
-//cPredTel := HB_UTF8TOSTR( fetch_metric( "obracun_plata_preduzece_telefon", NIL, cPredTel ) )
-//cPredEml := HB_UTF8TOSTR( fetch_metric( "obracun_plata_preduzece_email", NIL, cPredEml ) )
-//cDjlBroj := HB_UTF8TOSTR( fetch_metric( "obracun_plata_js_obrazac_djelovodni_broj", NIL, cDjlBroj ) )
-//cOpJmb := HB_UTF8TOSTR( fetch_metric( "obracun_plata_js_obrazac_op_jmb", NIL, cOpJmb ) )
-//cOpIme := HB_UTF8TOSTR( fetch_metric( "obracun_plata_js_obrazac_op_ime", NIL, cOpIme ) )
+select params
+private cSection:="4"
+private cHistory:=" "
+private aHistory:={}
+
+RPar("i1",@cPredNaz)
+RPar("i2",@cPredAdr)
+RPar("i3",@cPredJMB)
+RPar("i4",@cPredOpc)
+RPar("i5",@cPredTel)
+RPar("i6",@cPredEml)
+RPar("i7",@cDjlBroj)
+RPar("i8",@cOpJmb)
+RPar("i9",@cOpIme)
+
 
 Box("#JS-3400", 22, 75)
 
@@ -173,15 +178,16 @@ __op_jmb := cOpJmb
 __op_ime := cOpIme
 
 // upisi parametre...
-//set_metric( "obracun_plata_preduzece_naziv", NIL, cPredNaz )
-//set_metric( "obracun_plata_preduzece_adresa", NIL, cPredAdr )
-//set_metric( "obracun_plata_preduzece_id_broj", NIL, cPredJMB )
-//set_metric( "obracun_plata_preduzece_opcina", NIL, cPredOpc ) 
-//set_metric( "obracun_plata_preduzece_telefon", NIL, cPredTel )
-//set_metric( "obracun_plata_preduzece_email", NIL, cPredEml ) 
-//set_metric( "obracun_plata_js_obrazac_djelovodni_broj", NIL, cDjlBroj )
-//set_metric( "obracun_plata_js_obrazac_op_jmb", NIL, cOpJmb ) 
-//set_metric( "obracun_plata_js_obrazac_op_ime", NIL, cOpIme ) 
+select params
+WPar("i1",cPredNaz)
+WPar("i2",cPredAdr)
+WPar("i3",cPredJMB)
+WPar("i4",cPredOpc)
+WPar("i5",cPredTel)
+WPar("i6",cPredEml)
+WPar("i7",cDjlBroj)
+WPar("i8",cOpJmb)
+WPar("i9",cOpIme)
 
 select ld
 

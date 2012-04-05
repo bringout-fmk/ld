@@ -206,6 +206,7 @@ local nOper := 1
 local cIsplSaberi := "D"
 local cNule := "N"
 local cMipView := "N"
+local _pojed := .f.
 
 // kreiraj pomocnu tabelu
 mip_tmp_tbl()
@@ -325,6 +326,10 @@ if cIsplSaberi == "D"
 	__ispl_s := 1
 endif
 
+if !EMPTY( cRadnik )
+    _pojed := .t.
+endif
+
 // upisi vrijednosti
 select params
 WPar("i1", cPredNaz)
@@ -351,7 +356,7 @@ endif
 
 // stampa izvjestaja xml/oo3
 if __xml == 1
-	_xml_print()
+	_xml_print( _pojed )
 else
 	nBrZahtjeva := g_br_zaht()
 	_xml_export()
@@ -694,10 +699,14 @@ return
 // ----------------------------------------
 // stampa xml-a
 // ----------------------------------------
-static function _xml_print()
+static function _xml_print( pojed )
 local cOdtName := ""
 local cOutput := "c:\ld_out.odt"
 local cJavaStart := ALLTRIM( gJavaStart )
+
+if pojed == nil
+    pojed := .f.
+endif
 
 if __xml == 0
 	return
@@ -711,6 +720,10 @@ endif
 _fill_xml()
 
 cOdtName := "ld_mip.odt"
+
+if pojed == .t.
+    cOdtName := "ld_pmip.odt"
+endif
 
 save screen to cScreen
 
