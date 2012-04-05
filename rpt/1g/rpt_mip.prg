@@ -327,7 +327,9 @@ if cIsplSaberi == "D"
 endif
 
 if !EMPTY( cRadnik )
-    _pojed := .t.
+    	_pojed := .t.
+	// uvijek ces raditi stampanje u ovoj varijanti
+	__xml := 1
 endif
 
 // upisi vrijednosti
