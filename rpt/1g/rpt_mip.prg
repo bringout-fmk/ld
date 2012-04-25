@@ -441,6 +441,7 @@ local nU_prih
 local nU_dopr
 local nU_lodb
 local nU_porez
+local _ima_b_pr := .f.
 
 // otvori xml za upis
 open_xml( "c:\export.xml" )
@@ -530,6 +531,7 @@ do while !EOF()
 	nL_odb := 0
 	nOsnPor := 0
 	nIznPor := 0
+    _ima_b_pr := .f.
 	
 	do while !EOF() .and. field->idradn == cT_radnik
 		
@@ -543,10 +545,13 @@ do while !EOF()
 		cR_ime := field->r_ime
 		dD_ispl := field->d_isp
 		
-		nR_sati += field->r_sati
-		nR_satib += field->r_satib
-		nR_satit += field->r_satit
-		nBruto += field->bruto
+        if !_ima_b_pr
+		    nR_sati += field->r_sati
+		    nR_satib += field->r_satib
+		    nR_satit += field->r_satit
+		endif
+
+        nBruto += field->bruto
 		nO_prih += field->o_prih
 		nU_opor += field->u_opor
 		nU_d_zdr += field->u_d_zdr
@@ -576,7 +581,10 @@ do while !EOF()
 		// i bolovanje preko 42 dana
 		// uzmi puni fond sati sa stavke bolovanja
 		// bol_preko = "1"
+
 		if field->bol_preko == "1"
+            
+            _ima_b_pr := .t.
 			
 			nR_sati := field->r_sati
 			nR_satib := field->r_satib
@@ -769,6 +777,7 @@ return
 // --------------------------------------------
 static function _fill_xml()
 local nTArea := SELECT()
+local _ima_b_pr := .f.
 
 // otvori xml za upis
 open_xml("c:\data.xml")
@@ -873,6 +882,8 @@ do while !EOF()
 	nOsn_por := 0
 	nIzn_por := 0
 
+    _ima_b_pr := .f.
+
 	// provrti obracune
 	do while !EOF() .and. field->idradn == cT_radnik
 		
@@ -883,9 +894,13 @@ do while !EOF()
 	
 		// za obrazac i treba zadnja isplata
 		dD_isp := field->d_isp
-		nR_sati += field->r_sati
-		nR_satit += field->r_satit
-		nR_satib += field->r_satib
+		
+        if !_ima_b_pr
+            nR_sati += field->r_sati
+		    nR_satit += field->r_satit
+		    nR_satib += field->r_satib
+        endif
+
 		nR_stuv := field->r_stuv
 		cR_rmj := field->r_rmj
 		nBruto += field->bruto
@@ -902,7 +917,21 @@ do while !EOF()
 		nIzn_por += field->izn_por
 		nU_d_pms += field->u_d_pms
 
+        if field->bol_preko == "1"
+
+            _ima_b_pr := .t.
+
+            nR_sati := field->r_sati
+            nR_satib := field->r_satib
+
+            if nR_satiT <> 0
+                nR_satiT := field->r_sati
+            endif
+
+        endif
+
 		skip
+
 	enddo
 	
 	cStUv := ALLTRIM(STR(nR_Stuv,12,0)) + "/12"
